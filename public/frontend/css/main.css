@@ -1,0 +1,766 @@
+/* Global variables */
+:root {
+        --Hover-icon: #34A4E0; /* Main hover accent color */
+    }
+
+    /* === HEADER STYLES === */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 75px;
+    background-color: rgba(0, 0, 0, 0.7); /* đen nhưng có độ trong suốt */
+    backdrop-filter: blur(8px); /* tạo hiệu ứng mờ nội dung phía sau */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1030;
+}
+
+.navbar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 90%;
+        margin: 0 auto;
+        width: 100%;
+        /* padding: 10px 20px; */
+        flex-wrap: nowrap !important;
+    }
+.navbar__left, .navbar__center, .navbar__right {
+        display: flex;
+        align-items: center;
+    }
+.navbar__left a.navbar__logo {
+        display: flex; /* Ensure logo and text are in a flex container if not already */
+        align-items: center; /* Vertically align logo and the following element */
+    }
+
+/* .navbar__left a.navbar__logo img {
+        /* Existing styles for your logo */
+        /* margin-right: 20px;  Add right margin to create space 
+    } */
+
+.navbar__menu-list {
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.navbar__menu-list li {
+        display: inline-block;
+        padding-right: 15px;
+    }
+.navbar__menu-list li.active a {
+        color: var(--Hover-icon) !important;
+    }
+
+.navbar__menu-list li.active .hover-a::after {
+        width: 100%;
+        background-color: var(--Hover-icon);
+    }
+
+.navbar__menu-list .padding-list-menu {
+        padding: 0 15px;
+    }
+.navbar__menu-list li:first-child a {
+    /* Existing styles for the "Trang chủ" link */
+    margin-left: 15px; /* Add left margin to create space */
+    }
+
+.navbar__menu-list .fa-solid {
+        font-size: 14px;
+        margin-left: 5px;
+        color: #fff; /* Sử dụng màu cố định nếu --color-text không rõ */
+        transition: 0.4s;
+    }
+
+.navbar__menu-list li a {
+        text-decoration: none;
+        font-size: 16px;
+        color: #fff;
+        font-weight: 500;
+        padding: 0 0 5px 0;
+        transition: 0.4s;
+        position: relative;
+    }
+
+    /* Hover effect for menu links */
+.navbar__menu-list li .hover-a::after {
+        position: absolute;
+        content: "";
+        width: 0px;
+        height: 3px;
+        background-color: var(--Hover-icon);
+        left: 0;
+        bottom: 0;
+        transition: all 0.4s ease-in-out;
+    }
+
+.navbar__menu-list li .hover-a:hover::after {
+        width: 100%;
+    }
+
+.navbar__menu-list li a:hover {
+        color: var(--Hover-icon);
+    }
+
+.navbar__menu-list li:hover .angle-down {
+        color: var(--Hover-icon);
+    }
+
+    /* General hover effect for icons/images (e.g., login, cart) */
+.hover-effect {
+        transition: color 0.3s ease, filter 0.3s ease;
+        color: #fff; /* Inherit color by default */
+    }
+
+.hover-effect i {
+        transition: color 0.3s ease;
+        color: #fff; /* Default color for icons */
+        font-size: 24px; /* Set icon size here */
+    }
+
+.hover-effect:hover,
+.hover-effect:hover i {
+        color: var(--Hover-icon);
+    }
+
+.hover-effect img {
+        transition: filter 0.05s ease;
+    }
+
+.navbar__shoppingCart img {
+    width: 24px;
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%);
+    transition: filter 0.3s ease;
+}
+
+.navbar__shoppingCart:hover img {
+    filter: brightness(0) saturate(100%) invert(48%) sepia(98%) saturate(2584%) hue-rotate(204deg) brightness(96%) contrast(101%);
+}
+    /* Dropdown menu for categories */
+#dropdown-danhmuc {
+        white-space: normal;
+        width: 200px;
+        padding: 10px 0;
+        /* Thêm các thuộc tính hiển thị dropdown của Bootstrap */
+        display: none; /* Mặc định ẩn */
+        position: absolute;
+        background-color: #fff;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.175);
+        border: 1px solid rgba(0,0,0,.15);
+        border-radius: .25rem;
+        margin-top: .125rem; /* Khoảng cách với navbar */
+        left: 0; /* Căn chỉnh vị trí theo ý muốn */
+        z-index: 1000; /* Đảm bảo dropdown nằm trên nội dung */
+    }
+.dropdown:hover #dropdown-danhmuc {
+        display: block; /* Hiện khi hover */
+    }
+
+
+#dropdown-danhmuc li {
+        padding: 5px 15px; /* Giữ padding này cho li */
+    }
+
+#dropdown-danhmuc li a {
+        white-space: normal;
+        display: block;
+        word-break: break-word;
+        padding: .25rem 1.5rem;
+        clear: both;
+        font-weight: 400;
+        color: #212529 !important; /* THAY ĐỔI DÒNG NÀY */
+        text-align: inherit;
+        text-decoration: none;
+        background-color: transparent;
+        border: 0;
+        margin-left: 0 !important;
+    }
+
+#dropdown-danhmuc li a:hover {
+        color: var(--Hover-icon) !important; /* THAY ĐỔI DÒNG NÀY */
+    }
+
+    /* DROPDOWN DỊCH VỤ */
+
+    /* li.dropdown trong menu làm gốc định vị */
+    .navbar__menu-list .dropdown {
+        position: relative;
+    }
+
+    /* Hộp dropdown dịch vụ */
+    .navbar__menu-list .dropdown .dropdown-services {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        min-width: 220px;
+        padding: 10px 0;
+        margin: 0;
+
+        list-style: none;
+        background-color: #fff;
+        border-radius: .75rem;
+        border: 1px solid rgba(0,0,0,.15);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.175);
+        z-index: 1000;
+
+        /* Ẩn mặc định */
+        display: none;
+    }
+
+    /* Hiện dropdown khi hover */
+    .navbar__menu-list .dropdown:hover > .dropdown-services {
+        display: block !important;
+    }
+
+    /* Mỗi mục trong dropdown: 1 dòng, full chiều ngang */
+    .navbar__menu-list .dropdown .dropdown-services li {
+        display: block !important;
+        float: none !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Link dịch vụ */
+    .navbar__menu-list .dropdown .dropdown-services li a {
+        display: block !important;
+        padding: .5rem 2.5rem !important;
+        font-size: 16.3px;
+        font-weight: 400;
+        text-decoration: none;
+        white-space: normal !important;
+        color: #212529 !important;
+        background-color: transparent !important;
+        text-align: left !important;
+        margin: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /* Hover */
+    .navbar__menu-list .dropdown .dropdown-services li a:hover {
+        color: var(--Hover-icon) !important;
+    }
+    /* Căn trái toàn bộ text trong menu Dịch vụ */
+    .dropdown-services > li > a {
+        text-align: left !important;
+    }
+
+    /* Modal Styling (giữ nguyên hoặc điều chỉnh nếu cần) */
+.modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .3s ease, visibility .3s ease;
+    }
+
+.modal-wrapper {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(.9);
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .3s ease, transform .3s ease, visibility .3s ease;
+        max-width: 500px;
+        width: 90%;
+    }
+
+.modal.is-visible .modal-overlay,
+.modal.is-visible .modal-wrapper {
+        opacity: 1;
+        visibility: visible;
+    }
+
+.modal.is-visible .modal-wrapper {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+.modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+.modal-heading {
+        font-size: 1.8em;
+        margin: 0;
+        color: #333;
+    }
+
+.modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #888;
+        padding: 5px;
+        transition: color 0.3s ease;
+    }
+
+.modal-close:hover {
+        color: #333;
+    }
+
+    /* Specific styles for navbar__right elements */
+.navbar__right > *:not(:last-child) {
+        margin-right: 25px; /* Increased space between elements */
+    }
+
+    /* Adjust logout button icon color */
+.logout button i {
+        color: #fff; /* Ensure it starts black */
+        transition: color 0.3s ease; /* Smooth transition */
+    }
+
+    /* Align user name with icons */
+.user-info a {
+        display: flex;
+        align-items: center;
+        /* Optional: add some gap between text and icon if needed */
+        gap: 5px;
+    }
+
+    /* Basic responsiveness for body content */
+@media (max-width: 992px) {
+    .body {
+            width: unset;
+            margin: 0 auto;
+        }
+        /* Điều chỉnh lại padding-top cho main-content trên mobile nếu header thay đổi kích thước */
+    .main-content {
+            padding-top: 100px; /* Ví dụ: nếu header cao hơn trên mobile */
+        }
+    }
+
+    /* === FOOTER STYLES === */
+footer {
+        background-color: #2c3e50; /* Darker, professional background */
+        color: #ecf0f1; /* Light text color */
+        padding: 50px 20px 20px; /* Ample padding: top, sides, bottom */
+        font-family: 'Inter', sans-serif; /* Consistent font */
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+        z-index: 1010; /* Z-index cho footer */
+    }
+
+.footer__info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns */
+        gap: 40px; /* Space between columns */
+        max-width: 1200px; /* Max width for content */
+        margin: 0 auto 30px; /* Center and add space below */
+        padding-bottom: 30px; /* Space above copyright */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle separator */
+    }
+
+.footer__info-content {
+        text-align: left; /* Align text within columns */
+    }
+
+.footer__info-content h3 {
+        font-size: 1.6em;
+        color: #ffffff; /* White heading */
+        margin-bottom: 20px;
+        font-weight: bold;
+        position: relative;
+        padding-bottom: 10px; /* Space for underline effect */
+    }
+
+.footer__info-content h3::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 50px; /* Short underline */
+        height: 3px;
+        background-color: var(--Hover-icon); /* Orange accent */
+        border-radius: 2px;
+    }
+
+.footer__info-content p {
+        font-size: 0.95em;
+        line-height: 1.6;
+        margin-bottom: 10px;
+        color: #bdc3c7; /* Lighter text color */
+    }
+
+.footer__info-content a {
+        color: #ecf0f1; /* Link color */
+        text-decoration: none;
+        transition: color 0.3s ease; /* Simple color transition */
+        display: block; /* Make links block to take full width */
+        margin-bottom: 8px;
+    }
+
+.footer__info-content a:hover {
+        color: var(--Hover-icon); /* Orange on hover */
+    }
+
+.footer__info-content p i {
+        margin-right: 10px;
+        color: var(--Hover-icon); /* Icon color */
+    }
+
+.footer__social {
+        margin-top: 20px;
+        display: flex; /* Arrange icons in a row */
+        gap: 15px; /* Space between icons */
+        justify-content: flex-start; /* Align social icons to the left */
+    }
+
+.footer__social a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+        border-radius: 50%; /* Circular icons */
+        color: #ecf0f1;
+        font-size: 1.2em;
+        transition: background-color 0.3s ease, color 0.3s ease; /* Simple transitions */
+    }
+
+.footer__social a:hover {
+        background-color: var(--Hover-icon); /* Orange background on hover */
+        color: #ffffff; /* White icon on hover */
+    }
+
+.footer__copyright {
+        text-align: center;
+        font-size: 0.9em;
+        color: #bdc3c7;
+        padding-top: 20px; /* Space above copyright */
+        border-top: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle top border */
+    }
+
+    /* === GO-TO-TOP BUTTON STYLES === */
+.go-to-top {
+        position: fixed; /* Fixes it relative to the viewport */
+        bottom: 20px; /* Distance from the bottom */
+        right: 20px; /* Distance from the right */
+        z-index: 1040; /* Highest z-index for visibility on top of everything */
+        background-color: var(--Hover-icon); /* Example color */
+        color: #fff;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+.go-to-top:hover {
+        background-color: #e03d00; /* Darker on hover */
+        transform: translateY(-2px);
+    }
+
+    /* Responsive adjustments for footer */
+@media (max-width: 768px) {
+        .footer__info {
+            grid-template-columns: 1fr; /* Stack columns on smaller screens */
+            text-align: center; /* Center text for stacked columns */
+        }
+        .footer__info-content h3::after {
+            left: 50%;
+            transform: translateX(-50%); /* Center underline */
+        }
+        .footer__social {
+            justify-content: center; /* Center social icons */
+        }
+    }
+    /* XÓA hoặc CHỈNH SỬA DÒNG NÀY ĐỂ TRÁNH TRÙNG LẶP HOẶC GÂY LỆCH */
+    /* #dropdown-danhmuc li:first-child a {
+        padding-left: 10px;
+    } */
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-newsletter {
+    background-color: #050608;
+    color: #ffffff;
+    padding: 20px 0 1px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.footer-newsletter__left {
+    flex: 0 0 auto;
+}
+
+.footer-newsletter__subtitle {
+    letter-spacing: 0.3em;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--Hover-icon);
+    margin-bottom: 8px;
+}
+
+.footer-newsletter__title {
+    font-size: 42px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.footer-newsletter__center,
+.footer-newsletter__right {
+    flex: 0 0 auto;
+}
+
+.footer-newsletter .footer-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.footer-newsletter__form {
+    display: flex;
+    align-items: center;
+    background-color: #111317;
+    border-radius: 999px;
+    padding: 4px;
+    min-width: 380px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.footer-newsletter__form input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 14px 20px;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.footer-newsletter__form input::placeholder {
+    color: #8b8f99;
+}
+
+.footer-newsletter__form button {
+    border: none;
+    outline: none;
+    padding: 14px 32px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background-color: var(--Hover-icon);
+    color: #050608;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.footer-newsletter__form button:hover {
+    background-color: #00c2b0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transform: translateY(-1px);
+}
+
+.footer-newsletter__right {
+    display: flex;
+    gap: 18px;
+}
+
+.footer-newsletter__right a {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--Hover-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--Hover-icon);
+    font-size: 18px;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.footer-newsletter__right a:hover {
+    background-color: var(--Hover-icon);
+    color: #050608;
+    transform: translateY(-1px);
+}
+
+.site-footer {
+    background-color: #050608;   /* đen sâu */
+    color: #e5e7eb;
+    padding: 50px 0 25px;
+    font-size: 14px;
+}
+
+.site-footer__top {
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 2fr) minmax(0, 2fr);
+    gap: 60px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.site-footer__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.site-footer__logo img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.site-footer__logo span {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.site-footer__desc {
+    max-width: 360px;
+    color: #a1a5b3;
+    line-height: 1.7;
+}
+
+.site-footer__col h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: #ffffff;
+}
+
+.site-footer__links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 50px;
+}
+
+.site-footer__links-grid ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.site-footer__links-grid li {
+    margin-bottom: 6px;
+}
+
+.site-footer__links-grid a {
+    color: #c4c7d0;
+    text-decoration: none;
+    position: relative;
+    padding-left: 14px;
+    display: inline-block;
+}
+
+.site-footer__links-grid a::before {
+    content: "↗";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 11px;
+    color: var(--Hover-icon);
+}
+
+.site-footer__links-grid a:hover {
+    color: #ffffff;
+}
+
+.site-footer__contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.site-footer__contact-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--Hover-icon);
+    font-size: 18px;
+}
+
+.site-footer__contact-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.site-footer__contact-text .label {
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.site-footer__bottom {
+    padding-top: 18px;
+    text-align: center;
+    font-size: 13px;
+    color: #7b7f8b;
+}
+
+@media (max-width: 992px) {
+    .footer-newsletter .footer-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .footer-newsletter__form {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .site-footer__top {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-newsletter .footer-container {
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .footer-newsletter__title {
+        font-size: 32px;
+    }
+
+    .site-footer__top {
+        grid-template-columns: 1fr;
+    }
+
+    .site-footer__desc {
+        max-width: none;
+    }
+
+    .footer-newsletter__right {
+        align-self: flex-start;
+    }
+}

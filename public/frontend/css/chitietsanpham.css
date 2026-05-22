@@ -1,0 +1,379 @@
+.product-detail-section {
+    padding: 30px 0;
+}
+
+.product-detail-container {
+    display: flex;
+    gap: 35px;
+    max-width: 1250px;
+    margin: auto;
+}
+
+/* ================== CỘT TRÁI ================== */
+.product-images {
+    width: 35%;
+}
+
+.main-image img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.thumbnail-list {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.thumbnail-list img {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid transparent;
+}
+
+.thumbnail-list img:hover {
+    border-color: red;
+}
+
+.promo-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+
+/* ================== CỘT GIỮA ================== */
+.product-info {
+    width: 40%;
+}
+
+.product-title {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.meta {
+    margin: 12px 0;
+    color: #666;
+}
+
+.stock-yes { color: green; }
+.stock-no { color: red; }
+
+.price-box {
+    margin: 15px 0;
+}
+
+.current-price {
+    font-size: 28px;
+    color: #f43722;
+    font-weight: 900;
+}
+
+.old-price {
+    text-decoration: line-through;
+    margin-left: 10px;
+    color: #888;
+}
+
+.save-price {
+    display: block;
+    color: #f02917;
+}
+
+.benefits {
+    margin: 15px 0;
+    padding-left: 18px;
+    line-height: 1.7;
+}
+
+.quantity-area {
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.quantity-box {
+    display: inline-flex;
+    margin-left: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.qty-btn {
+    width: 32px;
+    background: #eee;
+    border: none;
+    cursor: pointer;
+}
+
+.qty-btn:hover {
+    background: #ddd;
+}
+
+#qtyInput {
+    width: 40px;
+    text-align: center;
+    border: none;
+}
+
+.action-buttons {
+    margin-top: 25px;
+}
+
+
+
+
+.btn {
+    display: block;
+    text-align: center;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.add-cart {
+    background: #34A4E0;
+    color: white;
+}
+.add-cart:hover {
+    color: #34A4E0;
+    background-color: #fff;
+    border: 1px solid #34A4E0;
+}
+
+.buy-now {
+    background: white;
+    border: 2px solid #34A4E0;
+    color: #34A4E0;
+}
+.buy-now:hover {
+    color: #fff;
+    background-color: #34A4E0;
+    border: 1px solid #fff;
+}
+
+.hotline {
+    margin-top: 10px;
+}
+
+
+/* ================== CỘT PHẢI ================== */
+.policy-box {
+    width: 25%;
+    border: 1px solid #eee;
+    border-top: 4px solid #34A4E0;
+    border-radius: 10px;
+    padding: 20px;
+    max-height: 320px;
+}
+
+.policy-list {
+    padding-left: 0;
+    list-style: none;
+    line-height: 1.8;
+}
+
+.pay-methods img {
+    width: 48px;
+    margin-right: 8px;
+}
+
+
+
+.thumbnail-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    position: relative;
+}
+
+.thumbnail-wrapper {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 5px 0;
+}
+
+.thumbnail-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.thumbnail-wrapper::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.thumb-item {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.thumb-item:hover {
+    border-color: #34A4E0;
+    transform: scale(1.05);
+}
+
+.thumb-item.active {
+    border-color: #34A4E0;
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+}
+
+/* NÚT MŨI TÊN */
+.thumb-nav {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    color: #555;
+    transition: 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumb-nav:hover {
+    background: #34A4E0;
+    color: #fff;
+    border-color: #34A4E0;
+}
+
+
+/* xem ảnh */
+
+/* Nền mờ khi mở ảnh */
+.img-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+/* Ảnh lớn */
+.overlay-img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+
+    border-radius: 1px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+    animation: zoomFade 0.3s ease;
+}
+
+
+/* Nút đóng */
+.close-preview {
+    position: absolute;
+    top: 25px;
+    right: 35px;
+    font-size: 45px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.close-preview:hover {
+    color: #ff5252;
+}
+
+/* Animation khi mở */
+@keyframes zoomFade {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+
+/* fix thêm giỏ hàng */
+.product-info-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 100px; /* chỉnh tùy UI bạn muốn */
+}
+
+.action-wrapper {
+    margin-top: auto;  /* ĐẨY XUỐNG DƯỚI */
+    padding-top: 50px; /* tạo khoảng cách đẹp */
+}
+
+
+/* section mô tả */
+
+.product-tabs-section {
+    margin-top: 6px;
+    margin-bottom: 40px;
+}
+
+.tabs-header {
+    position: relative; /* quan trọng */
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 0;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 700;
+    color: #555;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: #2c04f5;
+}
+
+/* underline chuẩn */
+.tab-underline {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: #2c04f5;
+    border-radius: 2px;
+    transition: 0.3s ease;
+}
+
+
+.tabs-content {
+    margin-top: 25px;
+    line-height: 1.7;
+    font-size: 17px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.review-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}

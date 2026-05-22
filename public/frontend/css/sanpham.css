@@ -1,0 +1,463 @@
+:root {
+    --red: #ff2e2e;
+    --gray: #777;
+    --light: #f8f8f8;
+    --shadow: 0 8px 24px rgba(0,0,0,0.12);
+    --radius: 14px;
+}
+
+/* ========== HERO ========== */
+
+.page-header {
+    height: 300px;
+    background-image: url('/frontend/img/Gioi-thieu/gioi-thieu-1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;   /* 🔥 giữ ảnh đứng yên khi scroll */
+    overflow: hidden;
+    position: relative;
+}
+
+.header-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.header-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+
+    text-shadow:
+        0 2px 6px rgba(0,0,0,0.45),
+        0 0 12px rgba(255,255,255,0.15);
+
+    z-index: 3;
+
+    /* 🔥 Animation trượt từ dưới lên */
+    animation: slideUp 0.9s ease-out forwards;
+}
+
+/* 🎬 Animation chạy từ dưới → lên */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20%); /* thấp hơn */
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%); /* vị trí chuẩn */
+    }
+}
+.page-title{
+    text-transform: uppercase;
+}
+/* ===== TOP BAR ===== */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 2px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+}
+
+.result-count {
+    font-size: 15px;
+    font-weight: 500;
+    color: #444;
+}
+
+.result-count strong {
+    color: #2563eb;
+    font-weight: 700;
+}
+
+/* SORT BOX */
+.sort-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+/* SELECT UI đẹp */
+.sort-select {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 2px solid #2563eb;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e3a8a;
+    background: #fff;
+
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+.sort-select:hover {
+    border-color: #1d4ed8;
+}
+
+.sort-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+.top-bar {
+    position: sticky;
+    top: 90px; /* Đặt bằng với filter-box */
+    z-index: 50;
+    background: #fff;
+}
+.top-bar.unstick {
+    position: relative;
+    top: 0; /* top-bar di chuyển theo page, không sticky nữa */
+}
+.topbar-wrapper {
+    position: sticky;
+    top: 80px; /* bên dưới header */
+    z-index: 999;
+    background: #fff;
+    padding: 10px 0;
+}
+
+
+    /* ========== SIDEBAR ========== */
+#selectedBox {
+    display: none;
+}
+
+#selectedDivider {
+    display: none;
+}
+
+.filter-box {
+    background: #fff;
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 170px;
+    z-index: 50; /* đứng dưới top-bar 1 chút */
+    background: #fff; /* tránh bị trong suốt */
+    margin-bottom: 20px;
+}
+
+
+/* ===== SELECTED FILTERS ===== */
+.selected-filter-box {
+    padding-bottom: 10px;
+    display: none; /* 👈 Mặc định ẩn – sẽ hiện khi có tag */
+}
+
+.selected-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.selected-header a.clear-all {
+    font-size: 13px;
+    color: #d62b2b;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.selected-tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    background: #d62b2b;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-block;
+
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tag:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+
+/* DIVIDER */
+.divider {
+    margin: 14px 0;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* ===== GROUP TITLE ===== */
+.filter-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* ===== FILTER LIST ===== */
+.filter-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.filter-list li {
+    margin: 9px 0;
+}
+
+.filter-list label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.filter-list label:hover {
+    background: #f7f7f7;
+}
+
+/* Custom checkbox */
+.filter-list input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    appearance: none;
+    border: 2px solid #bbb;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.2s;
+}
+
+.filter-list input[type="checkbox"]:checked {
+    background: #d62b2b;
+    border-color: #d62b2b;
+}
+
+.filter-list input[type="checkbox"]:checked::after {
+    content: "✔";
+    position: absolute;
+    color: #fff;
+    font-size: 12px;
+    top: -2px;
+    left: 3px;
+}
+
+
+
+/* ========== PRODUCT GRID ========== */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 22px;
+}
+
+/* ========== CARD (giống Áo Tập) ========== */
+.sale-item {
+    min-width: 240px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    position: relative;
+    transition: 0.25s;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.sale-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* IMAGE */
+.sale-img img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s;
+}
+.sale-item:hover .sale-img img {
+    transform: scale(1.05);
+}
+
+/* NAME */
+.sale-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* PRICE */
+.sale-price {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+}
+.new-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #e60023;
+}
+.old-price {
+    margin-left: 6px;
+    text-decoration: line-through;
+    color: #aaa;
+    font-size: 13px;
+}
+.discount {
+    margin-left: 6px;
+    padding: 3px 7px;
+    background: #ff2d2d;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* TAGS */
+.benefit, .gift {
+    font-size: 13px;
+    margin-top: 4px;
+    color: #444;
+}
+
+/* PROGRESS */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #eee;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+.progress {
+    height: 100%;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+}
+
+/* SOLD */
+.sold {
+    font-size: 12px;
+    color: #777;
+    margin-top: 6px;
+    display: block;
+}
+
+/* ICON HOVER */
+.hover-icons {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: 0.25s;
+}
+.sale-item:hover .hover-icons {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.icon-btn {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    cursor: pointer;
+    transition: 0.25s;
+}
+.icon-btn:hover {
+    background: #34A4E0;
+}
+.icon-btn:hover i {
+    color: #fff;
+}
+
+
+/* PAGINATION WRAPPER */
+.pagination-wrapper {
+    display: flex !important;
+    justify-content: center !important;  /* Căn giữa */
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+/* UL PAGINATION */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* PAGE ITEM */
+.pagination .page-item .page-link {
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    transition: 0.25s ease;
+}
+
+/* HOVER */
+.pagination .page-item .page-link:hover {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+/* ACTIVE */
+.pagination .page-item.active .page-link {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+    pointer-events: none;
+}
+
+/* DISABLED */
+.pagination .page-item.disabled .page-link {
+    opacity: 0.5;
+    background: #f3f4f6;
+    color: #aaa;
+    cursor: default;
+}
+
+/* REMOVE DEFAULT SHADOW */
+.page-link:focus {
+    box-shadow: none !important;
+}
+

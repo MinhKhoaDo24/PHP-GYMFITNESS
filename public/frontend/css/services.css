@@ -1,0 +1,793 @@
+/* ============= CÁC GÓI DỊCH VỤ ============= */
+
+.rf-packages-section {
+    background-color: #f5f5f7;
+    padding: 4rem 0 4.5rem;
+    color: #000000;
+}
+
+.rf-packages-heading {
+    margin-bottom: 3rem;
+}
+
+.rf-packages-eyebrow {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: 0;          /* hoặc giữ nếu bạn thích */
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+    color: #000000;
+}
+
+.rf-packages-title {
+    font-size: 0.8rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin: 0;
+    color: #555555;
+}
+
+/* Slider wrapper + track */
+.rf-packages-slider-wrapper {
+    position: relative;
+}
+
+.rf-packages-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 0.5rem;
+}
+
+/* Ẩn scrollbar cho đẹp (desktop) */
+.rf-packages-track::-webkit-scrollbar {
+    height: 0;
+}
+.rf-packages-track {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Card */
+.rf-package-card {
+    position: relative;
+    flex: 0 0 280px;
+    max-width: 280px;
+    background-color: #fff;
+    border: 1px solid #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.75rem; /* bo góc nhẹ */
+    overflow: hidden;       /* để ảnh cũng bo theo card */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.rf-package-card:hover {
+    transform: translateY(-6px); /* nổi nhẹ lên */
+    box-shadow: 0 16px 32px rgba(52, 164, 224, 0.5); /* tỏa glow xanh dương */
+}
+
+/* Vòng tròn nhỏ đánh dấu BEST */
+.rf-package-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background-color: #dd3f27;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+    z-index: 5;
+}
+
+.rf-package-card img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+    border-radius: inherit;
+}
+
+.rf-package-card:hover img {
+    transform: scale(1.03);
+}
+
+/* phần trên: ảnh */
+.rf-package-image {
+    width: 100%;
+}
+
+/* phần dưới: nội dung */
+.rf-package-body {
+    padding: 0.7rem 1.2rem 0.8rem;
+}
+
+.rf-package-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.4rem;
+}
+
+.rf-package-subtitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    color: #000;
+    margin-bottom: 0.9rem;
+}
+
+.rf-package-list {
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding-left: 0;
+}
+
+.rf-package-list li {
+    position: relative;
+    padding-left: 1.4rem;      /* chừa chỗ cho icon ✔ */
+    margin-bottom: 0.45rem;
+    font-size: 0.96rem;
+    line-height: 1.6;
+    color: #444444;
+}
+
+/* Dấu tích V màu xanh dương */
+.rf-package-list li::before {
+    content: "✔";
+    position: absolute;
+    left: 0;
+    top: 0.05rem;
+    color: #34A4E0;            /* xanh dương */
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* Arrow buttons */
+.rf-packages-arrows {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;          /* đẩy vào 1 chút cho khỏi sát mép */
+    pointer-events: none;    /* để click được vào slide phía sau */
+    z-index: 5;
+}
+
+/* nút arrow trái/phải – style giống gym */
+.rf-packages-arrow {
+    pointer-events: auto;               /* bật lại click cho chính nút */
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: transparent;;
+    border: none;                       /* bỏ viền cứng */
+    color: #34A4E0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+/* icon mũi tên (dùng chung với gym) */
+.gym-arrow-icon {
+    font-size: 4rem;      /* 👈 to theo yêu cầu */
+    line-height: 2;
+    font-weight: 700;
+    transition: transform 0.15s ease, text-shadow 0.15s ease;
+}
+
+.rf-packages-arrow:hover {        
+    color: #108fd4;
+    transform: translateY(-2px) scale(1.08);     /* nhô + phóng to nhẹ */
+    text-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .rf-package-card {
+        flex: 0 0 260px;
+        max-width: 260px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .rf-packages-section {
+        padding: 3rem 0 3.5rem;
+    }
+
+    .rf-package-card {
+        flex: 0 0 80%;
+        max-width: 80%;
+    }
+}
+
+/* page-header */
+.page-header {
+    height: 300px;
+    background-image: url('/frontend/img/Gioi-thieu/gioi-thieu-1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;   /* 🔥 giữ ảnh đứng yên khi scroll */
+    overflow: hidden;
+    position: relative;
+}
+
+.header-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.header-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+
+    text-shadow:
+        0 2px 6px rgba(0,0,0,0.45),
+        0 0 12px rgba(255,255,255,0.15);
+
+    z-index: 3;
+
+    /* 🔥 Animation trượt từ dưới lên */
+    animation: slideUp 0.9s ease-out forwards;
+}
+
+/* 🎬 Animation chạy từ dưới → lên */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20%); /* thấp hơn */
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%); /* vị trí chuẩn */
+    }
+}
+
+
+/* hero-section */
+.hero-section {
+    width: 100%;
+    padding: 80px 0;
+    background-color: black;
+}
+
+.hero-container {
+    max-width: 1400px;
+    margin: auto;
+    display: flex;
+    gap: 50px;
+    align-items: center;
+}
+
+.hero-images {
+    display: flex;
+    gap: 25px;
+}
+
+.hero-img {
+    position: relative;
+    border-radius: 30px;
+    /* overflow: hidden; */
+    
+}
+
+.hero-img img {
+    width: 350px;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 30px;
+}
+.hero-img:hover img {
+    transform: scale(1.05);  /* Zoom 12% */
+}
+
+.img-1 {
+    position: relative;
+}
+
+
+.hero-content {
+    flex: 1;
+    padding-left: 30px;
+}
+
+.hero-title {
+    font-size: 55px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: pre-line;
+}
+
+.hero-desc {
+    font-size: 17px;
+    color: #555;
+    margin-bottom: 35px;
+    color: #fff;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 60px;
+    margin-bottom: 40px;
+}
+
+.stat h2 {
+    font-size: 40px;
+    font-weight: 600;
+    color: #34A4E0;
+    text-align: center;
+
+    text-shadow:
+        0 0 6px rgba(52, 164, 224, 0.55),
+        0 0 12px rgba(52, 164, 224, 0.45),
+        0 0 20px rgba(52, 164, 224, 0.35),
+        0 0 30px rgba(52, 164, 224, 0.25);
+}
+
+.stat p {
+    font-size: 16px;
+    color: #fff;
+}
+
+.hero-btn {
+    display: inline-block;
+    background: #34A4E0;
+    color: white;
+    padding: 15px 45px;
+    border-radius: 50px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.hero-btn:hover {
+    transform: scale(1.08);
+    box-shadow:
+        0 0 10px rgba(52, 164, 224, 0.5),
+        0 0 20px rgba(52, 164, 224, 0.4),
+        0 0 35px rgba(52, 164, 224, 0.25);
+    color: #ffffff;
+}
+
+/* about-story */
+.about-story {
+    padding: 80px 0;
+}
+
+.story-container {
+    width: 90%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+/* Ảnh */
+.story-slider {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    border-radius: 25px;
+}
+
+.story-images img {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+}
+
+.story-images img.active {
+    opacity: 1;
+}
+
+/* Mũi tên */
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 45px;
+    color: white;
+    background: none;   /* ❌ bỏ nền */
+    border: none;       /* ❌ bỏ viền */
+    cursor: pointer;
+    z-index: 10;
+    transition: 0.2s;
+    padding: 0;
+}
+
+/* Hiệu ứng hover */
+.arrow:hover {
+    color: #34A4E0; /* màu thương hiệu */
+    transform: translateY(-50%) scale(1.2); /* phóng to nhẹ */
+}
+
+.arrow.left { left: 20px; }
+.arrow.right { right: 20px; }
+
+
+
+/* Nội dung */
+.story-title {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.story-text {
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Giá trị */
+.story-values {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.value-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 10px;
+    border-radius: 12px;
+    background: #f6faff;
+    border: 1px solid #e6f1ff;
+    transition: 0.25s ease;
+    cursor: pointer;
+}
+
+/* Hiệu ứng hover */
+.value-item:hover {
+    transform: scale(1.08);
+    background: #ffffff;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #34A4E0;
+}
+
+.value-item:hover .value-icon {
+    color: #34A4E0;
+    text-shadow: 
+        0 0 6px rgba(52, 164, 224, 0.5),
+        0 0 10px rgba(52, 164, 224, 0.35);
+}
+
+.value-item:hover h4 {
+    color: #34A4E0;
+}
+
+
+.value-item h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.value-item p {
+    margin: 2px 0 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* HERO WRAPPER */
+.landing-hero {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    
+    /* Ảnh + parallax đơn giản */
+    background-image: url('/frontend/img/Gioi-thieu/gioi-thieu-4.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; 
+
+    overflow: hidden;
+}
+
+/* Lớp làm tối để chữ nổi */
+.landing-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to right,
+        rgba(0,0,0,0.7),
+        rgba(0,0,0,0.1)
+    );
+    z-index: 1;
+}
+
+/* Nội dung */
+.landing-content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    padding: 160px 100px;
+    max-width: 1200px;
+}
+
+.landing-sub {
+    font-size: 14px;
+    letter-spacing: 7px;
+    opacity: 0.85;
+    margin-bottom: 22px;
+    display: inline-block;
+}
+
+.landing-title {
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 22px;
+}
+
+.landing-desc {
+    font-size: 18px;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: 38px;
+}
+
+/* stats-section */
+.stats-section {
+    background: #34A4E0; 
+    padding: 80px 0;
+    color: white;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.stats-header h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.stats-header h2 span {
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.stats-header p {
+    font-size: 22px;
+    opacity: 0.95;
+    margin-bottom: 50px;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 120px;
+    flex-wrap: wrap;
+}
+
+.stat-box h1 {
+    font-size: 100px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.stat-box p {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+
+/* why-choose-us */
+.why-choose-us {
+    padding: 20px 0;
+    text-align: center;
+}
+
+.why-title {
+    font-size: 42px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.why-subtitle {
+    color: #555;
+    margin-bottom: 50px;
+    font-size: 16px;
+}
+
+/* Grid layout */
+.why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px 30px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* Item */
+.why-item {
+    padding: 10px;
+    transition: 0.25s;
+    cursor: default;
+}
+
+.why-item:hover {
+    transform: translateY(-6px);
+}
+
+/* Icon */
+.why-icon {
+    width: 90px;
+    height: 90px;
+    background: #34A4E0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px auto;
+    transition: 0.25s ease;
+}
+
+.why-icon i {
+    color: white;
+    font-size: 38px;
+}
+
+/* Hover icon effect */
+.why-item:hover .why-icon {
+    transform: scale(1.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Text */
+.why-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.why-item p {
+    color: #555;
+    font-size: 14px;
+}
+/* register-location */
+/* Background mờ sang trọng */
+.trial-wrapper {
+    position: relative;
+    padding: 80px 0;
+    background-image: url('/frontend/img/Gioi-thieu/gioi-thieu-6.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.trial-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.35); 
+}
+
+/* GRID WRAPPER */
+.trial-container {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    width: 90%;
+    max-width: 1300px;
+    margin: auto;
+    align-items: center;
+}
+
+/* MAP */
+.trial-map iframe {
+    width: 100%;
+    height: 480px;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* FORM */
+.trial-form {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(16px);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+}
+
+.trial-form h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.trial-sub {
+    opacity: .9;
+    margin-bottom: 25px;
+}
+
+/* INPUT GROUP */
+.input-group {
+    margin-bottom: 18px;
+    color:#34A4E0;
+}
+
+.trial-form label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.trial-form input,
+.trial-form select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.85);
+    font-size: 15px;
+    outline: none;
+}
+
+.trial-btn {
+    width: 100%;
+    padding: 14px;
+    background: #34A4E0;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.trial-btn:hover {
+    background: #1d8ac0;
+}
+.required {
+    color: red;
+    font-weight: bold;
+}
+
