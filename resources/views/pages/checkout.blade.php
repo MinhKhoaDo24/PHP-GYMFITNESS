@@ -199,7 +199,7 @@
         </thead>
 
         <tbody>
-            @foreach(session('cart') as $item)
+            @foreach($cart as $item)
                 @php
                     $line = $item['giakhuyenmai'] * $item['quantity'];
                     $total += $line;

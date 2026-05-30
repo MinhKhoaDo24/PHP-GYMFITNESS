@@ -206,12 +206,15 @@ class CartController extends Controller
             return redirect('/login')->with('needLogin', true);
         }
 
+        $cart = session()->get('cart', []);
+        if (empty($cart)) {
+            return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
+        }
+
         $showusers = DB::table('nguoidung')
             ->select('nguoidung.*')
             ->where('nguoidung.id_nd', $user->id_nd)
             ->get();
-
-        $cart = session()->get('cart', []);
 
         $total = 0;
         foreach ($cart as $item) {
