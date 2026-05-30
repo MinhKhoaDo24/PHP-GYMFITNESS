@@ -134,7 +134,7 @@ Route::prefix('/admin')->group(function () {
     // API cho biểu đồ KHÔNG nên để trong admin.login
     Route::get('/chart/revenue', [AdminController::class, 'revenueChart']);
     Route::get('/chart/orders', [AdminController::class, 'orderChart']);
-    Route::get('/chart/customers', [AdminController::class, 'customerChart']);
+    Route::get('/chart/trials', [AdminController::class, 'trialChart']);
     Route::get('/chart/sold', [AdminController::class, 'soldChart']);
 });
 
