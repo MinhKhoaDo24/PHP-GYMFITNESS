@@ -350,6 +350,7 @@ class CartController extends Controller
             'hoten'        => $request->display_hoten,
             'email'        => $request->display_email,
             'sdt'          => $request->display_sdt,
+            'ngaydathang'  => now(),
             'ngaygiaohang' => now()->addDays(4),
             'id_nd'        => Auth::user()->id_nd,
         ]);

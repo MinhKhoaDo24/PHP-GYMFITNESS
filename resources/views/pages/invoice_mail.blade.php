@@ -35,7 +35,7 @@
                 </tr>
                 <tr>
                     <td style="padding: 6px 0; color: #6b7280;">Ngày đặt hàng:</td>
-                    <td style="padding: 6px 0; font-weight: 600; color: #111827;">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                    <td style="padding: 6px 0; font-weight: 600; color: #111827;">{{ $order->ngaydathang ? $order->ngaydathang->format('d/m/Y H:i') : '' }}</td>
                 </tr>
             </table>
 
