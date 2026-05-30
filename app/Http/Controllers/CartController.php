@@ -192,8 +192,9 @@ class CartController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'total'   => $total,
+            'success'    => true,
+            'total'      => $total,
+            'cart_count' => array_sum(array_column($cart, 'quantity')),
         ]);
     }
 
