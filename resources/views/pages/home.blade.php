@@ -609,6 +609,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     data = { message: "Đã thêm sản phẩm vào giỏ hàng!" };
                 }
                 showCartToast(data.message);
+
+                // Cập nhật số lượng giỏ hàng ở header
+                if (data.cart_count !== undefined) {
+                    const badge = document.querySelector('.navbar__shoppingCart span');
+                    if (badge) {
+                        badge.textContent = data.cart_count;
+                    }
+                }
             })
             .catch(() => {
                 showCartToast('Có lỗi xảy ra, vui lòng thử lại!');

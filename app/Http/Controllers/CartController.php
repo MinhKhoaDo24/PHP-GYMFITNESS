@@ -58,8 +58,14 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
+        // Lấy số lượng từ request
+        $qty = (int) $request->input('quantity', 1);
+        if ($qty < 1) {
+            $qty = 1;
+        }
+
         if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+            $cart[$id]['quantity'] += $qty;
         } else {
             $cart[$id] = [
                 "id_sanpham"    => $product->id_sanpham,
@@ -68,7 +74,7 @@ class CartController extends Controller
                 "giasp"         => $product->giasp,
                 "giamgia"       => $product->giamgia,
                 "giakhuyenmai"  => $product->giakhuyenmai,
-                "quantity"      => 1
+                "quantity"      => $qty
             ];
         }
 
@@ -85,7 +91,7 @@ class CartController extends Controller
         return redirect()->back()->with('success', 'Thêm vào giỏ hàng thành công!');
     }
 
-    public function addGoToCart($id)
+    public function addGoToCart(Request $request, $id)
     {
         $product = Sanpham::with('images')->findOrFail($id);
 
@@ -96,8 +102,14 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
+        // Lấy số lượng từ request
+        $qty = (int) $request->input('quantity', 1);
+        if ($qty < 1) {
+            $qty = 1;
+        }
+
         if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+            $cart[$id]['quantity'] += $qty;
         } else {
             $cart[$id] = [
                 "id_sanpham"    => $product->id_sanpham,
@@ -106,7 +118,7 @@ class CartController extends Controller
                 "giasp"         => $product->giasp,
                 "giamgia"       => $product->giamgia,
                 "giakhuyenmai"  => $product->giakhuyenmai,
-                "quantity"      => 1
+                "quantity"      => $qty
             ];
         }
 
@@ -221,6 +233,23 @@ class CartController extends Controller
         if (empty($cart)) {
             return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
         }
+
+        // -----------------------------
+        // XÁC THỰC THÔNG TIN NHẬN HÀNG
+        // -----------------------------
+        $request->validate([
+            'display_hoten' => 'required|string|max:100',
+            'display_email' => 'required|email|max:100',
+            'display_sdt' => 'required|regex:/^(0\d{9}|\d{9})$/',
+            'display_diachigiaohang' => 'required|string|max:255',
+        ], [
+            'display_hoten.required' => 'Họ tên không được để trống.',
+            'display_email.required' => 'Email không được để trống.',
+            'display_email.email' => 'Email không đúng định dạng.',
+            'display_sdt.required' => 'Số điện thoại không được để trống.',
+            'display_sdt.regex' => 'Số điện thoại không hợp lệ.',
+            'display_diachigiaohang.required' => 'Địa chỉ giao hàng không được để trống.',
+        ]);
 
         // -----------------------------
         // LẤY THÔNG TIN TỪ FORM
@@ -362,8 +391,25 @@ class CartController extends Controller
 
     public function vnpay(Request $request)
     {
-        $vnp_TmnCode    = "4M7EXIQQ"; 
-        $vnp_HashSecret = "QKB1K3QJ7DL73O6GHQDRUNWTIJ3XQ77Q";
+        // -----------------------------
+        // XÁC THỰC THÔNG TIN NHẬN HÀNG
+        // -----------------------------
+        $request->validate([
+            'display_hoten' => 'required|string|max:100',
+            'display_email' => 'required|email|max:100',
+            'display_sdt' => 'required|regex:/^(0\d{9}|\d{9})$/',
+            'display_diachigiaohang' => 'required|string|max:255',
+        ], [
+            'display_hoten.required' => 'Họ tên không được để trống.',
+            'display_email.required' => 'Email không được để trống.',
+            'display_email.email' => 'Email không đúng định dạng.',
+            'display_sdt.required' => 'Số điện thoại không được để trống.',
+            'display_sdt.regex' => 'Số điện thoại không hợp lệ.',
+            'display_diachigiaohang.required' => 'Địa chỉ giao hàng không được để trống.',
+        ]);
+
+        $vnp_TmnCode    = env('VNP_TMN_CODE', '4M7EXIQQ'); 
+        $vnp_HashSecret = env('VNP_HASH_SECRET', 'QKB1K3QJ7DL73O6GHQDRUNWTIJ3XQ77Q');
 
         $vnp_Url        = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl  = url('/thongbaodathang');

@@ -98,11 +98,11 @@
                 </div>
 
                 <div class="action-buttons">
-                    <a href="{{ route('add_to_cart', $sanpham->id_sanpham) }}" class="btn add-cart">
+                    <a id="add-to-cart-btn" href="{{ route('add_to_cart', $sanpham->id_sanpham) }}?quantity=1" class="btn add-cart">
                         Thêm vào giỏ hàng
                     </a>
 
-                    <a href="{{ route('add_go_to_cart', $sanpham->id_sanpham) }}" class="btn buy-now">
+                    <a id="buy-now-btn" href="{{ route('add_go_to_cart', $sanpham->id_sanpham) }}?quantity=1" class="btn buy-now">
                         Mua ngay
                     </a>
                 </div>
@@ -206,6 +206,21 @@ function changeQty(num) {
     let val = parseInt(input.value) + num;
     if (val < 1) val = 1;
     input.value = val;
+
+    // Cập nhật số lượng vào đường dẫn (href) của nút "Thêm vào giỏ hàng" và "Mua ngay"
+    let addToCartBtn = document.getElementById('add-to-cart-btn');
+    let buyNowBtn = document.getElementById('buy-now-btn');
+
+    if (addToCartBtn) {
+        let href = addToCartBtn.getAttribute('href');
+        let url = href.split('?')[0];
+        addToCartBtn.setAttribute('href', url + '?quantity=' + val);
+    }
+    if (buyNowBtn) {
+        let href = buyNowBtn.getAttribute('href');
+        let url = href.split('?')[0];
+        buyNowBtn.setAttribute('href', url + '?quantity=' + val);
+    }
 }
 </script>
 
