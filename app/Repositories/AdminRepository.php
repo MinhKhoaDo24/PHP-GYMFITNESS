@@ -70,7 +70,11 @@ class AdminRepository implements IAdminRepository
 
     public function totalsCustomer()
     {
-        return NguoiDung::where('id_phanquyen', 2)->count();
+        return DB::table('nguoidung')
+            ->join('dathang', 'nguoidung.id_nd', '=', 'dathang.id_nd')
+            ->where('nguoidung.id_phanquyen', 2)
+            ->distinct('nguoidung.id_nd')
+            ->count('nguoidung.id_nd');
     }
 
     public function totalsOrders()
@@ -137,12 +141,14 @@ class AdminRepository implements IAdminRepository
         $end   = $end instanceof Carbon   ? $end->copy()   : Carbon::parse($end);
 
         return DB::table('nguoidung')
-            ->where('id_phanquyen', 2)
-            ->whereBetween('created_at', [
+            ->join('dathang', 'nguoidung.id_nd', '=', 'dathang.id_nd')
+            ->where('nguoidung.id_phanquyen', 2)
+            ->whereBetween('dathang.ngaydathang', [
                 $start->startOfDay()->format('Y-m-d H:i:s'),
                 $end->endOfDay()->format('Y-m-d H:i:s')
             ])
-            ->count();
+            ->distinct('nguoidung.id_nd')
+            ->count('nguoidung.id_nd');
     }
 
     public function getSoldProducts($start, $end)
