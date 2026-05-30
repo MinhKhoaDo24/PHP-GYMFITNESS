@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -370,6 +371,20 @@ class CartController extends Controller
             $sp = Sanpham::find($item['id_sanpham']);
             $sp->soluong -= $item['quantity'];
             $sp->save();
+        }
+
+        // -----------------------------
+        // GỬI EMAIL HÓA ĐƠN
+        // -----------------------------
+        try {
+            $email = $order->email;
+            $hoten = $order->hoten;
+            Mail::send('pages.invoice_mail', compact('order', 'cart'), function ($message) use ($email, $hoten) {
+                $message->to($email, $hoten)
+                        ->subject('Rise Fitness - Hóa đơn mua hàng #' . time());
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Lỗi gửi email hóa đơn: ' . $e->getMessage());
         }
 
         // -----------------------------
