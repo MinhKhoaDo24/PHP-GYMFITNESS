@@ -84,7 +84,7 @@ class CartController extends Controller
             return response()->json([
                 'status'      => 'success',
                 'message'     => 'Đã thêm vào giỏ hàng thành công!',
-                'cart_count'  => array_sum(array_column($cart, 'quantity')),
+                'cart_count'  => count($cart),
             ]);
         }
 
@@ -280,23 +280,40 @@ class CartController extends Controller
                 return back()->with('error', 'Mã khuyến mãi đã hết lượt sử dụng!');
             }
 
-            // Nếu AJAX tính sai → Controller tính lại
-            $tiengiam_auto = ($km->kieu_giam === 'percent')
-                ? ($tongtien * $km->gia_tri_giam / 100)
-                : $km->gia_tri_giam;
+            // Kiểm tra xem có phải mã Freeship không
+            $isFreeship = ($km->kieu_giam === 'freeship' || stripos($km->ma_code, 'FREESHIP') !== false || stripos($km->ma_code, 'MIENPHISHIP') !== false);
 
-            if ($km->giam_toi_da && $tiengiam_auto > $km->giam_toi_da) {
-                $tiengiam_auto = $km->giam_toi_da;
+            if ($isFreeship) {
+                $tiengiam_auto = 25000; // Giảm đúng bằng 25k ship
+            } else {
+                // Nếu AJAX tính sai → Controller tính lại
+                $tiengiam_auto = ($km->kieu_giam === 'percent')
+                    ? ($tongtien * $km->gia_tri_giam / 100)
+                    : $km->gia_tri_giam;
+
+                if ($km->giam_toi_da && $tiengiam_auto > $km->giam_toi_da) {
+                    $tiengiam_auto = $km->giam_toi_da;
+                }
             }
 
             if ($tiengiam != $tiengiam_auto) {
                 // ép theo giá trị chuẩn để tránh bị chỉnh giá client
                 $tiengiam = $tiengiam_auto;
-                $tienphaitra = max($tongtien - $tiengiam, 0);
+            }
+
+            // Tổng thanh toán thực tế = Tiền hàng - Giảm giá + 25k phí ship (nếu freeship thì triệt tiêu)
+            if ($isFreeship) {
+                $tienphaitra = $tongtien;
+            } else {
+                $tienphaitra = max($tongtien - $tiengiam, 0) + 25000;
             }
 
             // Cập nhật lượt dùng mã KM
             $km->increment('so_luot_da_dung');
+        } else {
+            // Không dùng mã KM: tiêngiam = 0, tiền phải trả = tiền hàng + 25k ship
+            $tiengiam = 0;
+            $tienphaitra = $tongtien + 25000;
         }
 
         // -----------------------------
@@ -530,20 +547,28 @@ class CartController extends Controller
             ]);
         }
 
-        // Tính giảm giá
-        if ($promo->kieu_giam === 'percent') {
-            $discount = ($total * $promo->gia_tri_giam) / 100;
+        // Tính toán giảm giá và phí ship
+        $isFreeship = ($promo->kieu_giam === 'freeship' || stripos($promo->ma_code, 'FREESHIP') !== false || stripos($promo->ma_code, 'MIENPHISHIP') !== false);
+
+        if ($isFreeship) {
+            $discount = 25000; // Giảm ship 25k
+            $newTotal = $total; // Đơn Freeship có tổng bằng đúng tiền hàng sản phẩm
         } else {
-            $discount = $promo->gia_tri_giam;
-        }
+            // Tính giảm giá sản phẩm thông thường
+            if ($promo->kieu_giam === 'percent') {
+                $discount = ($total * $promo->gia_tri_giam) / 100;
+            } else {
+                $discount = $promo->gia_tri_giam;
+            }
 
-        // Giảm tối đa (nếu có)
-        if ($promo->giam_toi_da && $discount > $promo->giam_toi_da) {
-            $discount = $promo->giam_toi_da;
-        }
+            // Giảm tối đa (nếu có)
+            if ($promo->giam_toi_da && $discount > $promo->giam_toi_da) {
+                $discount = $promo->giam_toi_da;
+            }
 
-        // Tính tổng mới
-        $newTotal = max($total - $discount, 0);
+            // Tổng thanh toán = Tiền hàng - Giảm giá + 25k ship
+            $newTotal = max($total - $discount, 0) + 25000;
+        }
 
         // Lưu session tạm (client dùng để hiển thị)
         session([
@@ -551,7 +576,8 @@ class CartController extends Controller
                 'id' => $promo->id_khuyenmai,
                 'code' => $promo->ma_code,
                 'discount' => $discount,
-                'new_total' => $newTotal
+                'new_total' => $newTotal,
+                'is_freeship' => $isFreeship
             ]
         ]);
 
@@ -560,6 +586,7 @@ class CartController extends Controller
             'id_khuyenmai' => $promo->id_khuyenmai,   // ⭐ trả về ID đúng
             'discount' => $discount,
             'new_total' => $newTotal,
+            'is_freeship' => $isFreeship,
             'message' => 'Áp dụng mã thành công!',
         ]);
     }

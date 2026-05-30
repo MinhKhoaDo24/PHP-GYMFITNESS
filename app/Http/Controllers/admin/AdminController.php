@@ -71,7 +71,7 @@ class AdminController extends Controller
     $values[] = DB::table('dathang')
     ->whereDate('ngaydathang', $d->format('Y-m-d'))
     ->where('trangthai', 'Hoàn thành')
-    ->sum('tongtien');
+    ->sum('tienphaitra'); // Tiền thực khách trả sau giảm giá
     }
 
     return response()->json([
@@ -94,6 +94,7 @@ class AdminController extends Controller
 
             $values[] = DB::table('dathang')
                 ->whereDate('ngaydathang', $d->format('Y-m-d'))
+                ->where('trangthai', '!=', 'Đã hủy') // Không đếm đơn hủy
                 ->count();
         }
 
@@ -133,7 +134,12 @@ class AdminController extends Controller
     {
         $data = DB::table('sanpham')
             ->leftJoin('chitiet_donhang', 'sanpham.id_sanpham', '=', 'chitiet_donhang.id_sanpham')
+            ->leftJoin('dathang', 'chitiet_donhang.id_dathang', '=', 'dathang.id_dathang')
             ->select('sanpham.tensp', DB::raw('SUM(chitiet_donhang.soluong) AS total'))
+            ->where(function($q) {
+                $q->whereNull('dathang.id_dathang') // Sản phẩm chưa có đơn nào
+                  ->orWhere('dathang.trangthai', 'Hoàn thành'); // Hoặc đất hàng hoàn thành
+            })
             ->groupBy('sanpham.tensp')
             ->orderByDesc('total')
             ->limit(5)
