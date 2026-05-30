@@ -73,6 +73,10 @@
                         <td style="padding: 6px 0; color: #4b5563;">Tiền giảm giá:</td>
                         <td style="padding: 6px 0; text-align: right; color: #10b981; font-weight: 500;">-{{ number_format($order->tiengiam, 0, ',', '.') }}đ</td>
                     </tr>
+                    <tr>
+                        <td style="padding: 6px 0; color: #4b5563;">Phí giao hàng:</td>
+                        <td style="padding: 6px 0; text-align: right; color: #111827;">{{ number_format($order->tienphaitra - $order->tongtien + $order->tiengiam, 0, ',', '.') }}đ</td>
+                    </tr>
                     <tr style="border-top: 1px dashed #d1d5db;">
                         <td style="padding: 12px 0 0 0; font-size: 16px; font-weight: 700; color: #111827;">TỔNG THANH TOÁN:</td>
                         <td style="padding: 12px 0 0 0; text-align: right; font-size: 18px; font-weight: 700; color: #34A4E0;">{{ number_format($order->tienphaitra, 0, ',', '.') }}đ</td>
