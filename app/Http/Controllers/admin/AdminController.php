@@ -25,17 +25,17 @@ class AdminController extends Controller
     
 
     public function dashboard(Request $request)
-    {
-        $range = $request->input('range', 'month'); // mặc định: tháng này
+{
+    $range = $request->input('range', 'month');
+    $stats = $this->AdminRepository->getDashboardData($range);
 
-        $stats = $this->AdminRepository->getDashboardData($range);
 
-        return view('admin.dashboard', [
-            'stats' => $stats,
-            'range' => $range
-        ]);
-    }
 
+    return view('admin.dashboard', [
+        'stats' => $stats,
+        'range' => $range
+    ]);
+}
 
     public function search(Request $request){
         $searchs = $this->AdminRepository->searchProduct($request);
