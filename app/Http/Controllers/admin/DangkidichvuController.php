@@ -63,12 +63,12 @@ class DangkidichvuController extends Controller
     {
         $request->validate([
             'ho_ten' => 'required',
+            'email' => 'nullable|email',
             'so_dien_thoai' => 'required',
-            'ngay_mong_muon' => 'required|date',
+            'ngay_mong_muon' => 'required|date|after_or_equal:today',
             'gio_mong_muon' => 'required',
             'mon_ua_thich' => 'required',
             'co_so_tap' => 'required'
-
         ]);
 
         $data = [
@@ -80,10 +80,10 @@ class DangkidichvuController extends Controller
             'gio_mong_muon' => $request->gio_mong_muon,
             'ngay_mong_muon' => $request->ngay_mong_muon,
             'trangthai' => 0,
+            'id_nguoidung' => auth()->check() ? auth()->user()->id_nd : null,
             'created_at' => now(),
             'updated_at' => now(),
         ];
-
 
         $this->DangkiRepository->store($data);
 

@@ -33,17 +33,17 @@
 
                 <div class="form-group">
                     <label>Họ và tên <span>*</span></label>
-                    <input type="text" name="ho_ten" placeholder="Nhập tên của bạn" required>
+                    <input type="text" name="ho_ten" placeholder="Nhập tên của bạn" value="{{ auth()->check() ? auth()->user()->hoten : '' }}" required>
                 </div>
 
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" placeholder="Nhập email của bạn">
+                    <input type="email" name="email" placeholder="Nhập email của bạn" value="{{ auth()->check() ? auth()->user()->email : '' }}">
                 </div>
 
                 <div class="form-group">
                     <label>Số điện thoại <span>*</span></label>
-                    <input type="text" name="so_dien_thoai" placeholder="Nhập số điện thoại" required>
+                    <input type="text" name="so_dien_thoai" placeholder="Nhập số điện thoại" value="{{ auth()->check() ? auth()->user()->sdt : '' }}" required>
                 </div>
 
                 <div class="form-group">

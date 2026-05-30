@@ -39,7 +39,6 @@ Route::get('/congiong', [HomeController::class, 'congiong']);
 Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/viewAll', [HomeController::class, 'viewAll'])->name('viewAll');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
-Route::get('/dang-ky-tap-thu', [HomeController::class, 'dangKyTapThu'])->name('dang-ky-tap-thu');
 // Hiển thị form
 Route::get('/dang-ky-tap-thu', [DangkidichvuController::class, 'showForm'])->name('dang-ky-tap-thu');
 // Lưu form
