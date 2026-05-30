@@ -112,54 +112,49 @@ class AdminRepository implements IAdminRepository
     public function getRevenue($start, $end)
     {
         return DB::table('dathang')
-                ->whereBetween('ngaydathang', [
-                    $start->format('Y-m-d H:i:s'),
-                    $end->format('Y-m-d H:i:s')
-                ])
-                ->where('trangthai', 'Hoàn thành')
-                ->sum('tienphaitra'); // Dùng tienphaitra = số tiền thực khách trả (đã trừ giảm giá)
-
+            ->whereBetween('ngaydathang', [
+                $start->format('Y-m-d H:i:s'),
+                $end->format('Y-m-d H:i:s')
+            ])
+            ->where('trangthai', 'Hoàn thành')
+            ->sum('tienphaitra');
     }
 
     public function getOrders($start, $end)
     {
         return DB::table('dathang')
-                ->whereBetween('ngaydathang', [
-                    $start->format('Y-m-d H:i:s'),
-                    $end->format('Y-m-d H:i:s')
-                ])
-                ->where('trangthai', '!=', 'Đã hủy') // Không đếm đơn bị hủy
-                ->count();
-
+            ->whereBetween('ngaydathang', [
+                $start->format('Y-m-d H:i:s'),
+                $end->format('Y-m-d H:i:s')
+            ])
+            ->where('trangthai', 'Hoàn thành')
+            ->count();
     }
 
     public function getCustomers($start, $end)
     {
-        // Đảm bảo $start và $end là Carbon
-        $start = $start instanceof Carbon ? $start : Carbon::parse($start);
-        $end   = $end instanceof Carbon ? $end   : Carbon::parse($end);
+        $start = $start instanceof Carbon ? $start->copy() : Carbon::parse($start);
+        $end   = $end instanceof Carbon   ? $end->copy()   : Carbon::parse($end);
 
         return DB::table('nguoidung')
-                ->where('id_phanquyen', 2)
-                ->whereBetween('created_at', [
-                    $start->startOfDay()->format('Y-m-d H:i:s'),
-                    $end->endOfDay()->format('Y-m-d H:i:s')
-                ])
-                ->count();
-
+            ->where('id_phanquyen', 2)
+            ->whereBetween('created_at', [
+                $start->startOfDay()->format('Y-m-d H:i:s'),
+                $end->endOfDay()->format('Y-m-d H:i:s')
+            ])
+            ->count();
     }
 
     public function getSoldProducts($start, $end)
     {
         return DB::table('chitiet_donhang')
-                ->join('dathang', 'chitiet_donhang.id_dathang', '=', 'dathang.id_dathang')
-                ->where('dathang.trangthai', 'Hoàn thành')
-                ->whereBetween('dathang.ngaydathang', [
-                    $start->format('Y-m-d H:i:s'),
-                    $end->format('Y-m-d H:i:s')
-                ])
-                ->sum('chitiet_donhang.soluong');
-
+            ->join('dathang', 'chitiet_donhang.id_dathang', '=', 'dathang.id_dathang')
+            ->where('dathang.trangthai', 'Hoàn thành')
+            ->whereBetween('dathang.ngaydathang', [
+                $start->format('Y-m-d H:i:s'),
+                $end->format('Y-m-d H:i:s')
+            ])
+            ->sum('chitiet_donhang.soluong');
     }
 
     /* ============================
@@ -168,67 +163,52 @@ class AdminRepository implements IAdminRepository
 
     public function getDashboardData($range)
     {
-
         if ($range == "today") {
             $start = Carbon::today();
-            $end = Carbon::now();
-
+            $end = Carbon::now()->endOfDay();
             $prevStart = Carbon::yesterday();
             $prevEnd = Carbon::yesterday()->endOfDay();
 
         } elseif ($range == "week") {
-
             $start = Carbon::now()->startOfWeek();
-            $end = Carbon::now();
-
+            $end = Carbon::now()->endOfDay();
             $prevStart = Carbon::now()->subWeek()->startOfWeek();
             $prevEnd = Carbon::now()->subWeek()->endOfWeek();
 
         } elseif ($range == "month") {
-
             $start = Carbon::now()->startOfMonth();
-            $end = Carbon::now();
-
+            $end = Carbon::now()->endOfDay();
             $prevStart = Carbon::now()->subMonth()->startOfMonth();
             $prevEnd = Carbon::now()->subMonth()->endOfMonth();
 
         } else { // year
-
             $start = Carbon::now()->startOfYear();
-            $end = Carbon::now();
-
+            $end = Carbon::now()->endOfDay();
             $prevStart = Carbon::now()->subYear()->startOfYear();
             $prevEnd = Carbon::now()->subYear()->endOfYear();
         }
 
         // CURRENT DATA
-        $revenueNow   = $this->getRevenue($start, $end);
-        $ordersNow    = $this->getOrders($start, $end);
-        $customersNow = $this->getCustomers($start, $end);
-        $soldNow      = $this->getSoldProducts($start, $end);
+        $revenueNow   = $this->getRevenue($start->copy(), $end->copy());
+        $ordersNow    = $this->getOrders($start->copy(), $end->copy());
+        $customersNow = $this->getCustomers($start->copy(), $end->copy());
+        $soldNow      = $this->getSoldProducts($start->copy(), $end->copy());
 
         // PREVIOUS DATA
-        $revenuePrev   = $this->getRevenue($prevStart, $prevEnd);
-        $ordersPrev    = $this->getOrders($prevStart, $prevEnd);
-        $customersPrev = $this->getCustomers($prevStart, $prevEnd);
-        $soldPrev      = $this->getSoldProducts($prevStart, $prevEnd);
-
-        
-
+        $revenuePrev   = $this->getRevenue($prevStart->copy(), $prevEnd->copy());
+        $ordersPrev    = $this->getOrders($prevStart->copy(), $prevEnd->copy());
+        $customersPrev = $this->getCustomers($prevStart->copy(), $prevEnd->copy());
+        $soldPrev      = $this->getSoldProducts($prevStart->copy(), $prevEnd->copy());
 
         return [
-            "revenue"          => $revenueNow,
-            "revenueGrowth"    => $this->calcGrowth($revenueNow, $revenuePrev),
-
-            "orders"           => $ordersNow,
-            "ordersGrowth"     => $this->calcGrowth($ordersNow, $ordersPrev),
-
-            "customers"        => $customersNow,
-            "customersGrowth"  => $this->calcGrowth($customersNow, $customersPrev),
-
-            "soldProducts"     => $soldNow,
-            "soldGrowth"       => $this->calcGrowth($soldNow, $soldPrev),
+            "revenue"         => $revenueNow,
+            "revenueGrowth"   => $this->calcGrowth($revenueNow, $revenuePrev),
+            "orders"          => $ordersNow,
+            "ordersGrowth"    => $this->calcGrowth($ordersNow, $ordersPrev),
+            "customers"       => $customersNow,
+            "customersGrowth" => $this->calcGrowth($customersNow, $customersPrev),
+            "soldProducts"    => $soldNow,
+            "soldGrowth"      => $this->calcGrowth($soldNow, $soldPrev),
         ];
-        
     }
 }
