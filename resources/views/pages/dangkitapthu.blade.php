@@ -81,7 +81,7 @@
 
                 <div class="form-group">
                     <label>Ngày muốn tập thử <span>*</span></label>
-                    <input type="date" name="ngay_mong_muon" required>
+                    <input type="date" name="ngay_mong_muon" min="{{ date('Y-m-d') }}" required>
                 </div>
 
 
@@ -110,6 +110,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     @endif
 
+    @if($errors->any())
+        Swal.fire({
+            icon: "error",
+            title: "Thông báo",
+            text: "{{ $errors->first() }}",
+            confirmButtonColor: "#ef4444",
+            confirmButtonText: "OK"
+        });
+    @endif
 });
 </script>
 <script>

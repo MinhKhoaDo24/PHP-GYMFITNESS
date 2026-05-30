@@ -69,6 +69,16 @@ class DangkidichvuController extends Controller
             'gio_mong_muon' => 'required',
             'mon_ua_thich' => 'required',
             'co_so_tap' => 'required'
+        ], [
+            'ho_ten.required' => 'Vui lòng nhập họ và tên.',
+            'email.email' => 'Email không đúng định dạng.',
+            'so_dien_thoai.required' => 'Vui lòng nhập số điện thoại.',
+            'ngay_mong_muon.required' => 'Vui lòng chọn ngày muốn tập thử.',
+            'ngay_mong_muon.date' => 'Ngày tập thử không hợp lệ.',
+            'ngay_mong_muon.after_or_equal' => 'Ngày tập thử phải bắt đầu từ ngày hôm nay trở đi.',
+            'gio_mong_muon.required' => 'Vui lòng chọn khung giờ mong muốn.',
+            'mon_ua_thich.required' => 'Vui lòng chọn môn thể thao.',
+            'co_so_tap.required' => 'Vui lòng chọn cơ sở tập luyện.',
         ]);
 
         $data = [
