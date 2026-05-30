@@ -142,8 +142,13 @@
 <h5 class="fw-bold mb-2" style='color: #0ea5e9;'>Thanh toán</h5>
 <div class="grid-2 mb-4">
     <div>
-        <label class="detail-label">Tổng tiền hàng</label>
+        <label class="detail-label">Tổng tiền hàng (Tiền sản phẩm)</label>
         <div class="detail-box">{{ number_format($order->tongtien) }} đ</div>
+    </div>
+
+    <div>
+        <label class="detail-label">Phí vận chuyển</label>
+        <div class="detail-box">25,000 đ</div>
     </div>
 
     <div>
@@ -152,9 +157,9 @@
     </div>
 
     <div>
-        <label class="detail-label">Tiền phải trả</label>
-        <div class="detail-box">
-            {{ number_format($order->tienphaitra ?? ($order->tongtien - ($order->tiengiam ?? 0))) }} đ
+        <label class="detail-label" style="color: #0ea5e9; font-weight: 700;">Tổng thanh toán (Tiền phải trả)</label>
+        <div class="detail-box fw-bold" style="border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff;">
+            {{ number_format($order->tienphaitra ?? ($order->tongtien + 25000 - ($order->tiengiam ?? 0))) }} đ
         </div>
     </div>
 </div>

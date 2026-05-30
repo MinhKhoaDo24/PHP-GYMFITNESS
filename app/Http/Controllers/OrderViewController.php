@@ -53,7 +53,7 @@ class OrderViewController extends Controller
             return back()->with('error', 'Không thể hủy đơn hàng này!');
         }
 
-        $order->trangthai = 'Bị hủy';
+        $order->trangthai = 'Hủy';
         $order->save();
 
         return back()->with('success', 'Đơn hàng đã được hủy thành công.');

@@ -244,7 +244,7 @@
     <input type="hidden" name="id_khuyenmai" id="id_khuyenmai" value="">
 
     <input type="hidden" name="tiengiam" id="tiengiam" value="0">
-    <input type="hidden" name="tienphaitra" id="tienphaitra" value="{{ $total }}">
+    <input type="hidden" name="tienphaitra" id="tienphaitra" value="{{ $total + 25000 }}">
 
 </div>
 
@@ -270,20 +270,30 @@
 {{-- ==================== TỔNG TIỀN ==================== --}}
 <div class="checkout-summary-box">
     <div class="summary-row">
-        <span class="summary-label">Tạm tính:</span>
+        <span class="summary-label">Tạm tính (Tiền hàng):</span>
         <span class="summary-value">{{ number_format($total) }}đ</span>
     </div>
 
     <div class="summary-row">
-        <span class="summary-label">Giảm giá:</span>
+        <span class="summary-label">Phí vận chuyển:</span>
+        <span class="summary-value" id="shipping_fee_display">25.000đ</span>
+    </div>
+
+    <div class="summary-row">
+        <span class="summary-label">Giảm giá sản phẩm:</span>
         <span class="summary-value text-danger" id="discount_amount">0đ</span>
+    </div>
+
+    <div class="summary-row" id="shipping_discount_row" style="display: none;">
+        <span class="summary-label">Giảm giá vận chuyển:</span>
+        <span class="summary-value text-danger" id="shipping_discount_amount">-25.000đ</span>
     </div>
 
     <hr>
 
     <div class="summary-row">
         <span class="summary-label">Tổng thanh toán:</span>
-        <span class="summary-total" id="total_amount">{{ number_format($total) }}đ</span>
+        <span class="summary-total" id="total_amount">{{ number_format($total + 25000) }}đ</span>
     </div>
 </div>
 
@@ -350,6 +360,41 @@
 
 <script>
 const originalTotal = {{ $total }};
+const originalTotalWithShip = {{ $total + 25000 }};
+
+// Xử lý submit Form cập nhật thông tin trong Modal (Không load lại trang)
+$('#updateInfoForm').submit(function(e) {
+    e.preventDefault();
+    
+    const hoten = $('#hoten').val().trim();
+    const email = $('#email').val().trim();
+    const sdt = $('#sdt').val().trim();
+    const diachi = $('#diachi').val().trim();
+    
+    // Cập nhật text hiển thị trên trang checkout
+    $('#display_hoten').text(hoten);
+    $('#display_email').text(email);
+    $('#display_sdt').text(sdt);
+    $('#display_diachigiaohang').text(diachi);
+    
+    // Cập nhật giá trị vào các input hidden để gửi đi khi đặt hàng
+    $('#input_hoten').val(hoten);
+    $('#input_email').val(email);
+    $('#input_sdt').val(sdt);
+    $('#input_diachigiaohang').val(diachi);
+    
+    // Đóng Modal
+    $('#updateInfoModal').modal('hide');
+    
+    // Thông báo bằng SweetAlert2
+    Swal.fire({
+        icon: 'success',
+        title: 'Cập nhật thành công!',
+        text: 'Thông tin nhận hàng đã được cập nhật mới.',
+        timer: 2000,
+        showConfirmButton: false
+    });
+});
 
 // Áp mã KM
 $('#apply_promo').click(function() {
@@ -361,7 +406,18 @@ $('#apply_promo').click(function() {
         if (res.success) {
             Swal.fire("Thành công!", res.message, "success");
 
-            $('#discount_amount').text('-' + res.discount.toLocaleString() + "đ");
+            if (res.is_freeship) {
+                // Nếu là mã freeship
+                $('#shipping_fee_display').html('<del>25.000đ</del> <span class="text-success fw-bold">Miễn phí</span>');
+                $('#shipping_discount_row').show();
+                $('#discount_amount').text("0đ");
+            } else {
+                // Nếu là mã giảm giá sản phẩm bình thường
+                $('#shipping_fee_display').text("25.000đ");
+                $('#shipping_discount_row').hide();
+                $('#discount_amount').text('-' + res.discount.toLocaleString() + "đ");
+            }
+            
             $('#total_amount').text(res.new_total.toLocaleString() + "đ");
 
             $('#id_khuyenmai').val(res.id_khuyenmai);
@@ -370,12 +426,15 @@ $('#apply_promo').click(function() {
         } else {
             Swal.fire("Lỗi!", res.message, "error");
 
+            // Reset về trạng thái ban đầu
+            $('#shipping_fee_display').text("25.000đ");
+            $('#shipping_discount_row').hide();
             $('#discount_amount').text("0đ");
-            $('#total_amount').text(originalTotal.toLocaleString() + "đ");
+            $('#total_amount').text(originalTotalWithShip.toLocaleString() + "đ");
 
             $('#id_khuyenmai').val('');
             $('#tiengiam').val(0);
-            $('#tienphaitra').val(originalTotal);
+            $('#tienphaitra').val(originalTotalWithShip);
         }
     });
 
@@ -384,8 +443,10 @@ $('#apply_promo').click(function() {
 // Reset KM khi load trang
 $(document).ready(function () {
     $('#promo_code').val('');
+    $('#shipping_fee_display').text("25.000đ");
+    $('#shipping_discount_row').hide();
     $('#discount_amount').text("0đ");
-    $('#total_amount').text(originalTotal.toLocaleString() + "đ");
+    $('#total_amount').text(originalTotalWithShip.toLocaleString() + "đ");
 });
 
 // Chọn hình thức thanh toán

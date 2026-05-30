@@ -117,7 +117,7 @@ class AdminRepository implements IAdminRepository
                     $end->format('Y-m-d H:i:s')
                 ])
                 ->where('trangthai', 'Hoàn thành')
-                ->sum('tongtien');
+                ->sum('tienphaitra'); // Dùng tienphaitra = số tiền thực khách trả (đã trừ giảm giá)
 
     }
 
@@ -128,6 +128,7 @@ class AdminRepository implements IAdminRepository
                     $start->format('Y-m-d H:i:s'),
                     $end->format('Y-m-d H:i:s')
                 ])
+                ->where('trangthai', '!=', 'Đã hủy') // Không đếm đơn bị hủy
                 ->count();
 
     }
