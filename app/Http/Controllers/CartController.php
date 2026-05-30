@@ -240,10 +240,10 @@ class CartController extends Controller
         // XÁC THỰC THÔNG TIN NHẬN HÀNG
         // -----------------------------
         $request->validate([
-            'display_hoten' => 'required|string|max:100',
-            'display_email' => 'required|email|max:100',
-            'display_sdt' => 'required|regex:/^(0\d{9}|\d{9})$/',
-            'display_diachigiaohang' => 'required|string|max:255',
+            'display_hoten' => ['required', 'string', 'max:100'],
+            'display_email' => ['required', 'email', 'max:100'],
+            'display_sdt' => ['required', 'regex:/^(0\d{9}|\d{9})$/'],
+            'display_diachigiaohang' => ['required', 'string', 'max:255'],
         ], [
             'display_hoten.required' => 'Họ tên không được để trống.',
             'display_email.required' => 'Email không được để trống.',
@@ -428,10 +428,10 @@ class CartController extends Controller
         // XÁC THỰC THÔNG TIN NHẬN HÀNG
         // -----------------------------
         $request->validate([
-            'display_hoten' => 'required|string|max:100',
-            'display_email' => 'required|email|max:100',
-            'display_sdt' => 'required|regex:/^(0\d{9}|\d{9})$/',
-            'display_diachigiaohang' => 'required|string|max:255',
+            'display_hoten' => ['required', 'string', 'max:100'],
+            'display_email' => ['required', 'email', 'max:100'],
+            'display_sdt' => ['required', 'regex:/^(0\d{9}|\d{9})$/'],
+            'display_diachigiaohang' => ['required', 'string', 'max:255'],
         ], [
             'display_hoten.required' => 'Họ tên không được để trống.',
             'display_email.required' => 'Email không được để trống.',
