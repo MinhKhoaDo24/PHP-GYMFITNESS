@@ -85,7 +85,7 @@
         <!-- Footer -->
         <div style="background-color: #f9fafb; border-top: 1px solid #e5e7eb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
             <p style="margin: 0 0 5px 0;">Rise Fitness & Yoga - 12 Chùa Bộc, Đống Đa, Hà Nội</p>
-            <p style="margin: 0;">Hotline: 18006750 | Email: dlinh30042004@gmail.com</p>
+            <p style="margin: 0;">Hotline: 18006750 | Email: {{ config('mail.from.address', 'nhwquynhto1606@gmail.com') }}</p>
         </div>
 
     </div>
