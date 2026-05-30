@@ -64,7 +64,18 @@ class HomeController extends Controller
         $comments = \App\Models\Comment::where('sanpham_id', $id)
             ->with('user')
             ->get();
-        return view('pages.detail', compact('sanpham', 'randoms', 'comments'));
+
+        $userHasBought = false;
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $userHasBought = \App\Models\ChitietDonhang::where('id_sanpham', $id)
+                ->whereHas('dathang', function ($query) {
+                    $query->where('id_nd', \Illuminate\Support\Facades\Auth::user()->id_nd)
+                          ->where('trangthai', 'Hoàn thành');
+                })
+                ->exists();
+        }
+
+        return view('pages.detail', compact('sanpham', 'randoms', 'comments', 'userHasBought'));
     }
 
     /** ===================== SEARCH ===================== */

@@ -26,7 +26,7 @@
 
 .orders-wrapper {
     width: 100%;
-    max-width: 1160px;
+    /* max-width: 1500px; */
     margin: 0 auto;
     padding: 0 40px 0; 
 }
@@ -364,6 +364,69 @@
     transform: translateY(-1px);
 }
 
+/* ===========================
+    NÚT MUA LẠI
+=========================== */
+.orders-action-link--repurchase {
+    border-color: rgba(255, 140, 0, 0.75);
+    color: #ff8c00;
+    background: rgba(255, 140, 0, 0.12);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.orders-action-link--repurchase:hover {
+    background: linear-gradient(135deg, #ff8c00, #ff6b00);
+    color: #fff !important;
+    border-color: transparent;
+    transform: translateY(-1px);
+}
+
+/* ===========================
+    DANH SÁCH SẢN PHẨM TRONG ĐƠN
+=========================== */
+.order-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 320px;
+}
+
+.order-product-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid #ff8c00;
+    transition: all 0.25s ease;
+}
+
+.order-product-item:hover {
+    background: rgba(255, 140, 0, 0.08);
+    transform: translateX(3px);
+}
+
+.product-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    text-align: left;
+}
+
+.product-qty-badge {
+    background: #ff8c00;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 12px;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
 </style>
 
 <section class="page-header">
@@ -389,8 +452,8 @@
                         <th>Ngày đặt</th>
                         <th>Ngày giao dự kiến</th>
                         <th>Trạng thái</th>
-                        <th>Địa chỉ giao hàng</th>
-                        <th>Actions</th>
+                        <th>Sản phẩm</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
 
@@ -443,7 +506,20 @@
 
                             </td>
 
-                            <td>{{ $order->diachigiaohang ?? '---' }}</td>
+                            <td>
+                                <div class="order-products-list">
+                                    @if($order->details && $order->details->isNotEmpty())
+                                        @foreach($order->details as $detail)
+                                            <div class="order-product-item">
+                                                <span class="product-name">{{ $detail->tensp }}</span>
+                                                <span class="product-qty-badge">x{{ $detail->soluong }}</span>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <span class="text-muted">---</span>
+                                    @endif
+                                </div>
+                            </td>
 
                             <td>
                                 <a href="{{ route('donhang.edit', ['id' => $order->id_dathang]) }}" 
@@ -457,6 +533,16 @@
                                         @csrf
                                         <button type="button" class="orders-action-link orders-action-link--danger btn-cancel-order">
                                             Hủy đơn
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if(in_array($order->trangthai, ['Hoàn thành', 'Bị hủy', 'Thất bại']))
+                                    <form action="{{ route('donhang.repurchase', ['id' => $order->id_dathang]) }}" 
+                                        method="POST" class="d-inline repurchase-form">
+                                        @csrf
+                                        <button type="button" class="orders-action-link orders-action-link--repurchase btn-repurchase-order">
+                                            Mua lại
                                         </button>
                                     </form>
                                 @endif
@@ -493,6 +579,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 cancelButtonColor: "#6b7280",
                 confirmButtonText: "Hủy đơn",
                 cancelButtonText: "Không"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+
+        });
+    });
+
+    document.querySelectorAll('.btn-repurchase-order').forEach(btn => {
+        btn.addEventListener('click', function () {
+
+            let form = this.closest('form');
+
+            Swal.fire({
+                title: "Mua lại đơn hàng?",
+                text: "Toàn bộ sản phẩm trong đơn hàng cũ này sẽ được đưa vào giỏ hàng và bạn sẽ được chuyển đến trang thanh toán.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#34A4E0",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Đồng ý",
+                cancelButtonText: "Hủy"
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();

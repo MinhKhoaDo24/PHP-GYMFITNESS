@@ -182,16 +182,47 @@
         <div id="tab3" class="tab-pane">
             <h3>Đánh giá sản phẩm</h3>
 
-            @if($comments->count() === 0)
-                <p>Hiện chưa có đánh giá nào.</p>
-            @else
-                @foreach($comments as $c)
-                    <div class="review-item">
-                        <strong>{{ $c->user->name ?? 'Khách hàng' }}</strong>
-                        <p>{{ $c->content }}</p>
+            <div id="comments-list" class="comments-list">
+                @if($comments->count() === 0)
+                    <p class="no-comments-text">Hiện chưa có đánh giá nào.</p>
+                @else
+                    @foreach($comments as $c)
+                        <div class="review-item">
+                            <div class="review-user-info">
+                                <span class="review-author">{{ $c->user->hoten ?? $c->user->name ?? 'Khách hàng' }}</span>
+                                <span class="review-date">{{ $c->created_at ? $c->created_at->format('d-m-Y H:i') : '' }}</span>
+                            </div>
+                            <p class="review-content">{{ $c->content }}</p>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+
+            @auth
+                @if($userHasBought)
+                    <div class="add-comment-box">
+                        <h4>Viết đánh giá của bạn</h4>
+                        <form id="commentForm">
+                            @csrf
+                            <input type="hidden" name="sanpham_id" value="{{ $sanpham->id_sanpham }}">
+                            <div class="form-group">
+                                <textarea name="content" id="commentContent" class="comment-textarea" rows="4" placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm này..." required></textarea>
+                            </div>
+                            <button type="submit" class="comment-submit-btn">Gửi đánh giá</button>
+                        </form>
                     </div>
-                @endforeach
-            @endif
+                @else
+                    <div class="comment-warning-box">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>Chỉ những khách hàng đã mua sản phẩm này tại RISE FITNESS mới có thể viết đánh giá.</span>
+                    </div>
+                @endif
+            @else
+                <div class="comment-warning-box">
+                    <i class="bi bi-person-fill-lock"></i>
+                    <span>Vui lòng <a href="/login" style="color: #ff8c00; font-weight: 700; text-decoration: underline;">Đăng nhập</a> để viết đánh giá sản phẩm.</span>
+                </div>
+            @endauth
         </div>
 
     </div>
@@ -285,8 +316,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
+@auth
+@if($userHasBought)
+<script>
+$(document).ready(function() {
+    $('#commentForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        let form = $(this);
+        let content = $('#commentContent').val().trim();
+        if (content === '') return;
 
-
-
+        $.ajax({
+            url: "{{ route('comment.post') }}",
+            type: "POST",
+            data: form.serialize(),
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã gửi đánh giá',
+                        text: 'Cảm ơn bạn đã đánh giá sản phẩm này!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // Clear the textarea
+                    $('#commentContent').val('');
+                    
+                    // Format date
+                    let formattedDate = 'Vừa xong';
+                    
+                    // Append the new comment to the comments list
+                    let newCommentHtml = `
+                        <div class="review-item" style="opacity: 0; transform: translateY(10px); transition: all 0.3s ease;">
+                            <div class="review-user-info">
+                                <span class="review-author">${res.comment.user.hoten || res.comment.user.name || 'Khách hàng'}</span>
+                                <span class="review-date">${formattedDate}</span>
+                            </div>
+                            <p class="review-content">${res.comment.content}</p>
+                        </div>
+                    `;
+                    
+                    if ($('.no-comments-text').length) {
+                        $('.no-comments-text').remove();
+                    }
+                    
+                    let $newEl = $(newCommentHtml);
+                    $('#comments-list').append($newEl);
+                    
+                    // Trigger animation
+                    setTimeout(() => {
+                        $newEl.css({
+                            'opacity': 1,
+                            'transform': 'translateY(0)'
+                        });
+                    }, 50);
+                } else {
+                    Swal.fire('Lỗi', res.message || 'Đã xảy ra lỗi khi gửi đánh giá.', 'error');
+                }
+            },
+            error: function(xhr) {
+                let msg = 'Đã xảy ra lỗi khi gửi đánh giá.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire('Lỗi', msg, 'error');
+            }
+        });
+    });
+});
+</script>
+@endif
+@endauth
 
 @endsection
