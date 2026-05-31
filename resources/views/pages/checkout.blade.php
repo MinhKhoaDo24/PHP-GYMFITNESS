@@ -14,7 +14,7 @@
         background: #fff;
         padding: 25px 28px;
         border-radius: 18px;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
         margin-bottom: 25px;
         border: 1px solid #e5e7eb;
     }
@@ -113,7 +113,7 @@
         padding: 20px 24px;
         border-radius: 14px;
         border: 1px solid #e5e7eb;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
         max-width: 380px;
         margin-left: auto;
     }
@@ -143,176 +143,197 @@
 </style>
 
 <div class="order-co">
-<div class="container checkout-section">
+    <div class="container checkout-section">
 
-<form action="{{ route('dathang') }}" method="POST" id="checkout">
-@csrf
+        <form action="{{ route('dathang') }}" method="POST" id="checkout">
+            @csrf
 
-@php $u = $showusers->first(); @endphp
+            @php $u = $showusers->first(); @endphp
 
-{{-- ==================== THÔNG TIN KHÁCH HÀNG ==================== --}}
-<div class="checkout-card">
-    <div class="section-title"><i class="bi bi-person-circle"></i> Thông tin khách hàng</div>
+            {{-- ==================== THÔNG TIN KHÁCH HÀNG ==================== --}}
+            <div class="checkout-card">
+                <div class="section-title"><i class="bi bi-person-circle"></i> Thông tin khách hàng</div>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div><span class="info-label">Khách hàng:</span> <span class="info-value" id="display_hoten">{{ $u->hoten }}</span></div>
-            <div><span class="info-label">Email:</span> <span class="info-value" id="display_email">{{ $u->email }}</span></div>
-        </div>
-        <div class="col-md-6">
-            <div><span class="info-label">Số điện thoại:</span> <span class="info-value" id="display_sdt">0{{ $u->sdt }}</span></div>
-            <div><span class="info-label">Địa chỉ:</span> <span class="info-value" id="display_diachigiaohang">{{ $u->diachi }}</span></div>
-        </div>
-    </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div><span class="info-label">Khách hàng:</span> <span class="info-value" id="display_hoten">{{ $u->hoten }}</span></div>
+                        <div><span class="info-label">Email:</span> <span class="info-value" id="display_email">{{ $u->email }}</span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div><span class="info-label">Số điện thoại:</span> <span class="info-value" id="display_sdt">0{{ $u->sdt }}</span></div>
+                        <div><span class="info-label">Địa chỉ:</span> <span class="info-value" id="display_diachigiaohang">{{ $u->diachi }}</span></div>
+                    </div>
+                </div>
 
-    <button type="button" class="btn btn-outline-main btn-sm" data-bs-toggle="modal" data-bs-target="#updateInfoModal">
-        <i class="fa fa-edit"></i> Cập nhật thông tin
-    </button>
+                <button type="button" class="btn btn-outline-main btn-sm" data-bs-toggle="modal" data-bs-target="#updateInfoModal">
+                    <i class="fa fa-edit"></i> Cập nhật thông tin
+                </button>
 
-    {{-- Hidden --}}
-    <input type="hidden" name="id_nd" value="{{ $u->id_nd }}">
-    <input type="hidden" id="input_hoten" name="display_hoten" value="{{ $u->hoten }}">
-    <input type="hidden" id="input_email" name="display_email" value="{{ $u->email }}">
-    <input type="hidden" id="input_sdt" name="display_sdt" value="{{ $u->sdt }}">
-    <input type="hidden" id="input_diachigiaohang" name="display_diachigiaohang" value="{{ $u->diachi }}">
-</div>
+                {{-- Hidden --}}
+                <input type="hidden" name="id_nd" value="{{ $u->id_nd }}">
+                <input type="hidden" id="input_hoten" name="display_hoten" value="{{ $u->hoten }}">
+                <input type="hidden" id="input_email" name="display_email" value="{{ $u->email }}">
+                <input type="hidden" id="input_sdt" name="display_sdt" value="{{ $u->sdt }}">
+                <input type="hidden" id="input_diachigiaohang" name="display_diachigiaohang" value="{{ $u->diachi }}">
+            </div>
 
+            {{-- ==================== GIỎ HÀNG ==================== --}}
+            <div class="checkout-card">
+                <div class="section-title"><i class="bi bi-cart-check"></i> Giỏ hàng</div>
 
-
-{{-- ==================== GIỎ HÀNG ==================== --}}
-<div class="checkout-card">
-    <div class="section-title"><i class="bi bi-cart-check"></i> Giỏ hàng</div>
-
-    @php $total = 0; @endphp
-
-    <table class="table table-cart table-hover">
-        <thead>
-            <tr>
-                <th>Ảnh</th>
-                <th>Sản phẩm</th>
-                <th>Giá gốc</th>
-                <th>Giảm</th>
-                <th>Giá KM</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach($cart as $item)
-                @php
-                    $line = $item['giakhuyenmai'] * $item['quantity'];
-                    $total += $line;
+                @php 
+                    $total = 0;
+                    $totalOriginal = 0;
+                    $totalSale = 0;
+                    $totalSurcharge = 0;
+                    $totalDiscount = 0; 
                 @endphp
 
-                <tr>
-                    <td><img src="{{ asset($item['anhsp']) }}" width="90"></td>
-                    <td>{{ $item['tensp'] }}</td>
-                    <td>{{ number_format($item['giasp']) }}đ</td>
-                    <td>{{ $item['giamgia'] }}%</td>
-                    <td>{{ number_format($item['giakhuyenmai']) }}đ</td>
-                    <td>{{ $item['quantity'] }}</td>
-                    <td><strong>{{ number_format($line) }}đ</strong></td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+                <table class="table table-cart table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Sản phẩm</th>
+                            <th>Size</th>
+                            <th>Giá gốc</th>
+                            <th>Giảm</th>
+                            <th>Giá KM</th>
+                            <th>Giá cộng thêm</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
 
-    {{-- Hidden cho tất cả sản phẩm --}}
-    @foreach(session('cart') as $item)
-        <input type="hidden" name="id_sanpham[]" value="{{ $item['id_sanpham'] }}">
-        <input type="hidden" name="soluong[]" value="{{ $item['quantity'] }}">
-        <input type="hidden" name="giakhuyenmai[]" value="{{ $item['giakhuyenmai'] }}">
-    @endforeach
-</div>
+                    <tbody>
+                        @foreach(session('cart') as $item)
+                        @php
+                            $line = ($item['giakhuyenmai']) * $item['quantity'];
+                            $Thanhtien = $line + ($item['gia_cong_them'] * $item['quantity']) ;
+                            $Original_Price = $item['giasp'] * $item['quantity'];
+                            $totalOriginal += $Original_Price;
+                            $totalSale += $line;
+                            $totalSurcharge += $item['gia_cong_them'] * $item['quantity'];
+                        @endphp
 
+                        <tr>
+                            <td><img src="{{ asset($item['anhsp']) }}" width="90"></td>
+                            <td>{{ $item['tensp'] }}</td>
+                            <td class="text-center font-weight-bold" style="color: #ff8c00;">{{ $item['ten_size'] ?? '' }}</td>
+                            <td>{{ number_format($item['giasp']) }}đ</td>
+                            <td>{{ $item['giamgia'] }}%</td>
+                            <td>{{ number_format($item['giakhuyenmai']) }}đ</td>
+                            <td class="text-success font-weight-bold">{{ number_format($item['gia_cong_them'] ?? 0) }}đ</td>
+                            <td>{{ $item['quantity'] }}</td>
+                            <td><strong>{{ number_format($Thanhtien) }}đ</strong></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
 
+                @php
+                    $total = $totalSale + $totalSurcharge;
+                    $totalDiscount = $totalOriginal - $totalSale;
+                @endphp
 
-{{-- ==================== MÃ KHUYẾN MÃI ==================== --}}
-<div class="checkout-card">
-    <div class="section-title"><i class="bi bi-ticket-perforated"></i> Mã khuyến mãi</div>
+                {{-- Hidden cho tất cả sản phẩm --}}
+                @foreach(session('cart') as $item)
+                <input type="hidden" name="id_sanpham[]" value="{{ $item['id_sanpham'] }}">
+                <input type="hidden" name="soluong[]" value="{{ $item['quantity'] }}">
+                <input type="hidden" name="giakhuyenmai[]" value="{{ $item['giakhuyenmai'] }}">
+                @endforeach
+            </div>
 
-    <div class="promo-group">
-        <input type="text" id="promo_code" name="ma_khuyen_mai" class="promo-input"
-            placeholder="Nhập mã khuyến mãi...">
-        <button type="button" id="apply_promo" class="promo-btn">Áp dụng</button>
+            {{-- ==================== MÃ KHUYẾN MÃI ==================== --}}
+            <div class="checkout-card">
+                <div class="section-title"><i class="bi bi-ticket-perforated"></i> Mã khuyến mãi</div>
+
+                <div class="promo-group">
+                    <input type="text" id="promo_code" name="ma_khuyen_mai" class="promo-input"
+                        placeholder="Nhập mã khuyến mãi...">
+                    <button type="button" id="apply_promo" class="promo-btn">Áp dụng</button>
+                </div>
+
+                <p id="promo_message" class="mt-2 fw-bold"></p>
+
+                <!-- Hidden lưu ID thật -->
+                <input type="hidden" name="id_khuyenmai" id="id_khuyenmai" value="">
+
+                <input type="hidden" name="tiengiam" id="tiengiam" value="0">
+                <input type="hidden" name="tienphaitra" id="tienphaitra" value="{{ $total + 25000 }}">
+            </div>
+
+            {{-- ==================== THÔNG TIN THANH TOÁN ==================== --}}
+            <div class="checkout-card">
+                <div class="section-title"><i class="bi bi-credit-card-2-back"></i> Phương thức thanh toán</div>
+
+                <label class="d-flex align-items-center mb-2">
+                    <input type="radio" name="redirect" id="cod" value="COD" checked>
+                    <span class="ml-3">Thanh toán khi nhận hàng (COD)</span>
+                </label>
+
+                <label class="d-flex align-items-center">
+                    <input type="radio" name="redirect" id="vnpay" value="VNPAY">
+                    <span class="ml-3">Thanh toán online (VNPay)</span>
+                </label>
+            </div>
+
+            {{-- ==================== TỔNG TIỀN ==================== --}}
+            <div class="checkout-summary-box">
+                <div class="summary-row">
+                    <span class="summary-label">Giá gốc (Sản phẩm):</span>
+                    <span class="summary-value">{{ number_format($totalOriginal) }}đ</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Giảm giá khuyến mãi:</span>
+                    <span class="summary-value text-danger">- {{ number_format($totalDiscount) }}đ</span>
+                </div>
+
+                @if($totalSurcharge > 0)
+                <div class="summary-row">
+                    <span class="summary-label">Phụ phí size:</span>
+                    <span class="summary-value text-success">+ {{ number_format($totalSurcharge) }}đ</span>
+                </div>
+                @endif
+
+                <div class="summary-row">
+                    <span class="summary-label">Phí vận chuyển:</span>
+                    <span class="summary-value" id="shipping_fee_display">25.000đ</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Giảm giá vouchers:</span>
+                    <span class="summary-value text-danger" id="discount_amount">- 0đ</span>
+                </div>
+
+                <div class="summary-row" id="shipping_discount_row" style="display: none;">
+                    <span class="summary-label">Giảm giá vận chuyển:</span>
+                    <span class="summary-value text-danger" id="shipping_discount_amount">- 25.000đ</span>
+                </div>
+
+                <hr>
+
+                <div class="summary-row">
+                    <span class="summary-label">Tổng thanh toán:</span>
+                    <span class="summary-total" id="total_amount">{{ number_format($total + 25000) }}đ</span>
+                </div>
+            </div>
+
+            <input type="hidden" name="tongtien" id="tongtien" value="{{ $total }}">
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="/cart" class="btn btn-outline-main">← Quay lại</a>
+                <button type="submit" class="btn btn-main">Đặt hàng</button>
+            </div>
+
+        </form>
     </div>
-
-    <p id="promo_message" class="mt-2 fw-bold"></p>
-
-    <!-- Hidden lưu ID thật -->
-    <input type="hidden" name="id_khuyenmai" id="id_khuyenmai" value="">
-
-    <input type="hidden" name="tiengiam" id="tiengiam" value="0">
-    <input type="hidden" name="tienphaitra" id="tienphaitra" value="{{ $total + 25000 }}">
-
 </div>
-
-
-
-{{-- ==================== THÔNG TIN THANH TOÁN ==================== --}}
-<div class="checkout-card">
-    <div class="section-title"><i class="bi bi-credit-card-2-back"></i> Phương thức thanh toán</div>
-
-    <label class="d-flex align-items-center mb-2">
-        <input type="radio" name="redirect" id="cod" value="COD" checked>
-        <span class="ml-3">Thanh toán khi nhận hàng (COD)</span>
-    </label>
-
-    <label class="d-flex align-items-center">
-        <input type="radio" name="redirect" id="vnpay" value="VNPAY">
-        <span class="ml-3">Thanh toán online (VNPay)</span>
-    </label>
-</div>
-
-
-
-{{-- ==================== TỔNG TIỀN ==================== --}}
-<div class="checkout-summary-box">
-    <div class="summary-row">
-        <span class="summary-label">Tạm tính (Tiền hàng):</span>
-        <span class="summary-value">{{ number_format($total) }}đ</span>
-    </div>
-
-    <div class="summary-row">
-        <span class="summary-label">Phí vận chuyển:</span>
-        <span class="summary-value" id="shipping_fee_display">25.000đ</span>
-    </div>
-
-    <div class="summary-row">
-        <span class="summary-label">Giảm giá sản phẩm:</span>
-        <span class="summary-value text-danger" id="discount_amount">0đ</span>
-    </div>
-
-    <div class="summary-row" id="shipping_discount_row" style="display: none;">
-        <span class="summary-label">Giảm giá vận chuyển:</span>
-        <span class="summary-value text-danger" id="shipping_discount_amount">-25.000đ</span>
-    </div>
-
-    <hr>
-
-    <div class="summary-row">
-        <span class="summary-label">Tổng thanh toán:</span>
-        <span class="summary-total" id="total_amount">{{ number_format($total + 25000) }}đ</span>
-    </div>
-</div>
-
-<input type="hidden" name="tongtien" id="tongtien" value="{{ $total }}">
-
-<div class="d-flex justify-content-between mt-4">
-    <a href="/cart" class="btn btn-outline-main">← Quay lại</a>
-    <button type="submit" class="btn btn-main">Đặt hàng</button>
-</div>
-
-</form>
-</div>
-
-
 
 {{-- ==================== MODAL UPDATE USER ==================== --}}
 <div class="modal fade" id="updateInfoModal" tabindex="-1">
     <div class="modal-dialog">
-        <form id="updateInfoForm" action="{{ route('profile.update') }}" method="POST" class="modal-content">
+        <form id="updateInfoForm" class="modal-content">
             @csrf
             <input type="hidden" name="id_nd" value="{{ $u->id_nd }}">
 
@@ -354,163 +375,160 @@
     </div>
 </div>
 
-
 {{-- ==================== SCRIPT ==================== --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-const originalTotal = {{ $total }};
-const originalTotalWithShip = {{ $total + 25000 }};
+    const originalTotal = {{ $total }};
+    const originalTotalWithShip = {{ $total + 25000 }};
 
-// Xử lý submit Form cập nhật thông tin trong Modal (Không load lại trang)
-$('#updateInfoForm').submit(function(e) {
-    e.preventDefault();
-    
-    const hoten = $('#hoten').val().trim();
-    const email = $('#email').val().trim();
-    const sdt = $('#sdt').val().trim();
-    const diachi = $('#diachi').val().trim();
-    
-    // Cập nhật text hiển thị trên trang checkout
-    $('#display_hoten').text(hoten);
-    $('#display_email').text(email);
-    $('#display_sdt').text(sdt);
-    $('#display_diachigiaohang').text(diachi);
-    
-    // Cập nhật giá trị vào các input hidden để gửi đi khi đặt hàng
-    $('#input_hoten').val(hoten);
-    $('#input_email').val(email);
-    $('#input_sdt').val(sdt);
-    $('#input_diachigiaohang').val(diachi);
-    
-    // Đóng Modal
-    $('#updateInfoModal').modal('hide');
-    
-    // Thông báo bằng SweetAlert2
-    Swal.fire({
-        icon: 'success',
-        title: 'Cập nhật thành công!',
-        text: 'Thông tin nhận hàng đã được cập nhật mới.',
-        timer: 2000,
-        showConfirmButton: false
+    // Xử lý submit Form cập nhật thông tin trong Modal (Không load lại trang)
+    $('#updateInfoForm').submit(function(e) {
+        e.preventDefault();
+        
+        const hoten = $('#hoten').val().trim();
+        const email = $('#email').val().trim();
+        const sdt = $('#sdt').val().trim();
+        const diachi = $('#diachi').val().trim();
+        
+        // Cập nhật text hiển thị trên trang checkout
+        $('#display_hoten').text(hoten);
+        $('#display_email').text(email);
+        $('#display_sdt').text(sdt);
+        $('#display_diachigiaohang').text(diachi);
+        
+        // Cập nhật giá trị vào các input hidden để gửi đi khi đặt hàng
+        $('#input_hoten').val(hoten);
+        $('#input_email').val(email);
+        $('#input_sdt').val(sdt);
+        $('#input_diachigiaohang').val(diachi);
+        
+        // Đóng Modal
+        $('#updateInfoModal').modal('hide');
+        
+        // Thông báo bằng SweetAlert2
+        Swal.fire({
+            icon: 'success',
+            title: 'Cập nhật thành công!',
+            text: 'Thông tin nhận hàng đã được cập nhật mới.',
+            timer: 2000,
+            showConfirmButton: false
+        });
     });
-});
 
-// Áp mã KM
-$('#apply_promo').click(function() {
-    $.post("{{ route('promo.apply') }}", {
-        promo_code: $('#promo_code').val().trim(),
-        _token: '{{ csrf_token() }}'
-    }, function(res) {
+    // Áp mã KM
+    $('#apply_promo').click(function() {
+        $.post("{{ route('promo.apply') }}", {
+            promo_code: $('#promo_code').val().trim(),
+            _token: '{{ csrf_token() }}'
+        }, function(res) {
 
-        if (res.success) {
-            Swal.fire("Thành công!", res.message, "success");
+            if (res.success) {
+                Swal.fire("Thành công!", res.message, "success");
 
-            if (res.is_freeship) {
-                // Nếu là mã freeship
-                $('#shipping_fee_display').html('<del>25.000đ</del> <span class="text-success fw-bold">Miễn phí</span>');
-                $('#shipping_discount_row').show();
-                $('#discount_amount').text("0đ");
+                if (res.is_freeship) {
+                    // Nếu là mã freeship
+                    $('#shipping_fee_display').html('<del>25.000đ</del> <span class="text-success fw-bold">Miễn phí</span>');
+                    $('#shipping_discount_row').show();
+                    $('#discount_amount').text("0đ");
+                } else {
+                    // Nếu là mã giảm giá sản phẩm bình thường
+                    $('#shipping_fee_display').text("25.000đ");
+                    $('#shipping_discount_row').hide();
+                    $('#discount_amount').text('-' + res.discount.toLocaleString() + "đ");
+                }
+                
+                $('#total_amount').text(res.new_total.toLocaleString() + "đ");
+
+                $('#id_khuyenmai').val(res.id_khuyenmai);
+                $('#tiengiam').val(res.discount);
+                $('#tienphaitra').val(res.new_total);
             } else {
-                // Nếu là mã giảm giá sản phẩm bình thường
+                Swal.fire("Lỗi!", res.message, "error");
+
+                // Reset về trạng thái ban đầu
                 $('#shipping_fee_display').text("25.000đ");
                 $('#shipping_discount_row').hide();
-                $('#discount_amount').text('-' + res.discount.toLocaleString() + "đ");
+                $('#discount_amount').text("0đ");
+                $('#total_amount').text(originalTotalWithShip.toLocaleString() + "đ");
+
+                $('#id_khuyenmai').val('');
+                $('#tiengiam').val(0);
+                $('#tienphaitra').val(originalTotalWithShip);
             }
-            
-            $('#total_amount').text(res.new_total.toLocaleString() + "đ");
+        });
+    });
 
-            $('#id_khuyenmai').val(res.id_khuyenmai);
-            $('#tiengiam').val(res.discount);
-            $('#tienphaitra').val(res.new_total);
-        } else {
-            Swal.fire("Lỗi!", res.message, "error");
+    // Reset KM khi load trang
+    $(document).ready(function () {
+        $('#promo_code').val('');
+        $('#shipping_fee_display').text("25.000đ");
+        $('#shipping_discount_row').hide();
+        $('#discount_amount').text("0đ");
+        $('#total_amount').text(originalTotalWithShip.toLocaleString() + "đ");
+    });
 
-            // Reset về trạng thái ban đầu
-            $('#shipping_fee_display').text("25.000đ");
-            $('#shipping_discount_row').hide();
-            $('#discount_amount').text("0đ");
-            $('#total_amount').text(originalTotalWithShip.toLocaleString() + "đ");
+    // Chọn hình thức thanh toán
+    $('#cod').click(() => $('#checkout').attr('action', "{{ route('dathang') }}"));
+    $('#vnpay').click(() => $('#checkout').attr('action', "{{ route('vnpay') }}"));
 
-            $('#id_khuyenmai').val('');
-            $('#tiengiam').val(0);
-            $('#tienphaitra').val(originalTotalWithShip);
+    // Ràng buộc kiểm tra trước khi đặt hàng (Không cho đặt hàng khi sđt/địa chỉ trống hoặc sđt = 0)
+    $('#checkout').submit(function(e) {
+        const sdt = $('#input_sdt').val().trim();
+        const diachi = $('#input_diachigiaohang').val().trim();
+        const hoten = $('#input_hoten').val().trim();
+
+        if (!diachi || !sdt || sdt === '0' || sdt === '') {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin giao hàng!',
+                text: 'Vui lòng bấm nút "Cập nhật thông tin" để cập nhật Số điện thoại và Địa chỉ giao hàng trước khi đặt hàng.',
+                confirmButtonText: 'Đồng ý'
+            });
+            return false;
+        }
+
+        const sdtRegex = /^(0\d{9}|\d{9})$/;
+        if (!sdtRegex.test(sdt)) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Số điện thoại không hợp lệ!',
+                text: 'Số điện thoại phải gồm 10 chữ số bắt đầu bằng số 0 (hoặc 9 chữ số nếu không có số 0 ở đầu). Vui lòng cập nhật lại!',
+                confirmButtonText: 'Đồng ý'
+            });
+            return false;
         }
     });
 
-});
-
-// Reset KM khi load trang
-$(document).ready(function () {
-    $('#promo_code').val('');
-    $('#shipping_fee_display').text("25.000đ");
-    $('#shipping_discount_row').hide();
-    $('#discount_amount').text("0đ");
-    $('#total_amount').text(originalTotalWithShip.toLocaleString() + "đ");
-});
-
-// Chọn hình thức thanh toán
-$('#cod').click(() => $('#checkout').attr('action', "{{ route('dathang') }}"));
-$('#vnpay').click(() => $('#checkout').attr('action', "{{ route('vnpay') }}"));
-
-// Ràng buộc kiểm tra trước khi đặt hàng (Không cho đặt hàng khi sđt/địa chỉ trống hoặc sđt = 0)
-$('#checkout').submit(function(e) {
-    const sdt = $('#input_sdt').val().trim();
-    const diachi = $('#input_diachigiaohang').val().trim();
-    const hoten = $('#input_hoten').val().trim();
-
-    if (!diachi || !sdt || sdt === '0' || sdt === '') {
-        e.preventDefault();
+    // Hiển thị thông báo flash từ server (nếu có) bằng SweetAlert2
+    @if(session('success'))
         Swal.fire({
-            icon: 'warning',
-            title: 'Thiếu thông tin giao hàng!',
-            text: 'Vui lòng bấm nút "Cập nhật thông tin" để cập nhật Số điện thoại và Địa chỉ giao hàng trước khi đặt hàng.',
+            icon: 'success',
+            title: 'Thành công!',
+            text: "{{ session('success') }}",
             confirmButtonText: 'Đồng ý'
         });
-        return false;
-    }
+    @endif
 
-    const sdtRegex = /^(0\d{9}|\d{9})$/;
-    if (!sdtRegex.test(sdt)) {
-        e.preventDefault();
+    @if(session('error'))
         Swal.fire({
             icon: 'error',
-            title: 'Số điện thoại không hợp lệ!',
-            text: 'Số điện thoại phải gồm 10 chữ số bắt đầu bằng số 0 (hoặc 9 chữ số nếu không có số 0 ở đầu). Vui lòng cập nhật lại!',
+            title: 'Lỗi!',
+            text: "{{ session('error') }}",
             confirmButtonText: 'Đồng ý'
         });
-        return false;
-    }
-});
+    @endif
 
-// Hiển thị thông báo flash từ server (nếu có) bằng SweetAlert2
-@if(session('success'))
-    Swal.fire({
-        icon: 'success',
-        title: 'Thành công!',
-        text: "{{ session('success') }}",
-        confirmButtonText: 'Đồng ý'
-    });
-@endif
-
-@if(session('error'))
-    Swal.fire({
-        icon: 'error',
-        title: 'Lỗi!',
-        text: "{{ session('error') }}",
-        confirmButtonText: 'Đồng ý'
-    });
-@endif
-
-@if($errors->any())
-    Swal.fire({
-        icon: 'error',
-        title: 'Lỗi dữ liệu!',
-        text: "{{ $errors->first() }}",
-        confirmButtonText: 'Đồng ý'
-    });
-@endif
-
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi dữ liệu!',
+            text: "{{ $errors->first() }}",
+            confirmButtonText: 'Đồng ý'
+        });
+    @endif
 </script>
 
 @endsection

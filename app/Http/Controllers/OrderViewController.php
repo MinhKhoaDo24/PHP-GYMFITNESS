@@ -145,9 +145,9 @@ class OrderViewController extends Controller
 
         if (!empty($warningMessages)) {
             $warningText = implode(' ', $warningMessages);
-            return redirect()->route('checkout')->with('warning', $warningText);
+            return redirect()->route('cart')->with('warning', $warningText);
         }
 
-        return redirect()->route('checkout')->with('success', 'Đã tạo lại từ đơn hàng cũ thành công.');
+        return redirect()->route('cart')->with('success', 'Đã tạo lại từ đơn hàng cũ vào giỏ hàng thành công.');
     }
 }

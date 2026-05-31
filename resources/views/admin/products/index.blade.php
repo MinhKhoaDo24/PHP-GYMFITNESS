@@ -175,7 +175,8 @@
 </div>
 
 {{-- ======================= BẢNG SẢN PHẨM ======================= --}}
-<table class="table table-hover product-table">
+<div class="card p-0 shadow-sm table-responsive">
+    <table class="table table-hover product-table mb-0">
     <thead>
         <tr>
             <!-- <th>ẢNH</th> -->
@@ -256,6 +257,7 @@
         @endforeach
     </tbody>
 </table>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

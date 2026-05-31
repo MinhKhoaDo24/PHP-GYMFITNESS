@@ -192,5 +192,7 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     ->name('users.restore');
 
     Route::resource('/admin/dangki', DangkidichvuController::class);
+    Route::resource('/admin/sizes', \App\Http\Controllers\Admin\SizeController::class);
+    Route::post('/admin/sizes/{id}/restore', [\App\Http\Controllers\Admin\SizeController::class, 'restore'])->name('sizes.restore');
 
 });

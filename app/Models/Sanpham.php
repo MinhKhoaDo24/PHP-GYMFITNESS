@@ -23,7 +23,8 @@ class SanPham extends Model
         'soluong',
         'noi_bat',
         'trang_thai',
-        'id_danhmuc'
+        'id_danhmuc',
+        'co_size'
     ];
 
     public function danhMuc()
@@ -38,6 +39,11 @@ class SanPham extends Model
     {
         return $this->hasMany(ChitietDonhang::class, 'id_sanpham');
     }
+    public function sizes()
+    {
+        return $this->belongsToMany(Size::class, 'sanpham_size', 'id_sanpham', 'id_size')
+            ->withPivot('soluong', 'gia_cong_them');
+    }
 
 
     public function getSoldAttribute()
@@ -48,6 +54,4 @@ class SanPham extends Model
             })
             ->sum('soluong');
     }
-
-
 }
