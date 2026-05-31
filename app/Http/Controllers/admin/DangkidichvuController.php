@@ -176,7 +176,7 @@ class DangkidichvuController extends Controller
             }
         }
 
-        $this->DangkiRepository->update($id, $request->all());
+        $this->DangkiRepository->update($id, $request->except(['_token', '_method']));
         return redirect()->route('dangki.index')->with('success', 'Cập nhật thành công!');
     }
 
