@@ -199,7 +199,7 @@
         </thead>
 
         <tbody>
-            @foreach(session('cart') as $item)
+            @foreach($cart as $item)
                 @php
                     $line = $item['giakhuyenmai'] * $item['quantity'];
                     $total += $line;
@@ -312,7 +312,7 @@
 {{-- ==================== MODAL UPDATE USER ==================== --}}
 <div class="modal fade" id="updateInfoModal" tabindex="-1">
     <div class="modal-dialog">
-        <form id="updateInfoForm" class="modal-content">
+        <form id="updateInfoForm" action="{{ route('profile.update') }}" method="POST" class="modal-content">
             @csrf
             <input type="hidden" name="id_nd" value="{{ $u->id_nd }}">
 
@@ -452,6 +452,64 @@ $(document).ready(function () {
 // Chọn hình thức thanh toán
 $('#cod').click(() => $('#checkout').attr('action', "{{ route('dathang') }}"));
 $('#vnpay').click(() => $('#checkout').attr('action', "{{ route('vnpay') }}"));
+
+// Ràng buộc kiểm tra trước khi đặt hàng (Không cho đặt hàng khi sđt/địa chỉ trống hoặc sđt = 0)
+$('#checkout').submit(function(e) {
+    const sdt = $('#input_sdt').val().trim();
+    const diachi = $('#input_diachigiaohang').val().trim();
+    const hoten = $('#input_hoten').val().trim();
+
+    if (!diachi || !sdt || sdt === '0' || sdt === '') {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'Thiếu thông tin giao hàng!',
+            text: 'Vui lòng bấm nút "Cập nhật thông tin" để cập nhật Số điện thoại và Địa chỉ giao hàng trước khi đặt hàng.',
+            confirmButtonText: 'Đồng ý'
+        });
+        return false;
+    }
+
+    const sdtRegex = /^(0\d{9}|\d{9})$/;
+    if (!sdtRegex.test(sdt)) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Số điện thoại không hợp lệ!',
+            text: 'Số điện thoại phải gồm 10 chữ số bắt đầu bằng số 0 (hoặc 9 chữ số nếu không có số 0 ở đầu). Vui lòng cập nhật lại!',
+            confirmButtonText: 'Đồng ý'
+        });
+        return false;
+    }
+});
+
+// Hiển thị thông báo flash từ server (nếu có) bằng SweetAlert2
+@if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        text: "{{ session('success') }}",
+        confirmButtonText: 'Đồng ý'
+    });
+@endif
+
+@if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: "{{ session('error') }}",
+        confirmButtonText: 'Đồng ý'
+    });
+@endif
+
+@if($errors->any())
+    Swal.fire({
+        icon: 'error',
+        title: 'Lỗi dữ liệu!',
+        text: "{{ $errors->first() }}",
+        confirmButtonText: 'Đồng ý'
+    });
+@endif
 
 </script>
 

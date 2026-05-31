@@ -68,9 +68,9 @@ class AdminRepository implements IAdminRepository
             ->get();
     }
 
-    public function totalsCustomer()
+    public function totalsTrialRegister()
     {
-        return NguoiDung::where('id_phanquyen', 2)->count();
+        return DB::table('dangkidichvu')->count();
     }
 
     public function totalsOrders()
@@ -131,13 +131,12 @@ class AdminRepository implements IAdminRepository
             ->count();
     }
 
-    public function getCustomers($start, $end)
+    public function getTrialRegisters($start, $end)
     {
         $start = $start instanceof Carbon ? $start->copy() : Carbon::parse($start);
         $end   = $end instanceof Carbon   ? $end->copy()   : Carbon::parse($end);
 
-        return DB::table('nguoidung')
-            ->where('id_phanquyen', 2)
+        return DB::table('dangkidichvu')
             ->whereBetween('created_at', [
                 $start->startOfDay()->format('Y-m-d H:i:s'),
                 $end->endOfDay()->format('Y-m-d H:i:s')
@@ -191,13 +190,13 @@ class AdminRepository implements IAdminRepository
         // CURRENT DATA
         $revenueNow   = $this->getRevenue($start->copy(), $end->copy());
         $ordersNow    = $this->getOrders($start->copy(), $end->copy());
-        $customersNow = $this->getCustomers($start->copy(), $end->copy());
+        $trialsNow    = $this->getTrialRegisters($start->copy(), $end->copy());
         $soldNow      = $this->getSoldProducts($start->copy(), $end->copy());
 
         // PREVIOUS DATA
         $revenuePrev   = $this->getRevenue($prevStart->copy(), $prevEnd->copy());
         $ordersPrev    = $this->getOrders($prevStart->copy(), $prevEnd->copy());
-        $customersPrev = $this->getCustomers($prevStart->copy(), $prevEnd->copy());
+        $trialsPrev    = $this->getTrialRegisters($prevStart->copy(), $prevEnd->copy());
         $soldPrev      = $this->getSoldProducts($prevStart->copy(), $prevEnd->copy());
 
         return [
@@ -205,8 +204,8 @@ class AdminRepository implements IAdminRepository
             "revenueGrowth"   => $this->calcGrowth($revenueNow, $revenuePrev),
             "orders"          => $ordersNow,
             "ordersGrowth"    => $this->calcGrowth($ordersNow, $ordersPrev),
-            "customers"       => $customersNow,
-            "customersGrowth" => $this->calcGrowth($customersNow, $customersPrev),
+            "trials"          => $trialsNow,
+            "trialsGrowth"    => $this->calcGrowth($trialsNow, $trialsPrev),
             "soldProducts"    => $soldNow,
             "soldGrowth"      => $this->calcGrowth($soldNow, $soldPrev),
         ];

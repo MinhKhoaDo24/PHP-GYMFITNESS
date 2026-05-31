@@ -104,10 +104,8 @@ class AdminController extends Controller
         ]);
     }
 
-    public function customerChart()
+    public function trialChart()
     {
-       
-
         $labels = [];
         $values = [];
 
@@ -118,8 +116,7 @@ class AdminController extends Controller
 
             $labels[] = $d->format('d/m');
 
-            $values[] = DB::table('nguoidung')
-                ->where('id_phanquyen', 2)
+            $values[] = DB::table('dangkidichvu')
                 ->whereDate('created_at', $d->format('Y-m-d'))
                 ->count();
         }

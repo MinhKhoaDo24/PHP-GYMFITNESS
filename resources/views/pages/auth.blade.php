@@ -4,6 +4,18 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('frontend/css/login.css') }}">
 @endpush
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<style>
+    .recaptcha-wrapper {
+        margin: 16px 0;
+        display: flex;
+        justify-content: center;
+    }
+    .recaptcha-wrapper .g-recaptcha {
+        transform: scale(0.95);
+        transform-origin: center;
+    }
+</style>
 @if (session('needLogin'))
 <script>
     Swal.fire({
