@@ -235,7 +235,7 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <button type="button" class="btn btn-outline-main btn-sm px-3 py-2" style="border-radius: 8px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#updateInfoModal">
+                    <button type="button" class="btn btn-outline-main btn-sm px-3 py-2" style="border-radius: 8px; font-weight: 600;" data-toggle="modal" data-target="#updateInfoModal">
                         <i class="fa fa-edit"></i> Cập nhật thông tin nhận hàng
                     </button>
                     <small class="text-muted"><i class="bi bi-info-circle"></i> Đổi địa chỉ / khu vực để cập nhật lại phí ship.</small>
@@ -408,7 +408,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><i class="bi bi-person-gear"></i> Cập nhật thông tin nhận hàng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
 
             <div class="modal-body">
@@ -519,7 +521,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" id="saveInfoBtn">Lưu thay đổi</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
             </div>
         </div>
     </div>
