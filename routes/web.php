@@ -94,6 +94,7 @@ Route::get('/donhang', [OrderViewController::class, 'donhang']);
 
 Route::prefix('/')->middleware('orderview')->group(function () {
     Route::get('/donhang/edit/{id}', [OrderViewController::class, 'edit'])->name('donhang.edit');
+    Route::post('/donhang/repurchase/{id}', [OrderViewController::class, 'repurchase'])->name('donhang.repurchase');
 });
 Route::post('/donhang/cancel/{id}', [OrderViewController::class, 'cancel'])->name('donhang.cancel');
 

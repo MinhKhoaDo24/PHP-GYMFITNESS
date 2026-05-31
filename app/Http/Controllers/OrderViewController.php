@@ -9,6 +9,7 @@ use DB;
 use App\Models\Dathang;
 use App\Models\Khuyenmai;
 use App\Models\ChitietDonhang;
+use App\Models\SanPham;
 use Illuminate\Support\Facades\Auth;
 
 class OrderViewController extends Controller
@@ -81,5 +82,72 @@ class OrderViewController extends Controller
         return redirect()->back()->with('success', 'Cập nhật thông tin thành công!');
     }
 
+    public function repurchase($id)
+    {
+        $order = Dathang::findOrFail($id);
 
+        // Check if the order status is Hoàn thành, Bị hủy, or Thất bại
+        $allowedStatuses = ['Hoàn thành', 'Bị hủy', 'Thất bại'];
+        if (!in_array($order->trangthai, $allowedStatuses)) {
+            return back()->with('error', 'Trạng thái đơn hàng không hợp lệ để mua lại.');
+        }
+
+        // Get the list of products in the old order details
+        $orderdetails = ChitietDonhang::where('id_dathang', $id)->get();
+        if ($orderdetails->isEmpty()) {
+            return back()->with('error', 'Đơn hàng này không chứa sản phẩm nào.');
+        }
+
+        $cart = [];
+        $warningMessages = [];
+
+        foreach ($orderdetails as $detail) {
+            $product = SanPham::with('images')->find($detail->id_sanpham);
+            if ($product) {
+                // If product is out of stock, warn user
+                if ($product->soluong <= 0) {
+                    $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" đã hết hàng và không được thêm vào.";
+                    continue;
+                }
+
+                $qty = $detail->soluong;
+                if ($qty > $product->soluong) {
+                    $qty = $product->soluong;
+                    $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" chỉ còn " . $product->soluong . " sản phẩm trong kho (yêu cầu cũ: " . $detail->soluong . ").";
+                }
+
+                $firstImage = $product->images->first();
+                $imagePath = $firstImage ? $firstImage->duong_dan : 'frontend/upload/placeholder.jpg';
+
+                $cart[$product->id_sanpham] = [
+                    "id_sanpham"   => $product->id_sanpham,
+                    "tensp"        => $product->tensp,
+                    "anhsp"        => $imagePath,
+                    "giasp"        => $product->giasp,
+                    "giamgia"      => $product->giamgia,
+                    "giakhuyenmai" => $product->giakhuyenmai,
+                    "quantity"     => $qty
+                ];
+            } else {
+                $warningMessages[] = "Sản phẩm \"" . $detail->tensp . "\" không còn tồn tại trên hệ thống.";
+            }
+        }
+
+        if (empty($cart)) {
+            return back()->with('error', 'Không có sản phẩm nào khả dụng để mua lại.');
+        }
+
+        // Clear existing promo session
+        session()->forget('promo');
+
+        // Set the session cart to the new cart list
+        session()->put('cart', $cart);
+
+        if (!empty($warningMessages)) {
+            $warningText = implode(' ', $warningMessages);
+            return redirect()->route('checkout')->with('warning', $warningText);
+        }
+
+        return redirect()->route('checkout')->with('success', 'Đã tạo lại từ đơn hàng cũ thành công.');
+    }
 }

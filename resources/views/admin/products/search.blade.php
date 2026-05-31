@@ -22,7 +22,7 @@
             <th>Hình</th>
             <th>Số lượng</th>
             <th>giá</th>
-            <th colspan="2">Actions</th>
+            <th colspan="2">Hành động</th>
             </tr>
         </thead>
         <tbody>
