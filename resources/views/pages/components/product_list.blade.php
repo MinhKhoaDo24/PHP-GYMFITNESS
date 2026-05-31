@@ -11,7 +11,11 @@
     </div>
 
     <div class="hover-icons">
-        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart',$p->id_sanpham) }}">
+        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart',$p->id_sanpham) }}"
+           data-id="{{ $p->id_sanpham }}"
+           data-name="{{ $p->tensp }}"
+           data-co-size="{{ $p->co_size }}"
+           data-sizes="{{ $p->co_size == 1 ? json_encode($p->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
             <i class="fa fa-shopping-cart"></i>
         </a>
         <a href="{{ route('detail', $p->id_sanpham) }}" class="icon-btn">

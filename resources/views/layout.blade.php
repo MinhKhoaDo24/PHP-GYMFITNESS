@@ -294,6 +294,154 @@
 
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.js-add-to-cart');
+            if (!btn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const coSize = btn.getAttribute('data-co-size');
+            const productId = btn.getAttribute('data-id') || btn.getAttribute('data-url').split('/').pop();
+            const productName = btn.getAttribute('data-name') || 'Sản phẩm';
+
+            if (coSize === '1') {
+                let sizes = [];
+                try {
+                    sizes = JSON.parse(btn.getAttribute('data-sizes') || '[]');
+                } catch(err) {
+                    console.error(err);
+                }
+
+                if (sizes.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Thông báo',
+                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình kích thước!'
+                    });
+                    return;
+                }
+
+                let sizesHtml = `
+                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">Vui lòng chọn kích thước (Size) của sản phẩm:</p>
+                    <div class="swal-size-options" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 15px; margin-bottom: 15px;">
+                `;
+
+                sizes.forEach(sz => {
+                    const isOos = sz.qty <= 0;
+                    const surchargeText = sz.surcharge > 0 ? ` (+${sz.surcharge.toLocaleString('vi-VN')}đ)` : '';
+                    sizesHtml += `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <button type="button" class="swal-size-btn ${isOos ? 'swal-size-disabled' : ''}" 
+                                    data-id="${sz.id}" ${isOos ? 'disabled' : ''} 
+                                    style="border: 2px dashed ${isOos ? '#e5e7eb' : '#34A4E0'}; background: ${isOos ? '#f3f4f6' : '#fff'}; color: ${isOos ? '#9ca3af' : '#111827'}; padding: 12px 20px; font-weight: 700; font-size: 16px; border-radius: 12px; cursor: ${isOos ? 'not-allowed' : 'pointer'}; min-width: 70px; transition: all 0.25s ease;">
+                                ${sz.name}
+                            </button>
+                            <span style="font-size: 12px; font-weight: 600; color: ${isOos ? '#ef4444' : '#10b981'}">
+                                ${isOos ? 'Hết hàng' : (sz.surcharge > 0 ? surchargeText : 'Mặc định')}
+                            </span>
+                        </div>
+                    `;
+                });
+
+                sizesHtml += `</div>`;
+
+                Swal.fire({
+                    title: productName,
+                    html: sizesHtml,
+                    showCancelButton: true,
+                    confirmButtonText: 'Thêm vào giỏ hàng',
+                    cancelButtonText: 'Hủy',
+                    confirmButtonColor: '#34A4E0',
+                    cancelButtonColor: '#6B7280',
+                    didOpen: () => {
+                        const btns = Swal.getHtmlContainer().querySelectorAll('.swal-size-btn');
+                        btns.forEach(b => {
+                            b.addEventListener('click', function() {
+                                btns.forEach(x => {
+                                    x.classList.remove('active');
+                                    x.style.borderStyle = 'dashed';
+                                    x.style.borderColor = '#34A4E0';
+                                    x.style.backgroundColor = '#fff';
+                                    x.style.color = '#111827';
+                                });
+                                this.classList.add('active');
+                                this.style.borderStyle = 'solid';
+                                this.style.borderColor = '#34A4E0';
+                                this.style.backgroundColor = '#34A4E0';
+                                this.style.color = '#fff';
+                            });
+                        });
+                    },
+                    preConfirm: () => {
+                        const active = Swal.getHtmlContainer().querySelector('.swal-size-btn.active');
+                        if (!active) {
+                            Swal.showValidationMessage('Vui lòng chọn một size trước khi thêm vào giỏ hàng!');
+                            return false;
+                        }
+                        return active.getAttribute('data-id');
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        const selectedSizeId = result.value;
+                        const url = `/add-to-cart/${productId}?id_size=${selectedSizeId}&quantity=1`;
+                        submitAddToCartAjax(url);
+                    }
+                });
+
+            } else {
+                const url = btn.getAttribute('data-url') || btn.getAttribute('href');
+                if (!url || url === '#' || url === 'javascript:void(0)') return;
+                submitAddToCartAjax(url);
+            }
+        }, true);
+
+        function submitAddToCartAjax(url) {
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(async res => {
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch(err) {
+                    data = { message: "Đã thêm sản phẩm vào giỏ hàng!" };
+                }
+
+                if (res.status === 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: data.message || 'Đã thêm sản phẩm vào giỏ hàng!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    const cartBadge = document.querySelector('.navbar__shoppingCart span');
+                    if (cartBadge && typeof data.cart_count !== 'undefined') {
+                        cartBadge.textContent = data.cart_count;
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: data.message || 'Không thể thêm vào giỏ hàng!',
+                    });
+                }
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Có lỗi xảy ra, vui lòng thử lại sau!',
+                });
+            });
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
     @if(session('thongbao'))
     <script>

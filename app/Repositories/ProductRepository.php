@@ -8,33 +8,33 @@ class ProductRepository implements IProductRepository
 {
     public function allProduct()
     {
-        return Sanpham::where('trang_thai', 1)->get();
+        return Sanpham::with(['images', 'sizes'])->where('trang_thai', 1)->get();
     }
 
     public function featuredProducts()
     {
-        return Sanpham::where('noi_bat', 1)
+        return Sanpham::with(['images', 'sizes'])->where('noi_bat', 1)
             ->where('trang_thai', 1)
             ->get();
     }
 
     public function getProductsByCategory($danhmucId)
     {
-        return Sanpham::where('id_danhmuc', $danhmucId)
+        return Sanpham::with(['images', 'sizes'])->where('id_danhmuc', $danhmucId)
             ->where('trang_thai', 1)
             ->get();
     }
 
     public function randomProduct()
     {
-        return Sanpham::where('trang_thai', 1)
+        return Sanpham::with(['images', 'sizes'])->where('trang_thai', 1)
             ->inRandomOrder()
             ->get();
     }
 
     public function findProduct($id)
     {
-        return Sanpham::with(['images', 'danhmuc'])->findOrFail($id);
+        return Sanpham::with(['images', 'danhmuc', 'sizes'])->findOrFail($id);
     }
 
     public function findByName($name)
@@ -65,7 +65,7 @@ class ProductRepository implements IProductRepository
     {
         $keyword = $request->input('tukhoa');
 
-        return Sanpham::with('images')
+        return Sanpham::with(['images', 'sizes'])
             ->where('tensp', 'LIKE', "%$keyword%")
             ->where('trang_thai', 1)
             ->paginate(12)

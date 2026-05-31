@@ -121,7 +121,8 @@ class ProductController extends Controller
     public function create()
     {
         $list_danhmucs = Danhmuc::all();
-        return view('admin.products.create', compact('list_danhmucs'));
+        $sizes = \App\Models\Size::where('trang_thai', 1)->get();
+        return view('admin.products.create', compact('list_danhmucs', 'sizes'));
     }
 
     /* ==================== STORE ==================== */
@@ -131,7 +132,7 @@ class ProductController extends Controller
             'tensp'           => 'required',
             'sku'             => 'nullable|string',
             'anhsp'           => 'required',
-            'anhsp.*'       => 'mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'anhsp.*'         => 'mimes:jpeg,png,jpg,gif,webp|max:5120',
             'giasp'           => 'required|numeric',
             'giakhuyenmai'    => 'nullable|numeric',
             'giamgia'         => 'nullable|numeric',
@@ -140,14 +141,37 @@ class ProductController extends Controller
             'mota_ngan'       => 'nullable|string',
             'soluong'         => 'required|numeric',
             'id_danhmuc'      => 'required',
-            'noi_bat'         => 'numeric'
+            'noi_bat'         => 'numeric',
+            'co_size'         => 'nullable|numeric'
         ]);
 
         $files = $request->file('anhsp');
 
         unset($validatedData['anhsp']);
 
+        $co_size = intval($request->co_size ?? 0);
+        $validatedData['co_size'] = $co_size;
+        $syncData = [];
+        if ($co_size == 1 && $request->has('product_sizes')) {
+            $totalSoluong = 0;
+            foreach ($request->product_sizes as $item) {
+                if (!empty($item['id_size'])) {
+                    $qty = intval($item['soluong'] ?? 0);
+                    $syncData[$item['id_size']] = [
+                        'soluong' => $qty,
+                        'gia_cong_them' => floatval($item['gia_cong_them'] ?? 0)
+                    ];
+                    $totalSoluong += $qty;
+                }
+            }
+            $validatedData['soluong'] = $totalSoluong;
+        }
+
         $sanpham = $this->productRepository->storeProduct($validatedData);
+
+        if ($co_size == 1) {
+            $sanpham->sizes()->sync($syncData);
+        }
 
         if ($files) {
             $destination = public_path('frontend/upload');
@@ -179,9 +203,9 @@ class ProductController extends Controller
     {
         $sp = $this->productRepository->findProduct($id);
         $list_danhmucs = Danhmuc::all();
+        $sizes = \App\Models\Size::where('trang_thai', 1)->get();
 
-
-        return view('admin.products.edit', compact('sp', 'list_danhmucs'));
+        return view('admin.products.edit', compact('sp', 'list_danhmucs', 'sizes'));
     }
 
     /* ==================== UPDATE ==================== */
@@ -203,12 +227,38 @@ class ProductController extends Controller
             'noi_bat'         => 'numeric',
             'trang_thai'      => 'numeric',
             'delete_images'   => 'nullable|array',
-            'delete_images.*' => 'numeric'
+            'delete_images.*' => 'numeric',
+            'co_size'         => 'nullable|numeric'
         ]);
 
         unset($validatedData['anhsp']);
 
+        $co_size = intval($request->co_size ?? 0);
+        $validatedData['co_size'] = $co_size;
+        $syncData = [];
+        if ($co_size == 1 && $request->has('product_sizes')) {
+            $totalSoluong = 0;
+            foreach ($request->product_sizes as $item) {
+                if (!empty($item['id_size'])) {
+                    $qty = intval($item['soluong'] ?? 0);
+                    $syncData[$item['id_size']] = [
+                        'soluong' => $qty,
+                        'gia_cong_them' => floatval($item['gia_cong_them'] ?? 0)
+                    ];
+                    $totalSoluong += $qty;
+                }
+            }
+            $validatedData['soluong'] = $totalSoluong;
+        }
+
         $this->productRepository->updateProduct($validatedData, $id);
+
+        $sanpham = \App\Models\SanPham::findOrFail($id);
+        if ($co_size == 1) {
+            $sanpham->sizes()->sync($syncData);
+        } else {
+            $sanpham->sizes()->detach();
+        }
 
         if ($request->has('delete_images')) {
             foreach ($request->delete_images as $imgId) {
