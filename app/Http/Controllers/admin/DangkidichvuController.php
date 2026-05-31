@@ -17,6 +17,14 @@ class DangkidichvuController extends Controller
 
     public function index(Request $request)
     {
+        // ====== TỰ ĐỘNG HỦY ĐƠN QUÁ HẠN ======
+        \App\Models\Dangkidichvu::whereIn('trangthai', [0, 1])
+            ->whereDate('ngay_mong_muon', '<', now()->format('Y-m-d'))
+            ->update([
+                'trangthai' => 3,
+                'ghi_chu' => \DB::raw("CONCAT(COALESCE(ghi_chu, ''), ' [Hệ thống tự động hủy do quá hạn]')")
+            ]);
+
         $status     = $request->input('status');
         $date       = $request->input('date');
         $sort_time  = $request->input('sort_time');
@@ -98,6 +106,18 @@ class DangkidichvuController extends Controller
             'co_so_tap.required' => 'Vui lòng chọn cơ sở tập luyện.',
         ]);
 
+        // Kiểm tra Spam: Một SĐT không được đăng ký nhiều lịch chờ
+        $existingTrial = \App\Models\Dangkidichvu::where('so_dien_thoai', $request->so_dien_thoai)
+            ->whereIn('trangthai', [0, 1])
+            ->whereDate('ngay_mong_muon', '>=', now()->format('Y-m-d'))
+            ->exists();
+            
+        if ($existingTrial) {
+            return redirect()->back()->withErrors([
+                'so_dien_thoai' => 'Số điện thoại này đang có lịch hẹn chưa hoàn thành. Vui lòng chờ bộ phận CSKH liên hệ hoặc gọi Hotline.'
+            ])->withInput();
+        }
+
         $data = [
             'ho_ten' => $request->ho_ten,
             'email' => $request->email,
@@ -177,11 +197,27 @@ class DangkidichvuController extends Controller
         }
 
         $this->DangkiRepository->update($id, $request->except(['_token', '_method']));
+
+        // Gửi email xác nhận nếu chuyển từ Mới đăng ký (0) sang Đã xác nhận (1)
+        if (isset($newStatus) && isset($currentStatus) && $newStatus === 1 && $currentStatus === 0 && !empty($trial->email)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($trial->email)->send(new \App\Mail\TrialConfirmedMail($trial));
+            } catch (\Exception $e) {
+                // Log lỗi gửi mail nhưng vẫn cho qua
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email xác nhận lịch tập thử: ' . $e->getMessage());
+            }
+        }
+
         return redirect()->route('dangki.index')->with('success', 'Cập nhật thành công!');
     }
 
     public function destroy($id)
     {
+        $trial = $this->DangkiRepository->find($id);
+        if ($trial->trangthai == 2) {
+            return redirect()->back()->withErrors(['error' => 'Không thể xóa dữ liệu khách hàng đã hoàn thành tập thử.']);
+        }
+
         $this->DangkiRepository->delete($id);
         return redirect()->route('dangki.index')->with('success', 'Xóa thành công!');
     }
