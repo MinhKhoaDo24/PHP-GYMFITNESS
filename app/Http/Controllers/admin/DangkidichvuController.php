@@ -139,6 +139,43 @@ class DangkidichvuController extends Controller
 
     public function update(Request $request, $id)
     {
+        $trial = $this->DangkiRepository->find($id);
+
+        if ($request->has('trangthai')) {
+            $newStatus = (int) $request->trangthai;
+            $currentStatus = (int) $trial->trangthai;
+
+            // 1. Nếu đã Hoàn thành (2) hoặc Hủy (3) thì khóa, không cho đổi (Backend guard)
+            if (in_array($currentStatus, [2, 3]) && $newStatus !== $currentStatus) {
+                return redirect()->back()->withErrors(['trangthai' => 'Đăng ký đã ở trạng thái đóng băng, không thể thay đổi.']);
+            }
+
+            // 2. Không cho nhảy cóc từ 0 lên 2
+            if ($currentStatus === 0 && $newStatus === 2) {
+                return redirect()->back()->withErrors(['trangthai' => 'Không thể chuyển trực tiếp từ Mới đăng ký sang Hoàn thành.']);
+            }
+
+            // 3. Không cho quay lui trạng thái
+            if ($newStatus < $currentStatus) {
+                return redirect()->back()->withErrors(['trangthai' => 'Không thể quay ngược trạng thái đăng ký.']);
+            }
+
+            // 4. Nếu chuyển sang Hoàn thành (2), phải đảm bảo đã qua giờ hẹn tập
+            if ($newStatus === 2 && $currentStatus === 1) {
+                $dateStr = $trial->ngay_mong_muon;
+                $parts = explode('-', $trial->gio_mong_muon);
+                $startTimeStr = trim($parts[0] ?? '00:00');
+                
+                try {
+                    $trialCarbon = \Carbon\Carbon::createFromFormat('Y-m-d H:i', $dateStr . ' ' . $startTimeStr);
+                    if ($trialCarbon->isFuture()) {
+                        return redirect()->back()->withErrors(['trangthai' => 'Chưa đến thời gian hẹn tập, không thể đánh dấu Hoàn thành.']);
+                    }
+                } catch (\Exception $e) {
+                }
+            }
+        }
+
         $this->DangkiRepository->update($id, $request->all());
         return redirect()->route('dangki.index')->with('success', 'Cập nhật thành công!');
     }
