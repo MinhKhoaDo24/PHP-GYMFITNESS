@@ -66,7 +66,24 @@ class DangkidichvuController extends Controller
             'email' => 'nullable|email',
             'so_dien_thoai' => 'required',
             'ngay_mong_muon' => 'required|date|after_or_equal:today',
-            'gio_mong_muon' => 'required',
+            'gio_mong_muon' => [
+                'required',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->ngay_mong_muon === now()->format('Y-m-d')) {
+                        $parts = explode('-', $value);
+                        if (count($parts) > 0) {
+                            $startTimeStr = trim($parts[0]);
+                            try {
+                                $startCarbon = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                                if ($startCarbon->isPast()) {
+                                    $fail('Khung giờ này đã qua, vui lòng chọn khung giờ khác cho ngày hôm nay.');
+                                }
+                            } catch (\Exception $e) {
+                            }
+                        }
+                    }
+                }
+            ],
             'mon_ua_thich' => 'required',
             'co_so_tap' => 'required'
         ], [
