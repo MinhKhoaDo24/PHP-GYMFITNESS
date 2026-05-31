@@ -75,7 +75,7 @@ class OrderController extends Controller
 
             $query->where(function ($q) use ($keyword) {
                 $q->where('hoten', 'like', "%$keyword%")
-                ->orWhere('sodienthoai', 'like', "%$keyword%")
+                ->orWhere('sdt', 'like', "%$keyword%")
                 ->orWhere('id_dathang', 'like', "%$keyword%");
             });
         }
@@ -115,7 +115,7 @@ class OrderController extends Controller
 
             $query->where(function ($q) use ($keyword) {
                 $q->where('hoten', 'like', "%$keyword%")
-                ->orWhere('sodienthoai', 'like', "%$keyword%")
+                ->orWhere('sdt', 'like', "%$keyword%")
                 ->orWhere('id_dathang', 'like', "%$keyword%");
             });
         }
@@ -155,6 +155,18 @@ public function update(Request $request, $id)
 {
     $order = Dathang::findOrFail($id);
 
+    // Định nghĩa các trạng thái cho phép chuyển đổi từ trạng thái hiện tại
+    $currentStatus = $order->trangthai;
+    $allowedStatuses = [$currentStatus];
+    
+    if ($currentStatus === 'Chờ xác nhận') {
+        $allowedStatuses = ['Chờ xác nhận', 'Chờ giao hàng', 'Hủy'];
+    } elseif ($currentStatus === 'Chờ giao hàng') {
+        $allowedStatuses = ['Chờ giao hàng', 'Đang giao hàng', 'Hủy'];
+    } elseif ($currentStatus === 'Đang giao hàng') {
+        $allowedStatuses = ['Đang giao hàng', 'Hoàn thành', 'Thất bại'];
+    }
+
     // 1. VALIDATE – bắt buộc phải có PTTT
     $data = $request->validate([
         'sdt'                 => 'required|string|max:20',
@@ -163,6 +175,11 @@ public function update(Request $request, $id)
         'trangthai'           => 'required|string',
         'ngaygiaohang'        => 'nullable|date',
     ]);
+
+    // Kiểm tra tính hợp lệ của trạng thái mới theo quy trình
+    if (!in_array($data['trangthai'], $allowedStatuses)) {
+        return back()->withErrors(['trangthai' => 'Quy trình chuyển trạng thái không hợp lệ: Không thể chuyển từ "' . $currentStatus . '" sang "' . $data['trangthai'] . '".'])->withInput();
+    }
 
     // 2. GÁN DỮ LIỆU
     $order->sdt            = $data['sdt'];

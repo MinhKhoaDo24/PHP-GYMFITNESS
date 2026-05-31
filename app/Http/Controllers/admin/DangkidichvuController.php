@@ -17,6 +17,14 @@ class DangkidichvuController extends Controller
 
     public function index(Request $request)
     {
+        // ====== TỰ ĐỘNG HỦY ĐƠN QUÁ HẠN ======
+        \App\Models\Dangkidichvu::whereIn('trangthai', [0, 1])
+            ->whereDate('ngay_mong_muon', '<', now()->format('Y-m-d'))
+            ->update([
+                'trangthai' => 3,
+                'ghi_chu' => \DB::raw("CONCAT(COALESCE(ghi_chu, ''), ' [Hệ thống tự động hủy do quá hạn]')")
+            ]);
+
         $status     = $request->input('status');
         $date       = $request->input('date');
         $sort_time  = $request->input('sort_time');
@@ -63,13 +71,52 @@ class DangkidichvuController extends Controller
     {
         $request->validate([
             'ho_ten' => 'required',
+            'email' => 'nullable|email',
             'so_dien_thoai' => 'required',
-            'ngay_mong_muon' => 'required|date',
-            'gio_mong_muon' => 'required',
+            'ngay_mong_muon' => 'required|date|after_or_equal:today',
+            'gio_mong_muon' => [
+                'required',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->ngay_mong_muon === now()->format('Y-m-d')) {
+                        $parts = explode('-', $value);
+                        if (count($parts) > 0) {
+                            $startTimeStr = trim($parts[0]);
+                            try {
+                                $startCarbon = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                                if ($startCarbon->isPast()) {
+                                    $fail('Khung giờ này đã qua, vui lòng chọn khung giờ khác cho ngày hôm nay.');
+                                }
+                            } catch (\Exception $e) {
+                            }
+                        }
+                    }
+                }
+            ],
             'mon_ua_thich' => 'required',
             'co_so_tap' => 'required'
-
+        ], [
+            'ho_ten.required' => 'Vui lòng nhập họ và tên.',
+            'email.email' => 'Email không đúng định dạng.',
+            'so_dien_thoai.required' => 'Vui lòng nhập số điện thoại.',
+            'ngay_mong_muon.required' => 'Vui lòng chọn ngày muốn tập thử.',
+            'ngay_mong_muon.date' => 'Ngày tập thử không hợp lệ.',
+            'ngay_mong_muon.after_or_equal' => 'Ngày tập thử phải bắt đầu từ ngày hôm nay trở đi.',
+            'gio_mong_muon.required' => 'Vui lòng chọn khung giờ mong muốn.',
+            'mon_ua_thich.required' => 'Vui lòng chọn môn thể thao.',
+            'co_so_tap.required' => 'Vui lòng chọn cơ sở tập luyện.',
         ]);
+
+        // Kiểm tra Spam: Một SĐT không được đăng ký nhiều lịch chờ
+        $existingTrial = \App\Models\Dangkidichvu::where('so_dien_thoai', $request->so_dien_thoai)
+            ->whereIn('trangthai', [0, 1])
+            ->whereDate('ngay_mong_muon', '>=', now()->format('Y-m-d'))
+            ->exists();
+            
+        if ($existingTrial) {
+            return redirect()->back()->withErrors([
+                'so_dien_thoai' => 'Số điện thoại này đang có lịch hẹn chưa hoàn thành. Vui lòng chờ bộ phận CSKH liên hệ hoặc gọi Hotline.'
+            ])->withInput();
+        }
 
         $data = [
             'ho_ten' => $request->ho_ten,
@@ -80,10 +127,10 @@ class DangkidichvuController extends Controller
             'gio_mong_muon' => $request->gio_mong_muon,
             'ngay_mong_muon' => $request->ngay_mong_muon,
             'trangthai' => 0,
+            'id_nguoidung' => auth()->check() ? auth()->user()->id_nd : null,
             'created_at' => now(),
             'updated_at' => now(),
         ];
-
 
         $this->DangkiRepository->store($data);
 
@@ -112,12 +159,65 @@ class DangkidichvuController extends Controller
 
     public function update(Request $request, $id)
     {
-        $this->DangkiRepository->update($id, $request->all());
+        $trial = $this->DangkiRepository->find($id);
+
+        if ($request->has('trangthai')) {
+            $newStatus = (int) $request->trangthai;
+            $currentStatus = (int) $trial->trangthai;
+
+            // 1. Nếu đã Hoàn thành (2) hoặc Hủy (3) thì khóa, không cho đổi (Backend guard)
+            if (in_array($currentStatus, [2, 3]) && $newStatus !== $currentStatus) {
+                return redirect()->back()->withErrors(['trangthai' => 'Đăng ký đã ở trạng thái đóng băng, không thể thay đổi.']);
+            }
+
+            // 2. Không cho nhảy cóc từ 0 lên 2
+            if ($currentStatus === 0 && $newStatus === 2) {
+                return redirect()->back()->withErrors(['trangthai' => 'Không thể chuyển trực tiếp từ Mới đăng ký sang Hoàn thành.']);
+            }
+
+            // 3. Không cho quay lui trạng thái
+            if ($newStatus < $currentStatus) {
+                return redirect()->back()->withErrors(['trangthai' => 'Không thể quay ngược trạng thái đăng ký.']);
+            }
+
+            // 4. Nếu chuyển sang Hoàn thành (2), phải đảm bảo đã qua giờ hẹn tập
+            if ($newStatus === 2 && $currentStatus === 1) {
+                $dateStr = $trial->ngay_mong_muon;
+                $parts = explode('-', $trial->gio_mong_muon);
+                $startTimeStr = trim($parts[0] ?? '00:00');
+                
+                try {
+                    $trialCarbon = \Carbon\Carbon::createFromFormat('Y-m-d H:i', $dateStr . ' ' . $startTimeStr);
+                    if ($trialCarbon->isFuture()) {
+                        return redirect()->back()->withErrors(['trangthai' => 'Chưa đến thời gian hẹn tập, không thể đánh dấu Hoàn thành.']);
+                    }
+                } catch (\Exception $e) {
+                }
+            }
+        }
+
+        $this->DangkiRepository->update($id, $request->except(['_token', '_method']));
+
+        // Gửi email xác nhận nếu chuyển từ Mới đăng ký (0) sang Đã xác nhận (1)
+        if (isset($newStatus) && isset($currentStatus) && $newStatus === 1 && $currentStatus === 0 && !empty($trial->email)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($trial->email)->send(new \App\Mail\TrialConfirmedMail($trial));
+            } catch (\Exception $e) {
+                // Log lỗi gửi mail nhưng vẫn cho qua
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email xác nhận lịch tập thử: ' . $e->getMessage());
+            }
+        }
+
         return redirect()->route('dangki.index')->with('success', 'Cập nhật thành công!');
     }
 
     public function destroy($id)
     {
+        $trial = $this->DangkiRepository->find($id);
+        if ($trial->trangthai == 2) {
+            return redirect()->back()->withErrors(['error' => 'Không thể xóa dữ liệu khách hàng đã hoàn thành tập thử.']);
+        }
+
         $this->DangkiRepository->delete($id);
         return redirect()->route('dangki.index')->with('success', 'Xóa thành công!');
     }

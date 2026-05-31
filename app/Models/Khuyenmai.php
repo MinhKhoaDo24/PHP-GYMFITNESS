@@ -14,26 +14,26 @@ class Khuyenmai extends Model
         'ten_khuyenmai',
         'ma_code',
         'gia_tri_giam',
-        'kieu_giam',              // percent | fixed
+        'kieu_giam',              // percent | money
         'mo_ta',
-        'gia_tri_don_nho_nhat',
+        'don_toi_thieu',
         'giam_toi_da',
-        'so_lan_da_su_dung',
-        'gioi_han_su_dung',
+        'so_luot_da_dung',
+        'gioi_han_luot',
         'ngay_bat_dau',
         'ngay_ket_thuc',
         'trang_thai',            // 1 = active, 0 = inactive
     ];
 
     protected $casts = [
-        'gia_tri_giam'        => 'float',
-        'gia_tri_don_nho_nhat'=> 'float',
-        'giam_toi_da'         => 'float',
-        'so_lan_da_su_dung'   => 'integer',
-        'gioi_han_su_dung'    => 'integer',
-        'ngay_bat_dau'        => 'datetime',
-        'ngay_ket_thuc'       => 'datetime',
-        'trang_thai'          => 'integer',
+        'gia_tri_giam'      => 'float',
+        'don_toi_thieu'     => 'float',
+        'giam_toi_da'       => 'float',
+        'so_luot_da_dung'   => 'integer',
+        'gioi_han_luot'     => 'integer',
+        'ngay_bat_dau'      => 'datetime',
+        'ngay_ket_thuc'     => 'datetime',
+        'trang_thai'        => 'integer',
     ];
 
 
@@ -60,8 +60,8 @@ class Khuyenmai extends Model
         return $this->trang_thai == 1 &&
                $this->ngay_bat_dau <= $today &&
                $this->ngay_ket_thuc >= $today &&
-               ($this->gioi_han_su_dung == null ||
-                $this->so_lan_da_su_dung < $this->gioi_han_su_dung);
+               ($this->gioi_han_luot == null ||
+                $this->so_luot_da_dung < $this->gioi_han_luot);
     }
 
     /*---------------------------------------

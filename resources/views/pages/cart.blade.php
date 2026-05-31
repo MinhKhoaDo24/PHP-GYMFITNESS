@@ -792,11 +792,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
 
-                    row.remove();
+                    // Cập nhật badge số lượng ở header
+                    if (data.cart_count !== undefined) {
+                        const badge = document.querySelector('.navbar__shoppingCart span');
+                        if (badge) {
+                            badge.textContent = data.cart_count;
+                        }
+                    }
 
-                    updateCartTotal();
-
-                    showToast('Xóa sản phẩm thành công!');
+                    if (data.cart_count === 0) {
+                        // Nếu giỏ hàng trống hoàn toàn, load lại trang để hiển thị giao diện giỏ hàng trống
+                        location.reload();
+                    } else {
+                        row.remove();
+                        updateCartTotal();
+                        showToast('Xóa sản phẩm thành công!');
+                    }
                 })
                 .catch(() => {
                     showToast('Có lỗi khi xóa sản phẩm!');

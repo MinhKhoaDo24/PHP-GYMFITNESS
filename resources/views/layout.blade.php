@@ -173,13 +173,7 @@
 
                         @php
                         $cart = session('cart', []);
-                        $totalQty = 0;
-
-                        if (is_array($cart)) {
-                            foreach ($cart as $item) {
-                                $totalQty += $item['quantity'] ?? 0;
-                            }
-                        }
+                        $totalQty = is_array($cart) ? count($cart) : 0;
                         @endphp
 
                         <span>{{ $totalQty }}</span>

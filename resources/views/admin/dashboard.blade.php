@@ -61,9 +61,9 @@
 
     <div class="col-md-3">
         <div class="kpi-box">
-            <p>Khách Hàng</p>
-            <div class="kpi-value">{{ $stats['customers'] }}</div>
-            <div class="kpi-growth">↑ {{ $stats['customersGrowth'] }}%</div>
+            <p>Đăng Ký Tập Thử</p>
+            <div class="kpi-value">{{ $stats['trials'] }}</div>
+            <div class="kpi-growth">↑ {{ $stats['trialsGrowth'] }}%</div>
         </div>
     </div>
 
@@ -99,9 +99,9 @@
 
     <div class="col-lg-6 mb-4">
         <div class="card">
-            <div class="card-header fw-bold">Khách Hàng Mới</div>
+            <div class="card-header fw-bold">Lượt Đăng Ký Tập Thử Mới</div>
             <div class="card-body">
-                <canvas id="customerChart" height="130"></canvas>
+                <canvas id="trialChart" height="130"></canvas>
             </div>
         </div>
     </div>
@@ -164,16 +164,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
-    // 3. Customers
-    fetch("/admin/chart/customers")
+    // 3. Trial Registrations
+    fetch("/admin/chart/trials")
         .then(r => r.json())
         .then(data => {
-            new Chart(customerChart, {
+            new Chart(trialChart, {
                 type: "line",
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: "Khách hàng mới",
+                        label: "Lượt đăng ký mới",
                         data: data.values,
                         borderColor: "#36b9cc",
                         backgroundColor: "rgba(54,185,204,0.15)",

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -58,8 +59,14 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
+        // Lấy số lượng từ request
+        $qty = (int) $request->input('quantity', 1);
+        if ($qty < 1) {
+            $qty = 1;
+        }
+
         if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+            $cart[$id]['quantity'] += $qty;
         } else {
             $cart[$id] = [
                 "id_sanpham"    => $product->id_sanpham,
@@ -68,7 +75,7 @@ class CartController extends Controller
                 "giasp"         => $product->giasp,
                 "giamgia"       => $product->giamgia,
                 "giakhuyenmai"  => $product->giakhuyenmai,
-                "quantity"      => 1
+                "quantity"      => $qty
             ];
         }
 
@@ -78,14 +85,14 @@ class CartController extends Controller
             return response()->json([
                 'status'      => 'success',
                 'message'     => 'Đã thêm vào giỏ hàng thành công!',
-                'cart_count'  => array_sum(array_column($cart, 'quantity')),
+                'cart_count'  => count($cart),
             ]);
         }
 
         return redirect()->back()->with('success', 'Thêm vào giỏ hàng thành công!');
     }
 
-    public function addGoToCart($id)
+    public function addGoToCart(Request $request, $id)
     {
         $product = Sanpham::with('images')->findOrFail($id);
 
@@ -96,8 +103,14 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
+        // Lấy số lượng từ request
+        $qty = (int) $request->input('quantity', 1);
+        if ($qty < 1) {
+            $qty = 1;
+        }
+
         if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+            $cart[$id]['quantity'] += $qty;
         } else {
             $cart[$id] = [
                 "id_sanpham"    => $product->id_sanpham,
@@ -106,7 +119,7 @@ class CartController extends Controller
                 "giasp"         => $product->giasp,
                 "giamgia"       => $product->giamgia,
                 "giakhuyenmai"  => $product->giakhuyenmai,
-                "quantity"      => 1
+                "quantity"      => $qty
             ];
         }
 
@@ -180,8 +193,9 @@ class CartController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'total'   => $total,
+            'success'    => true,
+            'total'      => $total,
+            'cart_count' => array_sum(array_column($cart, 'quantity')),
         ]);
     }
 
@@ -192,12 +206,15 @@ class CartController extends Controller
             return redirect('/login')->with('needLogin', true);
         }
 
+        $cart = session()->get('cart', []);
+        if (empty($cart)) {
+            return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
+        }
+
         $showusers = DB::table('nguoidung')
             ->select('nguoidung.*')
             ->where('nguoidung.id_nd', $user->id_nd)
             ->get();
-
-        $cart = session()->get('cart', []);
 
         $total = 0;
         foreach ($cart as $item) {
@@ -221,6 +238,23 @@ class CartController extends Controller
         if (empty($cart)) {
             return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
         }
+
+        // -----------------------------
+        // XÁC THỰC THÔNG TIN NHẬN HÀNG
+        // -----------------------------
+        $request->validate([
+            'display_hoten' => ['required', 'string', 'max:100'],
+            'display_email' => ['required', 'email', 'max:100'],
+            'display_sdt' => ['required', 'regex:/^(0\d{9}|\d{9})$/'],
+            'display_diachigiaohang' => ['required', 'string', 'max:255'],
+        ], [
+            'display_hoten.required' => 'Họ tên không được để trống.',
+            'display_email.required' => 'Email không được để trống.',
+            'display_email.email' => 'Email không đúng định dạng.',
+            'display_sdt.required' => 'Số điện thoại không được để trống.',
+            'display_sdt.regex' => 'Số điện thoại không hợp lệ.',
+            'display_diachigiaohang.required' => 'Địa chỉ giao hàng không được để trống.',
+        ]);
 
         // -----------------------------
         // LẤY THÔNG TIN TỪ FORM
@@ -251,23 +285,40 @@ class CartController extends Controller
                 return back()->with('error', 'Mã khuyến mãi đã hết lượt sử dụng!');
             }
 
-            // Nếu AJAX tính sai → Controller tính lại
-            $tiengiam_auto = ($km->kieu_giam === 'percent')
-                ? ($tongtien * $km->gia_tri_giam / 100)
-                : $km->gia_tri_giam;
+            // Kiểm tra xem có phải mã Freeship không
+            $isFreeship = ($km->kieu_giam === 'freeship' || stripos($km->ma_code, 'FREESHIP') !== false || stripos($km->ma_code, 'MIENPHISHIP') !== false);
 
-            if ($km->giam_toi_da && $tiengiam_auto > $km->giam_toi_da) {
-                $tiengiam_auto = $km->giam_toi_da;
+            if ($isFreeship) {
+                $tiengiam_auto = 25000; // Giảm đúng bằng 25k ship
+            } else {
+                // Nếu AJAX tính sai → Controller tính lại
+                $tiengiam_auto = ($km->kieu_giam === 'percent')
+                    ? ($tongtien * $km->gia_tri_giam / 100)
+                    : $km->gia_tri_giam;
+
+                if ($km->giam_toi_da && $tiengiam_auto > $km->giam_toi_da) {
+                    $tiengiam_auto = $km->giam_toi_da;
+                }
             }
 
             if ($tiengiam != $tiengiam_auto) {
                 // ép theo giá trị chuẩn để tránh bị chỉnh giá client
                 $tiengiam = $tiengiam_auto;
-                $tienphaitra = max($tongtien - $tiengiam, 0);
+            }
+
+            // Tổng thanh toán thực tế = Tiền hàng - Giảm giá + 25k phí ship (nếu freeship thì triệt tiêu)
+            if ($isFreeship) {
+                $tienphaitra = $tongtien;
+            } else {
+                $tienphaitra = max($tongtien - $tiengiam, 0) + 25000;
             }
 
             // Cập nhật lượt dùng mã KM
             $km->increment('so_luot_da_dung');
+        } else {
+            // Không dùng mã KM: tiêngiam = 0, tiền phải trả = tiền hàng + 25k ship
+            $tiengiam = 0;
+            $tienphaitra = $tongtien + 25000;
         }
 
         // -----------------------------
@@ -299,6 +350,7 @@ class CartController extends Controller
             'hoten'        => $request->display_hoten,
             'email'        => $request->display_email,
             'sdt'          => $request->display_sdt,
+            'ngaydathang'  => now(),
             'ngaygiaohang' => now()->addDays(4),
             'id_nd'        => Auth::user()->id_nd,
         ]);
@@ -323,6 +375,20 @@ class CartController extends Controller
             $sp = Sanpham::find($item['id_sanpham']);
             $sp->soluong -= $item['quantity'];
             $sp->save();
+        }
+
+        // -----------------------------
+        // GỬI EMAIL HÓA ĐƠN
+        // -----------------------------
+        try {
+            $email = $order->email;
+            $hoten = $order->hoten;
+            Mail::send('pages.invoice_mail', compact('order', 'cart'), function ($message) use ($email, $hoten) {
+                $message->to($email, $hoten)
+                        ->subject('Rise Fitness - Hóa đơn mua hàng #' . time());
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Lỗi gửi email hóa đơn: ' . $e->getMessage());
         }
 
         // -----------------------------
@@ -362,8 +428,25 @@ class CartController extends Controller
 
     public function vnpay(Request $request)
     {
-        $vnp_TmnCode    = "4M7EXIQQ"; 
-        $vnp_HashSecret = "QKB1K3QJ7DL73O6GHQDRUNWTIJ3XQ77Q";
+        // -----------------------------
+        // XÁC THỰC THÔNG TIN NHẬN HÀNG
+        // -----------------------------
+        $request->validate([
+            'display_hoten' => ['required', 'string', 'max:100'],
+            'display_email' => ['required', 'email', 'max:100'],
+            'display_sdt' => ['required', 'regex:/^(0\d{9}|\d{9})$/'],
+            'display_diachigiaohang' => ['required', 'string', 'max:255'],
+        ], [
+            'display_hoten.required' => 'Họ tên không được để trống.',
+            'display_email.required' => 'Email không được để trống.',
+            'display_email.email' => 'Email không đúng định dạng.',
+            'display_sdt.required' => 'Số điện thoại không được để trống.',
+            'display_sdt.regex' => 'Số điện thoại không hợp lệ.',
+            'display_diachigiaohang.required' => 'Địa chỉ giao hàng không được để trống.',
+        ]);
+
+        $vnp_TmnCode    = env('VNP_TMN_CODE', '4M7EXIQQ'); 
+        $vnp_HashSecret = env('VNP_HASH_SECRET', 'QKB1K3QJ7DL73O6GHQDRUNWTIJ3XQ77Q');
 
         $vnp_Url        = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_Returnurl  = url('/thongbaodathang');
@@ -484,20 +567,28 @@ class CartController extends Controller
             ]);
         }
 
-        // Tính giảm giá
-        if ($promo->kieu_giam === 'percent') {
-            $discount = ($total * $promo->gia_tri_giam) / 100;
+        // Tính toán giảm giá và phí ship
+        $isFreeship = ($promo->kieu_giam === 'freeship' || stripos($promo->ma_code, 'FREESHIP') !== false || stripos($promo->ma_code, 'MIENPHISHIP') !== false);
+
+        if ($isFreeship) {
+            $discount = 25000; // Giảm ship 25k
+            $newTotal = $total; // Đơn Freeship có tổng bằng đúng tiền hàng sản phẩm
         } else {
-            $discount = $promo->gia_tri_giam;
-        }
+            // Tính giảm giá sản phẩm thông thường
+            if ($promo->kieu_giam === 'percent') {
+                $discount = ($total * $promo->gia_tri_giam) / 100;
+            } else {
+                $discount = $promo->gia_tri_giam;
+            }
 
-        // Giảm tối đa (nếu có)
-        if ($promo->giam_toi_da && $discount > $promo->giam_toi_da) {
-            $discount = $promo->giam_toi_da;
-        }
+            // Giảm tối đa (nếu có)
+            if ($promo->giam_toi_da && $discount > $promo->giam_toi_da) {
+                $discount = $promo->giam_toi_da;
+            }
 
-        // Tính tổng mới
-        $newTotal = max($total - $discount, 0);
+            // Tổng thanh toán = Tiền hàng - Giảm giá + 25k ship
+            $newTotal = max($total - $discount, 0) + 25000;
+        }
 
         // Lưu session tạm (client dùng để hiển thị)
         session([
@@ -505,7 +596,8 @@ class CartController extends Controller
                 'id' => $promo->id_khuyenmai,
                 'code' => $promo->ma_code,
                 'discount' => $discount,
-                'new_total' => $newTotal
+                'new_total' => $newTotal,
+                'is_freeship' => $isFreeship
             ]
         ]);
 
@@ -514,6 +606,7 @@ class CartController extends Controller
             'id_khuyenmai' => $promo->id_khuyenmai,   // ⭐ trả về ID đúng
             'discount' => $discount,
             'new_total' => $newTotal,
+            'is_freeship' => $isFreeship,
             'message' => 'Áp dụng mã thành công!',
         ]);
     }
