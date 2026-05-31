@@ -685,7 +685,7 @@ class CartController extends Controller
             'sdt'          => $request->display_sdt,
             'ngaygiaohang' => now()->addDays(4),
             'id_nd'        => Auth::user()->id_nd,
-            'trangthai'    => 'Chưa thanh toán',
+            'trangthai'    => 'Chờ xác nhận',
         ]);
 
         // -----------------------------
