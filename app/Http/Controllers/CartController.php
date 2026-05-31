@@ -285,17 +285,23 @@ class CartController extends Controller
                 return back()->with('error', 'Mã khuyến mãi đã hết lượt sử dụng!');
             }
 
+            // Kiểm tra điều kiện mã Freeship
+            if ($km->kieu_giam === 'freeship') {
+                if ($km->don_toi_thieu != null && $tongtien < $km->don_toi_thieu) {
+                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!");
+                }
+            }
+
             // Kiểm tra xem có phải mã Freeship không
             $phi_ship = $this->calculateShippingFee($request->thanh_pho);
-            $isFreeship = (
-                $km->kieu_giam === 'freeship'
-                && $request->thanh_pho === env('STORE_CITY', 'Hà Nội')
-                && ($km->don_toi_thieu === null || $tongtien >= $km->don_toi_thieu)
-            );
+            $isFreeship = ($km->kieu_giam === 'freeship');
 
-            if ($isFreeship) {
-                $tiengiam_auto = $phi_ship; // Giảm đúng bằng phí ship thực tế
-            } else {
+if ($isFreeship) {
+    $tiengiam_auto = $phi_ship;
+    if ($km->giam_toi_da && $tiengiam_auto > $km->giam_toi_da) {
+        $tiengiam_auto = $km->giam_toi_da;
+    }
+} else {
                 // Nếu AJAX tính sai → Controller tính lại
                 $tiengiam_auto = ($km->kieu_giam === 'percent')
                     ? ($tongtien * $km->gia_tri_giam / 100)
@@ -313,7 +319,9 @@ class CartController extends Controller
 
             // Tổng thanh toán thực tế = Tiền hàng - Giảm giá + phí ship (nếu freeship thì triệt tiêu)
             if ($isFreeship) {
-                $tienphaitra = $tongtien;
+                if ($isFreeship) {
+    $tienphaitra = $tongtien + $phi_ship - $tiengiam;
+}
             } else {
                 $tienphaitra = max($tongtien - $tiengiam, 0) + $phi_ship;
             }
@@ -536,6 +544,7 @@ class CartController extends Controller
     
     public function applyPromo(Request $request)
     {
+        
         $code = $request->promo_code;
 
         // Tìm mã khuyến mãi
@@ -584,18 +593,27 @@ class CartController extends Controller
             ]);
         }
 
+        // Kiểm tra điều kiện mã Freeship
+        if ($promo->kieu_giam === 'freeship') {
+            if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!",
+                ]);
+            }
+        }
+
         // Tính toán giảm giá và phí ship
         $phi_ship = $this->calculateShippingFee($request->thanh_pho);
-        $isFreeship = (
-            $promo->kieu_giam === 'freeship'
-            && $request->thanh_pho === env('STORE_CITY', 'Hà Nội')
-            && ($promo->don_toi_thieu === null || $total >= $promo->don_toi_thieu)
-        );
+        $isFreeship = ($promo->kieu_giam === 'freeship');
 
-        if ($isFreeship) {
-            $discount = $phi_ship; // Giảm đúng bằng phí ship thực tế
-            $newTotal = $total;    // Đơn Freeship: tổng = đúng tiền hàng
-        } else {
+       if ($isFreeship) {
+    $discount = $phi_ship;
+    if ($promo->giam_toi_da && $discount > $promo->giam_toi_da) {
+        $discount = $promo->giam_toi_da;
+    }
+    $newTotal = $total + $phi_ship - $discount;
+} else {
             // Tính giảm giá sản phẩm thông thường
             if ($promo->kieu_giam === 'percent') {
                 $discount = ($total * $promo->gia_tri_giam) / 100;
