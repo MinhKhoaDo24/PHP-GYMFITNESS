@@ -60,13 +60,13 @@ class KhuyenMaiSeeder extends Seeder
                 'updated_at'     => Carbon::now(),
             ],
             [
-                'ten_khuyenmai'  => 'Miễn phí vận chuyển cho đơn từ 500k',
+                'ten_khuyenmai'  => 'Miễn phí vận chuyển cho đơn từ 500k (Hà Nội)',
                 'ma_code'        => 'FREESHIP',
-                'gia_tri_giam'   => 25000,
-                'kieu_giam'      => 'money',
-                'mo_ta'          => 'Miễn phí vận chuyển cho đơn hàng từ 500.000đ.',
+                'gia_tri_giam'   => 0,       // Không dùng — hệ thống tự tính theo env SHIPPING_FEE_INSIDE
+                'kieu_giam'      => 'freeship',
+                'mo_ta'          => 'Miễn phí vận chuyển nội thành Hà Nội cho đơn hàng từ 500.000đ.',
                 'don_toi_thieu'  => 500000,
-                'giam_toi_da'    => 25000,
+                'giam_toi_da'    => 0,
                 'so_luot_da_dung'=> 0,
                 'gioi_han_luot'  => 1000,
                 'ngay_bat_dau'   => Carbon::now(),
