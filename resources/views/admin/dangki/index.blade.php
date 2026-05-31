@@ -349,12 +349,12 @@
         </a>
 
 
-        <a href="{{ url('/admin/dangki?status=3') }}"
+        <a href="{{ url('/admin/dangki?status=2') }}"
            class="tab-item {{ request('status') == '2' ? 'active' : '' }}">
             Hoàn thành
         </a>
 
-        <a href="{{ url('/admin/dangki?status=4') }}"
+        <a href="{{ url('/admin/dangki?status=3') }}"
            class="tab-item {{ request('status') == '3' ? 'active' : '' }}">
             Hủy
         </a>
