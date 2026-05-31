@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     CartController,
     CommentController,
     ForgotPasswordController,
-    ProfileController
+    ProfileController,
+    EmailVerificationController
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
@@ -93,6 +94,7 @@ Route::get('/donhang', [OrderViewController::class, 'donhang']);
 
 Route::prefix('/')->middleware('orderview')->group(function () {
     Route::get('/donhang/edit/{id}', [OrderViewController::class, 'edit'])->name('donhang.edit');
+    Route::post('/donhang/repurchase/{id}', [OrderViewController::class, 'repurchase'])->name('donhang.repurchase');
 });
 Route::post('/donhang/cancel/{id}', [OrderViewController::class, 'cancel'])->name('donhang.cancel');
 
@@ -104,6 +106,14 @@ Route::post('/register', [AuthController::class, 'registerPost'])->name('registe
 Route::post('/kiem-tra-email', [AuthController::class, 'kiemTraEmail'])->name('kiemtra.email');
 
 Route::delete('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ─── Email Verification ─────────────────────────────────────────────────────
+Route::get('/email/notice', [EmailVerificationController::class, 'notice'])->name('email.notice');
+Route::get('/email/verify/{token}', [EmailVerificationController::class, 'verify'])->name('email.verify');
+Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:3,1')  // tối đa 3 lần/phút
+    ->name('email.resend');
+// ────────────────────────────────────────────────────────────────────────────
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('password.forgot');
 
 // Gửi email khôi phục mật khẩu

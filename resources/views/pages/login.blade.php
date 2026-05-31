@@ -50,10 +50,15 @@
 
         <div class="remember-forgot">
             <label class="remember-me">
-                <input type="checkbox" name="remember">
+                <input type="checkbox" name="remember" value="1">
                 <span>Ghi nhớ đăng nhập</span>
             </label>
             <a href="{{ route('password.forgot') }}" style="color: #6366f1; text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
+        </div>
+
+        {{-- reCAPTCHA v2 --}}
+        <div class="recaptcha-wrapper">
+            <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
         </div>
 
         <button type="submit" class="form-submit" id="submitBtn">

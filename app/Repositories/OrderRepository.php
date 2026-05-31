@@ -54,7 +54,7 @@ class OrderRepository implements IOrderRepository
 
     public function orderView($id)
     {
-        return Dathang::where('id_nd', $id)
+        return Dathang::with('details')->where('id_nd', $id)
             ->orderBy('ngaydathang', 'desc')
             ->get();
     }

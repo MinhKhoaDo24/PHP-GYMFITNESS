@@ -37,6 +37,24 @@ class CommentController extends Controller
             'g-recaptcha-response' => 'required_if:require_captcha,true'
         ]);
 
+        // Kiểm tra khách hàng đã đăng nhập chưa
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để đánh giá sản phẩm.'], 401);
+        }
+
+        // Kiểm tra khách hàng đã mua sản phẩm này chưa
+        $hasBought = \App\Models\ChitietDonhang::where('id_sanpham', $request->sanpham_id)
+            ->whereHas('dathang', function ($query) use ($user) {
+                $query->where('id_nd', $user->id_nd)
+                      ->where('trangthai', 'Hoàn thành');
+            })
+            ->exists();
+
+        if (!$hasBought) {
+            return response()->json(['success' => false, 'message' => 'Bạn chỉ được đánh giá sản phẩm này sau khi đã mua hàng thành công.'], 403);
+        }
+
         // Kiểm tra nếu cần reCAPTCHA
         if ($request->has('g-recaptcha-response')) {
             $recaptchaResponse = $request->input('g-recaptcha-response');

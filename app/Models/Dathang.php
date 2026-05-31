@@ -52,5 +52,10 @@ class Dathang extends Model
     {
         return $this->belongsTo(Khuyenmai::class, 'id_khuyenmai', 'id_khuyenmai');
     }
+
+    public function details()
+    {
+        return $this->hasMany(ChitietDonhang::class, 'id_dathang', 'id_dathang');
+    }
 }
 
