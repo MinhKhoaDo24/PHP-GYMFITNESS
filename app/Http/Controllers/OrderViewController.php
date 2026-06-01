@@ -102,32 +102,80 @@ class OrderViewController extends Controller
         $warningMessages = [];
 
         foreach ($orderdetails as $detail) {
-            $product = SanPham::with('images')->find($detail->id_sanpham);
+            $product = SanPham::with(['images', 'sizes'])->find($detail->id_sanpham);
             if ($product) {
-                // If product is out of stock, warn user
-                if ($product->soluong <= 0) {
-                    $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" đã hết hàng và không được thêm vào.";
-                    continue;
-                }
-
-                $qty = $detail->soluong;
-                if ($qty > $product->soluong) {
-                    $qty = $product->soluong;
-                    $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" chỉ còn " . $product->soluong . " sản phẩm trong kho (yêu cầu cũ: " . $detail->soluong . ").";
-                }
-
                 $firstImage = $product->images->first();
                 $imagePath = $firstImage ? $firstImage->duong_dan : 'frontend/upload/placeholder.jpg';
 
-                $cart[$product->id_sanpham] = [
-                    "id_sanpham"   => $product->id_sanpham,
-                    "tensp"        => $product->tensp,
-                    "anhsp"        => $imagePath,
-                    "giasp"        => $product->giasp,
-                    "giamgia"      => $product->giamgia,
-                    "giakhuyenmai" => $product->giakhuyenmai,
-                    "quantity"     => $qty
-                ];
+                // Check if product supports size
+                if ($product->co_size == 1) {
+                    $sizeName = null;
+                    if (preg_match('/ \(Size:\s*([^)]+)\)/ui', $detail->tensp, $matches)) {
+                        $sizeName = trim($matches[1]);
+                    }
+
+                    if ($sizeName) {
+                        // Find matching size in this product's sizes
+                        $sizeObj = $product->sizes->first(function ($size) use ($sizeName) {
+                            return strcasecmp($size->ten_size, $sizeName) === 0;
+                        });
+
+                        if ($sizeObj) {
+                            $sizeStock = $sizeObj->pivot->soluong;
+                            if ($sizeStock <= 0) {
+                                $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" (Size: " . $sizeObj->ten_size . ") đã hết hàng và không được thêm vào.";
+                                continue;
+                            }
+
+                            $qty = $detail->soluong;
+                            if ($qty > $sizeStock) {
+                                $qty = $sizeStock;
+                                $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" (Size: " . $sizeObj->ten_size . ") chỉ còn " . $sizeStock . " sản phẩm trong kho (yêu cầu cũ: " . $detail->soluong . ").";
+                            }
+
+                            $cartKey = $product->id_sanpham . '_' . $sizeObj->id_size;
+                            $cart[$cartKey] = [
+                                "id_sanpham"    => $product->id_sanpham,
+                                "tensp"         => $product->tensp,
+                                "anhsp"         => $imagePath,
+                                "giasp"         => $product->giasp,
+                                "giamgia"       => $product->giamgia,
+                                "giakhuyenmai"  => $product->giakhuyenmai,
+                                "quantity"      => $qty,
+                                "id_size"       => $sizeObj->id_size,
+                                "ten_size"      => $sizeObj->ten_size,
+                                "gia_cong_them" => (int) $sizeObj->pivot->gia_cong_them
+                            ];
+                        } else {
+                            $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" (Size: " . $sizeName . ") không còn hỗ trợ kích cỡ này.";
+                        }
+                    } else {
+                        $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" hiện tại yêu cầu kích cỡ. Vui lòng chọn lại trên trang chi tiết.";
+                    }
+                } else {
+                    // If product is out of stock, warn user
+                    if ($product->soluong <= 0) {
+                        $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" đã hết hàng và không được thêm vào.";
+                        continue;
+                    }
+
+                    $qty = $detail->soluong;
+                    if ($qty > $product->soluong) {
+                        $qty = $product->soluong;
+                        $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" chỉ còn " . $product->soluong . " sản phẩm trong kho (yêu cầu cũ: " . $detail->soluong . ").";
+                    }
+
+                    $cartKey = $product->id_sanpham;
+                    $cart[$cartKey] = [
+                        "id_sanpham"   => $product->id_sanpham,
+                        "tensp"        => $product->tensp,
+                        "anhsp"        => $imagePath,
+                        "giasp"        => $product->giasp,
+                        "giamgia"      => $product->giamgia,
+                        "giakhuyenmai" => $product->giakhuyenmai,
+                        "quantity"     => $qty
+                    ];
+                }
             } else {
                 $warningMessages[] = "Sản phẩm \"" . $detail->tensp . "\" không còn tồn tại trên hệ thống.";
             }
