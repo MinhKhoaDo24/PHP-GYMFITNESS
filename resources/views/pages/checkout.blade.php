@@ -624,12 +624,16 @@ $('#apply_promo').click(function() {
             Swal.fire("Thành công!", res.message, "success");
 
             if (res.is_freeship) {
-                // Mã freeship → hiển thị gạch ngang phí ship
-                $('#shipping_fee_display').html('<del>' + fee.toLocaleString() + 'đ</del> <span class="text-success fw-bold">Miễn phí</span>');
-                $('#shipping_discount_row').show();
-                $('#shipping_discount_amount').text('-' + fee.toLocaleString() + 'đ');
-                $('#discount_amount').text('0đ');
-            } else {
+    const remainFee = fee - res.discount;
+    if (remainFee <= 0) {
+        $('#shipping_fee_display').html('<del>' + fee.toLocaleString() + 'đ</del> <span class="text-success fw-bold">Miễn phí</span>');
+    } else {
+        $('#shipping_fee_display').html('<del>' + fee.toLocaleString() + 'đ</del> <span class="text-warning fw-bold">' + remainFee.toLocaleString() + 'đ</span>');
+    }
+    $('#shipping_discount_row').show();
+    $('#shipping_discount_amount').text('-' + res.discount.toLocaleString() + 'đ');
+    $('#discount_amount').text('0đ');
+} else {
                 // Mã giảm giá thường
                 $('#shipping_fee_display').text(fee.toLocaleString() + 'đ');
                 $('#shipping_discount_row').hide();
