@@ -12,7 +12,7 @@ interface IAdminRepository
 
     /* Dashboard Simple Stats */
     public function getOrderView();
-    public function totalsCustomer();
+    public function totalsTrialRegister();
     public function totalsOrders();
     public function totalsMoney();
     public function totalsSaleProducts();
@@ -20,7 +20,7 @@ interface IAdminRepository
     /* Dashboard Analytics */
     public function getRevenue($start, $end);
     public function getOrders($start, $end);
-    public function getCustomers($start, $end);
+    public function getTrialRegisters($start, $end);
     public function getSoldProducts($start, $end);
 
     /* Main dashboard compiled data */

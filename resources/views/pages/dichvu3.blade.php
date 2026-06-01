@@ -14,7 +14,7 @@
         <div class="banner-swim-content text-center">
             <h1 class="banner-swim-title">BỂ BƠI BỐN MÙA</h1>
 
-            <a href="{{ url('/donhang') }}" class="banner-swim-btn">
+            <a href="{{ route('dang-ky-tap-thu') }}" class="banner-swim-btn">
                 Miễn Phí Bơi Thử
             </a>
         </div>
@@ -80,7 +80,7 @@
                                 <h3 class="rf-swim-program-title">
                                     KHÔNG GIAN BƠI LỘI<br>CHUYÊN NGHIỆP
                                 </h3>
-                                <a href="{{ url('/donhang') }}" class="rf-swim-program-btn">
+                                <a href="{{ route('dang-ky-tap-thu') }}" class="rf-swim-program-btn">
                                     Trải nghiệm miễn phí
                                 </a>
                             </div>
@@ -96,7 +96,7 @@
                                 <h3 class="rf-swim-program-title">
                                     KHÓA HỌC BƠI<br>CƠ BẢN ĐẾN NÂNG CAO
                                 </h3>
-                                <a href="{{ url('/donhang') }}" class="rf-swim-program-btn">
+                                <a href="{{ route('dang-ky-tap-thu') }}" class="rf-swim-program-btn">
                                     Trải nghiệm miễn phí
                                 </a>
                             </div>
@@ -112,7 +112,7 @@
                                 <h3 class="rf-swim-program-title">
                                     HỆ THỐNG LÀM NÓNG<br>BẰNG CÔNG NGHỆ HEATPUMP
                                 </h3>
-                                <a href="{{ url('/donhang') }}" class="rf-swim-program-btn">
+                                <a href="{{ route('dang-ky-tap-thu') }}" class="rf-swim-program-btn">
                                     Trải nghiệm miễn phí
                                 </a>
                             </div>
@@ -128,7 +128,7 @@
                                 <h3 class="rf-swim-program-title">
                                     AN TÂM BƠI LỘI<br>KHÔNG NGẠI KHÔ DA, HẠI TÓC
                                 </h3>
-                                <a href="{{ url('/donhang') }}" class="rf-swim-program-btn">
+                                <a href="{{ route('dang-ky-tap-thu') }}" class="rf-swim-program-btn">
                                     Trải nghiệm miễn phí
                                 </a>
                             </div>
@@ -144,7 +144,7 @@
                                 <h3 class="rf-swim-program-title">
                                     NỒNG ĐỘ PH<br>LUÔN GIỮ Ở MỨC ỔN ĐỊNH
                                 </h3>
-                                <a href="{{ url('/donhang') }}" class="rf-swim-program-btn">
+                                <a href="{{ route('dang-ky-tap-thu') }}" class="rf-swim-program-btn">
                                     Trải nghiệm miễn phí
                                 </a>
                             </div>
@@ -160,7 +160,7 @@
                                 <h3 class="rf-swim-program-title">
                                     LỌC NƯỚC &amp; KHỬ KHUẨN<br>BẰNG OZONE VÀ TIA UV
                                 </h3>
-                                <a href="{{ url('/donhang') }}" class="rf-swim-program-btn">
+                                <a href="{{ route('dang-ky-tap-thu') }}" class="rf-swim-program-btn">
                                     Trải nghiệm miễn phí
                                 </a>
                             </div>

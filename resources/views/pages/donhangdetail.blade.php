@@ -181,6 +181,11 @@
     color: #fff;
 }
 
+.product-detail-link:hover {
+    color: #1B8AC3 !important;
+    text-decoration: underline !important;
+}
+
 </style>
 
 <div class="order-bg">
@@ -291,7 +296,11 @@
                         @endphp
 
                         <tr>
-                            <td>{{ $od->tensp }}</td>
+                            <td>
+                                <a href="{{ route('detail', $od->id_sanpham) }}" class="product-detail-link" style="color: #34A4E0; font-weight: 700; text-decoration: none; transition: color 0.2s;">
+                                    {{ $od->tensp }}
+                                </a>
+                            </td>
                             <td>{{ $od->soluong }}</td>
                             <td>{{ number_format($od->giatien) }}đ</td>
                             <td>{{ $od->giamgia }}%</td>

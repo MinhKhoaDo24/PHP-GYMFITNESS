@@ -142,8 +142,29 @@
 <h5 class="fw-bold mb-2" style='color: #0ea5e9;'>Thanh toán</h5>
 <div class="grid-2 mb-4">
     <div>
-        <label class="detail-label">Tổng tiền hàng</label>
+        <label class="detail-label">Tổng tiền hàng (Tiền sản phẩm)</label>
         <div class="detail-box">{{ number_format($order->tongtien) }} đ</div>
+    </div>
+
+    <div>
+        <label class="detail-label">Phí vận chuyển</label>
+        @php
+            $phi_ship = 0;
+            if ($order->tienphaitra > 0) {
+                $phi_ship = $order->tienphaitra - $order->tongtien + ($order->tiengiam ?? 0);
+            } else {
+                $storeCity = env('STORE_CITY', 'Hà Nội');
+                $isInside = false;
+                if ($order->diachigiaohang) {
+                    if (mb_strpos(mb_strtolower($order->diachigiaohang), mb_strtolower($storeCity)) !== false) {
+                        $isInside = true;
+                    }
+                }
+                $phi_ship = $isInside ? (int)env('SHIPPING_FEE_INSIDE', 20000) : (int)env('SHIPPING_FEE_OUTSIDE', 35000);
+            }
+            if ($phi_ship < 0) $phi_ship = 0;
+        @endphp
+        <div class="detail-box">{{ number_format($phi_ship) }} đ</div>
     </div>
 
     <div>
@@ -152,9 +173,9 @@
     </div>
 
     <div>
-        <label class="detail-label">Tiền phải trả</label>
-        <div class="detail-box">
-            {{ number_format($order->tienphaitra ?? ($order->tongtien - ($order->tiengiam ?? 0))) }} đ
+        <label class="detail-label" style="color: #0ea5e9; font-weight: 700;">Tổng thanh toán (Tiền phải trả)</label>
+        <div class="detail-box fw-bold" style="border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff;">
+            {{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0))) }} đ
         </div>
     </div>
 </div>

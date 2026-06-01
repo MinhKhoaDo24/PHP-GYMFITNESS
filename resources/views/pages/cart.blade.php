@@ -790,7 +790,6 @@
             });
         });
 
-
         // Xử lý xóa sản phẩm
         document.querySelectorAll('.cart_remove').forEach(button => {
             button.addEventListener('click', function(e) {
@@ -825,11 +824,22 @@
                                 return;
                             }
 
-                            row.remove();
+                            // Cập nhật badge số lượng ở header
+                            if (data.cart_count !== undefined) {
+                                const badge = document.querySelector('.navbar__shoppingCart span');
+                                if (badge) {
+                                    badge.textContent = data.cart_count;
+                                }
+                            }
 
-                            updateCartTotal();
-
-                            showToast('Xóa sản phẩm thành công!');
+                            if (data.cart_count === 0) {
+                                // Nếu giỏ hàng trống hoàn toàn, load lại trang để hiển thị giao diện giỏ hàng trống
+                                location.reload();
+                            } else {
+                                row.remove();
+                                updateCartTotal();
+                                showToast('Xóa sản phẩm thành công!');
+                            }
                         })
                         .catch(() => {
                             showToast('Có lỗi khi xóa sản phẩm!');
@@ -854,6 +864,7 @@
                 setTimeout(() => toast.remove(), 300);
             }, 2000);
         }
+
         // Hàm cập nhật giỏ hàng
         function updateCart(row, quantity, element) {
             var button = element && element.classList.contains('quantity-btn') ? element : null;
@@ -874,6 +885,14 @@
                         var productTotal = row.querySelector('.product-total');
                         if (productTotal && typeof response.product_total !== 'undefined') {
                             productTotal.textContent = formatPrice(response.product_total);
+                        }
+
+                        // Cập nhật badge số lượng ở header
+                        if (typeof response.cart_count !== 'undefined') {
+                            const badge = document.querySelector('.navbar__shoppingCart span');
+                            if (badge) {
+                                badge.textContent = response.cart_count;
+                            }
                         }
 
                         updateCartSummary(response);

@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     CartController,
     CommentController,
     ForgotPasswordController,
-    ProfileController
+    ProfileController,
+    EmailVerificationController
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
@@ -39,7 +40,6 @@ Route::get('/congiong', [HomeController::class, 'congiong']);
 Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/viewAll', [HomeController::class, 'viewAll'])->name('viewAll');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
-Route::get('/dang-ky-tap-thu', [HomeController::class, 'dangKyTapThu'])->name('dang-ky-tap-thu');
 // Hiển thị form
 Route::get('/dang-ky-tap-thu', [DangkidichvuController::class, 'showForm'])->name('dang-ky-tap-thu');
 // Lưu form
@@ -106,6 +106,14 @@ Route::post('/register', [AuthController::class, 'registerPost'])->name('registe
 Route::post('/kiem-tra-email', [AuthController::class, 'kiemTraEmail'])->name('kiemtra.email');
 
 Route::delete('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ─── Email Verification ─────────────────────────────────────────────────────
+Route::get('/email/notice', [EmailVerificationController::class, 'notice'])->name('email.notice');
+Route::get('/email/verify/{token}', [EmailVerificationController::class, 'verify'])->name('email.verify');
+Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:3,1')  // tối đa 3 lần/phút
+    ->name('email.resend');
+// ────────────────────────────────────────────────────────────────────────────
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('password.forgot');
 
 // Gửi email khôi phục mật khẩu
@@ -135,7 +143,7 @@ Route::prefix('/admin')->group(function () {
     // API cho biểu đồ KHÔNG nên để trong admin.login
     Route::get('/chart/revenue', [AdminController::class, 'revenueChart']);
     Route::get('/chart/orders', [AdminController::class, 'orderChart']);
-    Route::get('/chart/customers', [AdminController::class, 'customerChart']);
+    Route::get('/chart/trials', [AdminController::class, 'trialChart']);
     Route::get('/chart/sold', [AdminController::class, 'soldChart']);
 });
 
@@ -187,4 +195,7 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::resource('/admin/sizes', \App\Http\Controllers\Admin\SizeController::class);
     Route::post('/admin/sizes/{id}/restore', [\App\Http\Controllers\Admin\SizeController::class, 'restore'])->name('sizes.restore');
 
+    // Quản lý đánh giá (Review/Comment Management)
+    Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
+    Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
 });

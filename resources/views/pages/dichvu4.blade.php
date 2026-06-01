@@ -14,8 +14,8 @@
         <div class="banner-boxing-content text-center">
             <h1 class="banner-boxing-title">KICK BOXING</h1>
 
-            <a href="{{ url('/donhang') }}" class="banner-boxing-btn">
-                Miễn Phí Bơi Thử
+            <a href="{{ route('dang-ky-tap-thu') }}" class="banner-boxing-btn">
+                Miễn Phí Tập Thử
             </a>
         </div>
     </section>
@@ -129,7 +129,7 @@
                         KICK BOXING TẠI RISE FITNESS
                     </h2>
 
-                    <a href="{{ url('/donhang') }}" class="rf-kick-offer-btn mt-4 d-inline-flex">
+                    <a href="{{ route('dang-ky-tap-thu') }}" class="rf-kick-offer-btn mt-4 d-inline-flex">
                         Đăng ký tập thử
                     </a>
                 </div>

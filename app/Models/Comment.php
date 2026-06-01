@@ -9,11 +9,16 @@ class Comment extends Model
 {
     use HasFactory;
     protected $table = 'comments'; // tên bảng
-
     protected $fillable = [
         'user_id',
         'sanpham_id',
+        'id_dathang',
         'content',
+        'rating',
+        'images',
+    ];
+    protected $casts = [
+        'images' => 'array',
     ];
 
     // Liên kết tới khách hàng (user)
