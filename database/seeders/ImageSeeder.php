@@ -15,7 +15,7 @@ class ImageSeeder extends Seeder
         foreach ($sanphams as $sp) {
             DB::table('images')->insert([
                 'id_sanpham' => $sp->id_sanpham,
-                'duong_dan' => 'frontend/upload/1764614789.png',
+                'duong_dan' => 'frontend/upload/1764693504.png',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]);

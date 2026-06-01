@@ -154,6 +154,34 @@
     font-weight: 700;
 }
 
+/* Nút đăng ký */
+.rf-package-button {
+    margin-top: auto;        /* Đẩy nút xuống dưới cùng */
+    padding: 1rem 1.2rem 1.2rem;
+    text-align: center;
+}
+
+.rf-package-button a {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #34A4E0;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rf-package-button a:hover {
+    background-color: #108fd4;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(52, 164, 224, 0.4);
+    color: #ffffff;
+}
+
 /* Arrow buttons */
 .rf-packages-arrows {
     position: absolute;

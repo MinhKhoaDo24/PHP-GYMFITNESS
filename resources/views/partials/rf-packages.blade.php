@@ -32,6 +32,9 @@
                                 <li>Gói cơ bản hiệu quả dành cho người mới bắt đầu.</li>
                             </ul>
                         </div>
+                        <div class="rf-package-button">
+                            <a href="#">Đăng kí</a>
+                        </div>
                     </div>
 
                     {{-- CARD 2 --}}
@@ -48,6 +51,9 @@
                                 <li>Ít gây chấn thương, phù hợp mọi độ tuổi.</li>
                                 <li>Gói tập nhẹ nhàng – thư giãn – tốt cho sức khỏe lâu dài.</li>
                             </ul>
+                        </div>
+                        <div class="rf-package-button">
+                            <a href="#">Đăng kí</a>
                         </div>
                     </div>
 
@@ -66,6 +72,9 @@
                                 <li>Sự kết hợp giữa rèn luyện cơ thể và nuôi dưỡng tinh thần.</li>
                             </ul>
                         </div>
+                        <div class="rf-package-button">
+                            <a href="#">Đăng kí</a>
+                        </div>
                     </div>
 
                     {{-- CARD 4 --}}
@@ -83,6 +92,9 @@
                                 <li>Gói tập nâng cao – đa dạng – hiệu quả cao.</li>
                             </ul>
                         </div>
+                        <div class="rf-package-button">
+                            <a href="#">Đăng kí</a>
+                        </div>
                     </div>
 
                     {{-- CARD 5 --}}
@@ -99,6 +111,9 @@
                                 <li>Bơi phục hồi cơ và cải thiện hệ tim mạch.</li>
                                 <li>Gói đa dạng – nhẹ nhàng – phù hợp với người thích sự cân bằng.</li>
                             </ul>
+                        </div>
+                        <div class="rf-package-button">
+                            <a href="#">Đăng kí</a>
                         </div>
                     </div>
 
@@ -119,6 +134,9 @@
                                 <li>Lộ trình tập luyện toàn diện nhất của phòng gym.</li>
                                 <li>Gói cao cấp nhất – không giới hạn – trải nghiệm trọn vẹn.</li>
                             </ul>
+                        </div>
+                        <div class="rf-package-button">
+                            <a href="#">Đăng kí</a>
                         </div>
                     </div>
                 </div>

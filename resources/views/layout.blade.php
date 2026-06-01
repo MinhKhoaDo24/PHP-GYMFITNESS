@@ -287,7 +287,7 @@
             </div>
 
             <div class="site-footer__bottom">
-                <span>Rise Fitness © All Rights Reserved – 2025</span>
+                <span>Rise Fitness © All Rights Reserved – 2026</span>
             </div>
         </div>
     </footer>
