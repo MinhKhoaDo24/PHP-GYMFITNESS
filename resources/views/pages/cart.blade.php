@@ -617,8 +617,29 @@
                                     </div>
                                 </td>
 
-                                <td class="text-center font-weight-bold" style="color: #ff8c00;">
-                                    {{ $details['ten_size'] ?? '' }}
+                                <td class="text-center font-weight-bold">
+                                    @if(isset($sizes[$id]) && count($sizes[$id]) > 0)
+                                        <select class="form-control cart-size-select" data-id="{{ $id }}" style="border-radius: 8px; border: 1px solid #ccc; padding: 4px 8px; font-weight: 600; color: #ff8c00; width: auto; display: inline-block; cursor: pointer;">
+                                            @foreach($sizes[$id] as $sizeOption)
+                                                @php 
+                                                    $isAvailable = $sizeOption->pivot->soluong > 0 || ($details['id_size'] == $sizeOption->id_size);
+                                                @endphp
+                                                <option value="{{ $sizeOption->id_size }}" 
+                                                    {{ ($details['id_size'] == $sizeOption->id_size) ? 'selected' : '' }}
+                                                    {{ !$isAvailable ? 'disabled' : '' }}>
+                                                    {{ $sizeOption->ten_size }} 
+                                                    @if($sizeOption->pivot->gia_cong_them > 0)
+                                                        (+{{ number_format($sizeOption->pivot->gia_cong_them, 0, ',', '.') }}đ)
+                                                    @endif
+                                                    @if($sizeOption->pivot->soluong <= 0 && $details['id_size'] != $sizeOption->id_size)
+                                                        (Hết hàng)
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        <span style="color: #777;">—</span>
+                                    @endif
                                 </td>
 
                                 <td class="cart-price-original" data-th="Price">
@@ -971,6 +992,53 @@
                 }
             }
         }
+
+        // Xử lý thay đổi size trực tiếp
+        document.querySelectorAll('.cart-size-select').forEach(function(select) {
+            select.addEventListener('change', function(e) {
+                e.preventDefault();
+                var cartId = this.getAttribute('data-id');
+                var newSizeId = this.value;
+
+                $.ajax({
+                    url: '{{ route("update_cart_size") }}',
+                    method: 'PATCH',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: cartId,
+                        id_size: newSizeId
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showToast(response.message);
+                            if (response.warning) {
+                                alert(response.warning);
+                            }
+                            if (response.redirect) {
+                                setTimeout(function() {
+                                    window.location.href = response.redirect;
+                                }, 800);
+                            }
+                        } else {
+                            showToast(response.message || 'Có lỗi khi cập nhật size!');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        }
+                    },
+                    error: function(xhr) {
+                        var msg = 'Có lỗi xảy ra!';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        showToast(msg);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    }
+                });
+            });
+        });
     });
 </script>
 

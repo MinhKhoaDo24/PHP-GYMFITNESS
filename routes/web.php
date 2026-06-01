@@ -76,6 +76,7 @@ Route::get('cart', [CartController::class, 'cart'])->name('cart');
 Route::get('add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add_to_cart');
 Route::get('add-go-to-cart/{id}', [CartController::class, 'addGoToCart'])->name('add_go_to_cart');
 Route::patch('update-cart', [CartController::class, 'update'])->name('update_cart');
+Route::patch('update-cart-size', [CartController::class, 'updateSize'])->name('update_cart_size');
 Route::get('/remove-from-cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 Route::post('/capnhat-thongtin', [OrderViewController::class, 'capnhatThongTin'])->name('donhang.update');

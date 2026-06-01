@@ -31,7 +31,10 @@ class CartController extends Controller
         $totalSalePrice = 0;
         $totalSurcharge = 0;
 
-        foreach ($cart as $item) {
+        $stock = [];
+        $sizes = [];
+
+        foreach ($cart as $id => $item) {
             $qty          = $item['quantity'] ?? 0;
             $surcharge    = $item['gia_cong_them'] ?? 0;
             $giaGoc       = ($item['giasp'] ?? 0) + $surcharge;
@@ -39,6 +42,28 @@ class CartController extends Controller
 
             $totalOriginal  += $giaGoc       * $qty;
             $totalSalePrice += $giaKhuyenMai * $qty;
+            $totalSurcharge += $surcharge    * $qty;
+
+            // Load product sizes and stock
+            $product = Sanpham::with('sizes')->find($item['id_sanpham']);
+            if ($product) {
+                if ($product->co_size == 1) {
+                    $sizes[$id] = $product->sizes;
+                } else {
+                    $sizes[$id] = [];
+                }
+
+                $szId = $item['id_size'] ?? null;
+                if ($product->co_size == 1 && $szId) {
+                    $sizePivot = $product->sizes()->where('sanpham_size.id_size', $szId)->first();
+                    $stock[$id] = $sizePivot ? $sizePivot->pivot->soluong : 0;
+                } else {
+                    $stock[$id] = $product->soluong;
+                }
+            } else {
+                $sizes[$id] = [];
+                $stock[$id] = 0;
+            }
         }
 
         $totalFinal = $totalSalePrice;
@@ -49,7 +74,9 @@ class CartController extends Controller
             'totalOriginal',
             'totalDiscount',
             'totalFinal',
-            'totalSurcharge'
+            'totalSurcharge',
+            'stock',
+            'sizes'
         ));
     }
 
@@ -301,6 +328,118 @@ class CartController extends Controller
             'status' => 'error',
             'message' => 'Sản phẩm không tồn tại trong giỏ hàng.'
         ], 400);
+    }
+
+    public function updateSize(Request $request)
+    {
+        $id = $request->id;
+        $newSizeId = $request->id_size;
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$id])) {
+            $item = $cart[$id];
+            $productId = $item['id_sanpham'];
+            $product = Sanpham::with('sizes')->find($productId);
+
+            if (!$product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Sản phẩm không tồn tại.'
+                ], 404);
+            }
+
+            if ($product->co_size != 1) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Sản phẩm này không hỗ trợ chọn size.'
+                ], 400);
+            }
+
+            $sizePivot = $product->sizes()->where('sanpham_size.id_size', $newSizeId)->first();
+            if (!$sizePivot) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Size được chọn không hợp lệ.'
+                ], 400);
+            }
+
+            $newMaxQty = (int)$sizePivot->pivot->soluong;
+            if ($newMaxQty <= 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Size này đã hết hàng.'
+                ], 400);
+            }
+
+            $qty = $item['quantity'];
+            $warning = null;
+            if ($qty > $newMaxQty) {
+                $qty = $newMaxQty;
+                $warning = "Đã điều chỉnh số lượng thành {$newMaxQty} do giới hạn tồn kho của size mới.";
+            }
+
+            $newCartKey = $productId . '_' . $newSizeId;
+
+            unset($cart[$id]);
+
+            if (isset($cart[$newCartKey])) {
+                $mergedQty = $cart[$newCartKey]['quantity'] + $qty;
+                if ($mergedQty > $newMaxQty) {
+                    $mergedQty = $newMaxQty;
+                    $warning = "Đã gộp giỏ hàng và điều chỉnh số lượng thành {$newMaxQty} (tối đa tồn kho của size này).";
+                }
+                $cart[$newCartKey]['quantity'] = $mergedQty;
+            } else {
+                $cart[$newCartKey] = [
+                    "id_sanpham"    => $productId,
+                    "tensp"         => $product->tensp,
+                    "anhsp"         => $item['anhsp'],
+                    "giasp"         => $product->giasp,
+                    "giamgia"       => $product->giamgia,
+                    "giakhuyenmai"  => $product->giakhuyenmai,
+                    "quantity"      => $qty,
+                    "id_size"       => (int)$newSizeId,
+                    "ten_size"      => $sizePivot->ten_size,
+                    "gia_cong_them" => (int)$sizePivot->pivot->gia_cong_them
+                ];
+            }
+
+            session()->put('cart', $cart);
+
+            $totalOriginal = 0;
+            $totalSalePrice = 0;
+            $totalSurcharge = 0;
+
+            foreach ($cart as $cartItem) {
+                $q            = $cartItem['quantity'];
+                $surcharge    = $cartItem['gia_cong_them'] ?? 0;
+                $giaGoc       = $cartItem['giasp'];
+                $giaKM        = $cartItem['giakhuyenmai'];
+
+                $totalOriginal  += $giaGoc * $q;
+                $totalSalePrice += $giaKM  * $q;
+                $totalSurcharge += $surcharge * $q;
+            }
+
+            $totalFinal = $totalSalePrice + $totalSurcharge;
+            $totalDiscount = $totalOriginal - $totalSalePrice;
+
+            return response()->json([
+                'status'          => 'success',
+                'warning'         => $warning,
+                'total_original'  => $totalOriginal,
+                'total_discount'  => $totalDiscount,
+                'total_final'     => $totalFinal,
+                'total_surcharge' => $totalSurcharge,
+                'message'         => 'Thay đổi size thành công!',
+                'redirect'        => route('cart')
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Không tìm thấy sản phẩm tương ứng trong giỏ hàng.'
+        ], 404);
     }
 
     public function remove($id)
