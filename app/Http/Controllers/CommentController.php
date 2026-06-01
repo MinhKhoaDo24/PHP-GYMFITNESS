@@ -33,7 +33,11 @@ class CommentController extends Controller
     {
         $request->validate([
             'sanpham_id' => 'required|exists:sanpham,id_sanpham',
+            'id_dathang' => 'required|exists:dathang,id_dathang',
             'content' => 'required|string|max:1000',
+            'rating' => 'required|integer|between:1,5',
+            'attachments' => 'nullable|array|max:5',
+            'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,webp,mp4,mov,ogg,qt,webm|max:20480',
             'g-recaptcha-response' => 'required_if:require_captcha,true'
         ]);
 
@@ -43,8 +47,9 @@ class CommentController extends Controller
             return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để đánh giá sản phẩm.'], 401);
         }
 
-        // Kiểm tra khách hàng đã mua sản phẩm này chưa
+        // Kiểm tra khách hàng đã mua sản phẩm này trong đơn hàng cụ thể chưa
         $hasBought = \App\Models\ChitietDonhang::where('id_sanpham', $request->sanpham_id)
+            ->where('id_dathang', $request->id_dathang)
             ->whereHas('dathang', function ($query) use ($user) {
                 $query->where('id_nd', $user->id_nd)
                       ->where('trangthai', 'Hoàn thành');
@@ -53,6 +58,16 @@ class CommentController extends Controller
 
         if (!$hasBought) {
             return response()->json(['success' => false, 'message' => 'Bạn chỉ được đánh giá sản phẩm này sau khi đã mua hàng thành công.'], 403);
+        }
+
+        // Kiểm tra xem người dùng đã đánh giá sản phẩm này cho đơn hàng này chưa
+        $alreadyReviewed = Comment::where('user_id', $user->id_nd)
+            ->where('sanpham_id', $request->sanpham_id)
+            ->where('id_dathang', $request->id_dathang)
+            ->exists();
+
+        if ($alreadyReviewed) {
+            return response()->json(['success' => false, 'message' => 'Bạn đã đánh giá sản phẩm này cho đơn hàng này rồi.'], 400);
         }
 
         // Kiểm tra nếu cần reCAPTCHA
@@ -75,10 +90,29 @@ class CommentController extends Controller
             return response()->json(['success' => false, 'message' => 'Vi phạm ngôn ngữ cộng đồng'], 422);
         }
 
+        // Xử lý tệp đính kèm
+        $attachments = [];
+        if ($request->hasFile('attachments')) {
+            $destination = public_path('frontend/upload');
+            if (!file_exists($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            foreach ($request->file('attachments') as $file) {
+                if ($file->isValid()) {
+                    $imageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move($destination, $imageName);
+                    $attachments[] = 'frontend/upload/' . $imageName;
+                }
+            }
+        }
+
         $comment = Comment::create([
             'user_id' => Auth::user()->id_nd,
             'sanpham_id' => $request->sanpham_id,
+            'id_dathang' => $request->id_dathang,
             'content' => $request->content,
+            'rating' => (int)$request->rating,
+            'images' => !empty($attachments) ? $attachments : null,
         ]);
 
         $comment->load('user');
@@ -122,5 +156,35 @@ class CommentController extends Controller
         $comment->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    // [ADMIN] Lấy toàn bộ danh sách comment phục vụ kiểm duyệt
+    public function adminIndex(Request $request)
+    {
+        $comments = Comment::with(['user', 'sanpham'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.comments.index', compact('comments'));
+    }
+
+    // [ADMIN] Xóa comment của khách hàng
+    public function adminDestroy($id)
+    {
+        $comment = Comment::findOrFail($id);
+
+        // Xóa các file ảnh/video đính kèm vật lý
+        if (!empty($comment->images)) {
+            foreach ($comment->images as $path) {
+                $filePath = public_path($path);
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+        }
+
+        $comment->delete();
+
+        return redirect()->back()->with('success', 'Xóa đánh giá của khách hàng thành công!');
     }
 }

@@ -254,6 +254,12 @@
 
 <h1 class="h3 mb-3"><strong>Danh sách đăng ký tập thử</strong></h1>
 
+@if($errors->any())
+    <div class="alert alert-danger">
+        {{ $errors->first() }}
+    </div>
+@endif
+
 {{-- =============== THỐNG KÊ =============== --}}
 <div class="row g-3 mb-4">
 
@@ -349,12 +355,12 @@
         </a>
 
 
-        <a href="{{ url('/admin/dangki?status=3') }}"
+        <a href="{{ url('/admin/dangki?status=2') }}"
            class="tab-item {{ request('status') == '2' ? 'active' : '' }}">
             Hoàn thành
         </a>
 
-        <a href="{{ url('/admin/dangki?status=4') }}"
+        <a href="{{ url('/admin/dangki?status=3') }}"
            class="tab-item {{ request('status') == '3' ? 'active' : '' }}">
             Hủy
         </a>
@@ -408,11 +414,19 @@
 
             {{-- ACTION --}}
 
-            <td class="text-center">
-
+            <td class="text-center d-flex justify-content-center" style="gap: 8px;">
                 {{-- Nút Sửa luôn hiển thị --}}
                 <a href="{{ route('dangki.edit', $item->id_dang_ky) }}" 
                     class="btn-action edit" style='text-decoration: none;'>Cập nhật</a>
+                
+                {{-- Nút Xóa (Ẩn nếu đã Hoàn thành) --}}
+                @if($item->trangthai != 2)
+                <form action="{{ route('dangki.destroy', $item->id_dang_ky) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn-action btn-delete btnDelete">Xóa</button>
+                </form>
+                @endif
             </td>
 
         </tr>

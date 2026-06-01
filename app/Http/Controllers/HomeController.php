@@ -24,6 +24,8 @@ class HomeController extends Controller
         $sanphams  = $this->productRepository->featuredProducts();
 
         $featured = Sanpham::with(['images', 'sizes'])
+            ->withAvg('comments', 'rating')
+            ->withCount('comments')
             ->where('noi_bat', 1)
             ->where('trang_thai', 1)
             ->take(8)
@@ -65,17 +67,7 @@ class HomeController extends Controller
             ->with('user')
             ->get();
 
-        $userHasBought = false;
-        if (\Illuminate\Support\Facades\Auth::check()) {
-            $userHasBought = \App\Models\ChitietDonhang::where('id_sanpham', $id)
-                ->whereHas('dathang', function ($query) {
-                    $query->where('id_nd', \Illuminate\Support\Facades\Auth::user()->id_nd)
-                          ->where('trangthai', 'Hoàn thành');
-                })
-                ->exists();
-        }
-
-        return view('pages.detail', compact('sanpham', 'randoms', 'comments', 'userHasBought'));
+        return view('pages.detail', compact('sanpham', 'randoms', 'comments'));
     }
 
     /** ===================== SEARCH ===================== */
@@ -100,7 +92,10 @@ class HomeController extends Controller
         // $viewAllPaginations = $this->productRepository->getAllByDanhMuc($request);
 
         // ===== TẠO QUERY MỚI CHO FILTER =====
-        $query = Sanpham::query()->with(['images', 'sizes'])->where('trang_thai', 1);
+        $query = Sanpham::query()->with(['images', 'sizes'])
+            ->withAvg('comments', 'rating')
+            ->withCount('comments')
+            ->where('trang_thai', 1);
 
         /* =============================
         1) LỌC THEO MỨC GIÁ
@@ -227,7 +222,10 @@ class HomeController extends Controller
 
     public function ajaxFilter(Request $request)
     {
-        $query = Sanpham::query()->with(['images', 'sizes'])->where('trang_thai', 1);
+        $query = Sanpham::query()->with(['images', 'sizes'])
+            ->withAvg('comments', 'rating')
+            ->withCount('comments')
+            ->where('trang_thai', 1);
 
         /* ===== FILTER: PRICE ===== */
         if ($request->price) {

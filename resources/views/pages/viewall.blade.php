@@ -140,6 +140,21 @@ $ten = request('category')
                             <span class="old-price">{{ number_format($p->giasp) }}đ</span>
                             <span class="discount">-{{ $p->giamgia }}%</span>
                         </div>
+                        
+                        <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 5px 0 8px; text-align: left;">
+                            @php
+                                $avg = $p->comments_avg_rating ?? 5;
+                                $count = $p->comments_count ?? 0;
+                            @endphp
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= round($avg))
+                                    <i class="fa fa-star"></i>
+                                @else
+                                    <i class="fa fa-star-o"></i>
+                                @endif
+                            @endfor
+                            <span style="color: #777; font-size: 11px; margin-left: 4px;">({{ $count }})</span>
+                        </div>
 
                         <div class="benefit">🔥 Giá tốt nhất thị trường</div>
                         <div class="gift">🎁 Quà tặng trị giá {{ rand(100000,200000) }}đ</div>

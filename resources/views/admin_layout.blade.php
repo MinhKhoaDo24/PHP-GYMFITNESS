@@ -131,8 +131,12 @@
                     </a>
                 </li>
 
-
-
+                {{-- ĐÁNH GIÁ --}}
+                <li class="sidebar-item {{ request()->is('admin/comments*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="{{ url('/admin/comments') }}">
+                        <i class="bi bi-chat-left-text me-2"></i> Quản lý Đánh giá
+                    </a>
+                </li>
             </ul>
 
 
