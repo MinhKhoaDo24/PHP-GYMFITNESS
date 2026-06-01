@@ -177,6 +177,9 @@
 <form method="POST" action="{{ route('orders.update', $order->id_dathang) }}">
     @csrf
     @method('PUT')
+    @if(request('redirect'))
+        <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+    @endif
 
 
     {{-- THÔNG TIN KHÁCH HÀNG & LIÊN HỆ --}}
@@ -329,7 +332,7 @@
 
     {{-- BUTTONS --}}
     <div class="d-flex justify-content-between mt-3">
-        <a href="{{ route('orders.pending') }}" class="btn-cancel">Quay lại</a>
+        <a href="{{ request('redirect') ?? route('orders.pending') }}" class="btn-cancel">Quay lại</a>
         <button type="submit" class="btn-submit">Cập nhật đơn hàng</button>
     </div>
 
