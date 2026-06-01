@@ -58,26 +58,26 @@ class AdminController extends Controller
 
     public function revenueChart()
     {
-    $labels = [];
-    $values = [];
+        $labels = [];
+        $values = [];
 
-    $start = Carbon::now()->startOfMonth();
-    $end   = Carbon::now()->endOfMonth();
+        $start = Carbon::now()->startOfMonth();
+        $end   = Carbon::now()->endOfMonth();
 
-    for ($d = $start; $d <= $end; $d->addDay()) {
+        for ($d = $start; $d <= $end; $d->addDay()) {
 
-    $labels[] = $d->format('d/m');
+            $labels[] = $d->format('d/m');
 
-    $values[] = DB::table('dathang')
-    ->whereDate('ngaydathang', $d->format('Y-m-d'))
-    ->where('trangthai', 'Hoàn thành')
-    ->sum('tienphaitra'); // Tiền thực khách trả sau giảm giá
-    }
+            $values[] = DB::table('dathang')
+                ->whereDate('ngay_hoan_thanh', $d->format('Y-m-d'))
+                ->where('trangthai', 'Hoàn thành')
+                ->sum('tienphaitra'); // Tiền thực khách trả sau giảm giá
+        }
 
-    return response()->json([
-    'labels' => $labels,
-    'values' => $values
-    ]);
+        return response()->json([
+            'labels' => $labels,
+            'values' => $values
+        ]);
     }
 
     public function orderChart()

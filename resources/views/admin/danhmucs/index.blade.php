@@ -151,7 +151,7 @@
         <input type="text" 
                name="q" 
                class="form-control"
-               placeholder="🔍 Tìm kiếm danh mục..."
+               placeholder="Tìm kiếm danh mục..."
                value="{{ request('q') }}">
     </form>
 
@@ -159,7 +159,7 @@
     <form method="GET">
         <input type="hidden" name="q" value="{{ request('q') }}">
         <select name="status" class="form-select" onchange="this.form.submit()">
-            <option value="">📌 Tất cả trạng thái</option>
+            <option value="">Tất cả trạng thái</option>
             <option value="1" {{ request('status')==="1" ? 'selected' : '' }}>Hoạt động</option>
             <option value="0" {{ request('status')==="0" ? 'selected' : '' }}>Không hoạt động</option>
         </select>
