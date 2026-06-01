@@ -24,6 +24,7 @@ class CartController extends Controller
 
     public function cart()
     {
+        session()->forget('buy_now');
         $cart = session()->get('cart', []);
 
         $totalOriginal = 0;
@@ -205,22 +206,13 @@ class CartController extends Controller
             ? $firstImage->duong_dan
             : 'frontend/upload/placeholder.jpg';
 
-        $cart = session()->get('cart', []);
+        $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
+        if ($quantity > $maxQty) {
+            return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
+        }
 
-        if (isset($cart[$cartKey])) {
-            $newQty = $cart[$cartKey]['quantity'] + $quantity;
-            $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
-            if ($newQty > $maxQty) {
-                return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
-            }
-            $cart[$cartKey]['quantity'] = $newQty;
-        } else {
-            $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
-            if ($quantity > $maxQty) {
-                return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
-            }
-
-            $cart[$cartKey] = [
+        $buyNowItem = [
+            $cartKey => [
                 "id_sanpham"    => $product->id_sanpham,
                 "tensp"         => $product->tensp,
                 "anhsp"         => $imagePath,
@@ -231,11 +223,11 @@ class CartController extends Controller
                 "id_size"       => $id_size,
                 "ten_size"      => $ten_size,
                 "gia_cong_them" => $gia_cong_them
-            ];
-        }
+            ]
+        ];
 
-        session()->put('cart', $cart);
-        return redirect('/cart');
+        session()->put('buy_now', $buyNowItem);
+        return redirect('/checkout');
     }
     public function update(Request $request)
     {
@@ -338,10 +330,11 @@ class CartController extends Controller
     {
         $user = Auth::user();
         if (!$user) {
-            return redirect('/login')->with('needLogin', true);
+            return redirect()->guest('/login')->with('needLogin', true);
         }
 
-        $cart = session()->get('cart', []);
+        $buyNow = session()->get('buy_now');
+        $cart = !empty($buyNow) ? $buyNow : session()->get('cart', []);
         if (empty($cart)) {
             return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
@@ -369,10 +362,8 @@ class CartController extends Controller
     public function dathang(Request $request)
     {
 
-        // -----------------------------
-        // KIỂM TRA GIỎ HÀNG
-        // -----------------------------
-        $cart = session('cart', []);
+        $buyNow = session('buy_now');
+        $cart = !empty($buyNow) ? $buyNow : session('cart', []);
         if (empty($cart)) {
             return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
         }
@@ -579,10 +570,11 @@ if ($isFreeship) {
             \Illuminate\Support\Facades\Log::error('Lỗi gửi email hóa đơn: ' . $e->getMessage());
         }
 
-        // -----------------------------
-        // XÓA GIỎ HÀNG
-        // -----------------------------
-        session()->forget('cart');
+        if (session()->has('buy_now')) {
+            session()->forget('buy_now');
+        } else {
+            session()->forget('cart');
+        }
 
         return view('pages.thongbaodathang');
     }
@@ -617,10 +609,8 @@ if ($isFreeship) {
 
     public function vnpay(Request $request)
     {
-        // -----------------------------
-        // KIỂM TRA GIỎ HÀNG
-        // -----------------------------
-        $cart = session('cart', []);
+        $buyNow = session('buy_now');
+        $cart = !empty($buyNow) ? $buyNow : session('cart', []);
         if (empty($cart)) {
             return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
         }
@@ -753,7 +743,11 @@ if ($isFreeship) {
         }
 
         // Xóa giỏ hàng khỏi session
-        session()->forget('cart');
+        if (session()->has('buy_now')) {
+            session()->forget('buy_now');
+        } else {
+            session()->forget('cart');
+        }
 
         // -----------------------------
         // CẤU HÌNH VNPAY
@@ -842,7 +836,8 @@ if ($isFreeship) {
         }
 
         // Tính tổng tiền giỏ hàng
-        $cart = session('cart', []);
+        $buyNow = session('buy_now');
+        $cart = !empty($buyNow) ? $buyNow : session('cart', []);
         $total = 0;
         foreach ($cart as $item) {
             $total += ($item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0)) * $item['quantity'];

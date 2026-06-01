@@ -27,7 +27,12 @@ class OrderViewController extends Controller
         $user = Auth::user();
         if ($user) {
             $orders = $this->OrderRepository->orderView($user->id_nd);
-            return view('pages.donhang', ['orders' => $orders]);
+            $comments = \App\Models\Comment::where('user_id', $user->id_nd)
+                ->get();
+            return view('pages.donhang', [
+                'orders' => $orders,
+                'comments' => $comments
+            ]);
         } else {
             return redirect('/login')->with('needLogin', true);
         }

@@ -277,14 +277,15 @@
                     </thead>
 
                     <tbody>
-                        @foreach(session('cart') as $item)
+                        @foreach($cart as $item)
                         @php
-                            $line = ($item['giakhuyenmai']) * $item['quantity'];
-                            $Thanhtien = $line + ($item['gia_cong_them'] * $item['quantity']) ;
+                            $giaKM = $item['giakhuyenmai'] ?? $item['giasp'];
+                            $line = $giaKM * $item['quantity'];
+                            $Thanhtien = $line + (($item['gia_cong_them'] ?? 0) * $item['quantity']) ;
                             $Original_Price = $item['giasp'] * $item['quantity'];
                             $totalOriginal += $Original_Price;
                             $totalSale += $line;
-                            $totalSurcharge += $item['gia_cong_them'] * $item['quantity'];
+                            $totalSurcharge += ($item['gia_cong_them'] ?? 0) * $item['quantity'];
                         @endphp
 
                         <tr>
@@ -308,7 +309,7 @@
                 @endphp
 
                 {{-- Hidden cho tất cả sản phẩm --}}
-                @foreach(session('cart') as $item)
+                @foreach($cart as $item)
                 <input type="hidden" name="id_sanpham[]" value="{{ $item['id_sanpham'] }}">
                 <input type="hidden" name="soluong[]" value="{{ $item['quantity'] }}">
                 <input type="hidden" name="giakhuyenmai[]" value="{{ $item['giakhuyenmai'] }}">

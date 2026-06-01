@@ -274,11 +274,11 @@
 .overlay-img {
     width: auto;
     height: auto;
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 85%;
+    max-height: 85%;
     object-fit: contain;
 
-    border-radius: 1px;
+    border-radius: 8px;
     box-shadow: 0 10px 35px rgba(0,0,0,0.3);
     animation: zoomFade 0.3s ease;
 }
@@ -477,3 +477,193 @@
 .comment-warning-box i {
     font-size: 20px;
 }
+
+/* ================== THỐNG KÊ ĐÁNH GIÁ (RATING DASHBOARD) ================== */
+.rating-dashboard-card {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 15px;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+@media (max-width: 768px) {
+    .rating-dashboard-card {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+}
+
+.rating-dashboard-average {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #e2e8f0;
+    padding-right: 20px;
+}
+
+@media (max-width: 768px) {
+    .rating-dashboard-average {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 20px;
+    }
+}
+
+.rating-dashboard-average .big-score {
+    font-size: 52px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.rating-dashboard-average .average-stars {
+    color: #ffb800;
+    font-size: 22px;
+    margin: 8px 0;
+}
+
+.rating-dashboard-average .total-reviews-count {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.rating-dashboard-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.star-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.star-bar-row .star-label {
+    width: 35px;
+    font-weight: 600;
+    color: #334155;
+    text-align: right;
+}
+
+.star-bar-row .progress-bar-container {
+    flex-grow: 1;
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+.star-bar-row .progress-bar-fill {
+    height: 100%;
+    background: #ffb800;
+    border-radius: 5px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.star-bar-row .percentage-label {
+    width: 40px;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: left;
+}
+
+.star-bar-row .count-label {
+    width: 30px;
+    color: #94a3b8;
+    text-align: left;
+}
+
+/* ================== HOVER BỘ CHỌN SAO (STAR SELECTOR) ================== */
+.star-rating-selector label {
+    font-size: 25px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.star-rating-selector label:hover,
+.star-rating-selector label:hover ~ label,
+.star-rating-selector input:checked ~ label {
+    color: #ffb800 !important;
+}
+
+.star-rating-selector label:active {
+    transform: scale(0.9);
+}
+
+/* ================== PREVIEW ĐẦU VÀO FILE UPLOAD ================== */
+.preview-item-box {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    background: #f1f5f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.preview-item-box img,
+.preview-item-box video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 10;
+    transition: background-color 0.2s;
+}
+
+.preview-remove-btn:hover {
+    background: rgba(220, 38, 38, 1);
+}
+
+.video-preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+/* Overlay Video lớn khi phóng to */
+video.overlay-img {
+    border-radius: 8px;
+    background-color: #000;
+}
+
