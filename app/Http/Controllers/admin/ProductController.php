@@ -18,20 +18,16 @@ class ProductController extends Controller
         $this->productRepository = $productRepository;
     }
 
-    /* ==================== HÀM RESIZE ẢNH ==================== */
-    private function resizeImageKeepRatio($sourcePath, $destPath, $maxWidth = 800, $maxHeight = 800)
+    /* ==================== HÀM CẮT VÀ XỬ LÝ ẢNH ==================== */
+    private function cropAndProcessImage($sourcePath, $destPath, $targetWidth = 600, $targetHeight = 600)
     {
-        list($origWidth, $origHeight, $imageType) = getimagesize($sourcePath);
-
-        $ratio = min($maxWidth / $origWidth, $maxHeight / $origHeight);
-
-        if ($ratio >= 1) {
+        // Kiểm tra thư viện GD có được bật không. Nếu không, copy trực tiếp (frontend đã crop sẵn 600x600)
+        if (!function_exists('imagecreatefromjpeg') || !function_exists('imagecreatetruecolor')) {
             copy($sourcePath, $destPath);
             return true;
         }
 
-        $newWidth = intval($origWidth * $ratio);
-        $newHeight = intval($origHeight * $ratio);
+        list($origWidth, $origHeight, $imageType) = getimagesize($sourcePath);
 
         switch ($imageType) {
             case IMAGETYPE_JPEG:
@@ -50,44 +46,131 @@ class ProductController extends Controller
                 return false;
         }
 
-        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+        if (!$image) {
+            return false;
+        }
 
-        // Giữ độ trong suốt cho PNG/GIF
-        if ($imageType == IMAGETYPE_PNG || $imageType == IMAGETYPE_GIF) {
-            imagecolortransparent($newImage, imagecolorallocatealpha($newImage, 0, 0, 0, 127));
-            imagealphablending($newImage, false);
-            imagesavealpha($newImage, true);
+        // 1. Tạo canvas màu trắng với kích thước cố định
+        $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+        $whiteColor = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $whiteColor);
+
+        // 2. Tính toán tỉ lệ để resize ảnh vừa với canvas (giữ tỉ lệ aspect ratio)
+        $ratio = min($targetWidth / $origWidth, $targetHeight / $origHeight);
+        $newWidth = intval($origWidth * $ratio);
+        $newHeight = intval($origHeight * $ratio);
+
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Giữ độ trong suốt khi resize đối với PNG/GIF/WEBP
+        if ($imageType == IMAGETYPE_PNG || $imageType == IMAGETYPE_GIF || $imageType == IMAGETYPE_WEBP) {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+            $transparent = imagecolorallocatealpha($resizedImage, 0, 0, 0, 127);
+            imagefill($resizedImage, 0, 0, $transparent);
         }
 
         imagecopyresampled(
-            $newImage,
+            $resizedImage,
             $image,
-            0,
-            0,
-            0,
-            0,
-            $newWidth,
-            $newHeight,
-            $origWidth,
-            $origHeight
+            0, 0, 0, 0,
+            $newWidth, $newHeight,
+            $origWidth, $origHeight
         );
 
+        // 3. Tự động nhận diện và xóa phông nền (whiten background)
+        // Lấy mẫu các pixel ở viền xung quanh ảnh đã resize
+        $samples = [];
+        $w = $newWidth;
+        $h = $newHeight;
+        if ($w > 5 && $h > 5) {
+            $samplePoints = [
+                [0, 0], [$w - 1, 0], [0, $h - 1], [$w - 1, $h - 1],
+                [intval($w / 2), 0], [0, intval($h / 2)], [$w - 1, intval($h / 2)], [intval($w / 2), $h - 1]
+            ];
+            foreach ($samplePoints as $pt) {
+                $rgb = imagecolorat($resizedImage, $pt[0], $pt[1]);
+                $r = ($rgb >> 16) & 0xFF;
+                $g = ($rgb >> 8) & 0xFF;
+                $b = $rgb & 0xFF;
+                $alpha = ($rgb & 0x7F000000) >> 24;
+                // Chỉ lấy các pixel không trong suốt hoàn toàn
+                if ($alpha < 100) {
+                    $samples[] = [$r, $g, $b];
+                }
+            }
+        }
+
+        // Xác định xem màu nền xung quanh có đồng màu hay không (ví dụ background studio)
+        $bgR = $bgG = $bgB = null;
+        if (count($samples) >= 4) {
+            $avgR = array_sum(array_column($samples, 0)) / count($samples);
+            $avgG = array_sum(array_column($samples, 1)) / count($samples);
+            $avgB = array_sum(array_column($samples, 2)) / count($samples);
+            
+            $variance = 0;
+            foreach ($samples as $s) {
+                $variance += pow($s[0] - $avgR, 2) + pow($s[1] - $avgG, 2) + pow($s[2] - $avgB, 2);
+            }
+            $stdDev = sqrt($variance / count($samples));
+            
+            // Nếu độ lệch chuẩn nhỏ hơn 30, nghĩa là màu viền rất đồng nhất -> có phông nền rõ ràng
+            if ($stdDev < 30) {
+                $bgR = $avgR;
+                $bgG = $avgG;
+                $bgB = $avgB;
+            }
+        }
+
+        // Nếu phát hiện phông nền đồng nhất không phải màu trắng tinh, thay các pixel tương đồng thành màu trắng
+        if ($bgR !== null && ($bgR < 250 || $bgG < 250 || $bgB < 250)) {
+            imagealphablending($resizedImage, true);
+            $threshold = 45; // Ngưỡng chênh lệch màu để xoá
+            for ($x = 0; $x < $w; $x++) {
+                for ($y = 0; $y < $h; $y++) {
+                    $rgb = imagecolorat($resizedImage, $x, $y);
+                    $r = ($rgb >> 16) & 0xFF;
+                    $g = ($rgb >> 8) & 0xFF;
+                    $b = $rgb & 0xFF;
+                    $alpha = ($rgb & 0x7F000000) >> 24;
+
+                    if ($alpha < 100) {
+                        $dist = sqrt(pow($r - $bgR, 2) + pow($g - $bgG, 2) + pow($b - $bgB, 2));
+                        if ($dist < $threshold) {
+                            $whiteColorResized = imagecolorallocate($resizedImage, 255, 255, 255);
+                            imagesetpixel($resizedImage, $x, $y, $whiteColorResized);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 4. Dán ảnh đã xử lý vào giữa canvas trắng
+        $dstX = intval(($targetWidth - $newWidth) / 2);
+        $dstY = intval(($targetHeight - $newHeight) / 2);
+
+        imagealphablending($canvas, true);
+        imagecopy($canvas, $resizedImage, $dstX, $dstY, 0, 0, $newWidth, $newHeight);
+
+        // 5. Lưu ảnh
         switch ($imageType) {
             case IMAGETYPE_JPEG:
-                imagejpeg($newImage, $destPath, 90);
+                imagejpeg($canvas, $destPath, 90);
                 break;
             case IMAGETYPE_PNG:
-                imagepng($newImage, $destPath);
+                imagepng($canvas, $destPath);
                 break;
             case IMAGETYPE_GIF:
-                imagegif($newImage, $destPath);
+                imagegif($canvas, $destPath);
                 break;
             case IMAGETYPE_WEBP:
-                imagewebp($newImage, $destPath, 90);
+                imagewebp($canvas, $destPath, 90);
+                break;
         }
 
         imagedestroy($image);
-        imagedestroy($newImage);
+        imagedestroy($resizedImage);
+        imagedestroy($canvas);
 
         return true;
     }
@@ -186,7 +269,7 @@ class ProductController extends Controller
                 $sourcePath = $file->getRealPath();
                 $destPath   = $destination . '/' . $imageName;
 
-                $this->resizeImageKeepRatio($sourcePath, $destPath, self::IMAGE_MAX_WIDTH, self::IMAGE_MAX_HEIGHT);
+                $this->cropAndProcessImage($sourcePath, $destPath, self::IMAGE_MAX_WIDTH, self::IMAGE_MAX_HEIGHT);
 
                 \App\Models\Image::create([
                     'id_sanpham' => $sanpham->id_sanpham,
@@ -293,7 +376,7 @@ class ProductController extends Controller
                 $sourcePath = $file->getRealPath();
                 $destPath   = $destination . '/' . $imageName;
 
-                $this->resizeImageKeepRatio(
+                $this->cropAndProcessImage(
                     $sourcePath,
                     $destPath,
                     self::IMAGE_MAX_WIDTH,
