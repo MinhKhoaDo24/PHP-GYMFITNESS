@@ -592,7 +592,6 @@
                                 <th>Giá gốc</th>
                                 <th>Giảm giá</th>
                                 <th class="text-center">Giá khuyến mãi</th>
-                                <th>Giá cộng thêm</th>
                                 <th class="text-center">Số lượng</th>
                                 <th class="text-right">Tổng tiền</th>
                             </tr>
@@ -623,7 +622,7 @@
                                 </td>
 
                                 <td class="cart-price-original" data-th="Price">
-                                    {{ number_format($details['giasp'] ?? 0, 0, ',', '.') }} VND
+                                    {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }} VND
                                 </td>
 
 
@@ -632,11 +631,7 @@
                                 </td>
 
                                 <td class="cart-price-promo text-center" data-th="Subtotal">
-                                    {{ number_format($details['giakhuyenmai'] ?? 0, 0, ',', '.') }} VND
-                                </td>
-
-                                <td class="cart-price-surcharge text-center font-weight-bold text-success">
-                                    {{ number_format($details['gia_cong_them'] ?? 0, 0, ',', '.') }} VND
+                                    {{ number_format(($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }} VND
                                 </td>
 
                                 <td class="cart-quantity" data-th="Quantity">
@@ -682,21 +677,7 @@
                         </span>
                     </div>
 
-                    @if(isset($totalSurcharge) && $totalSurcharge > 0)
-                    <div class="cart-summary-row" id="surcharge-row">
-                        <span>Phụ phí size</span>
-                        <span id="cart-surcharge">
-                            + {{ number_format($totalSurcharge, 0, ',', '.') }} vnđ
-                        </span>
-                    </div>
-                    @else
-                    <div class="cart-summary-row" id="surcharge-row" style="display: none;">
-                        <span>Phụ phí size</span>
-                        <span id="cart-surcharge">
-                            0 vnđ
-                        </span>
-                    </div>
-                    @endif
+
 
                     <div class="cart-summary-row cart-summary-total">
                         <span>Tổng thanh toán</span>

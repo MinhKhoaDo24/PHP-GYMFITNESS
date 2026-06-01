@@ -270,7 +270,6 @@
                             <th>Giá gốc</th>
                             <th>Giảm</th>
                             <th>Giá KM</th>
-                            <th>Giá cộng thêm</th>
                             <th>Số lượng</th>
                             <th>Thành tiền</th>
                         </tr>
@@ -279,23 +278,22 @@
                     <tbody>
                         @foreach($cart as $item)
                         @php
-                            $giaKM = $item['giakhuyenmai'] ?? $item['giasp'];
+                            $giaKM = ($item['giakhuyenmai'] ?? $item['giasp']) + ($item['gia_cong_them'] ?? 0);
                             $line = $giaKM * $item['quantity'];
-                            $Thanhtien = $line + (($item['gia_cong_them'] ?? 0) * $item['quantity']) ;
-                            $Original_Price = $item['giasp'] * $item['quantity'];
+                            $Thanhtien = $line;
+                            $Original_Price = ($item['giasp'] + ($item['gia_cong_them'] ?? 0)) * $item['quantity'];
                             $totalOriginal += $Original_Price;
                             $totalSale += $line;
-                            $totalSurcharge += ($item['gia_cong_them'] ?? 0) * $item['quantity'];
+                            $totalSurcharge += 0;
                         @endphp
 
                         <tr>
                             <td><img src="{{ asset($item['anhsp']) }}" width="90"></td>
                             <td>{{ $item['tensp'] }}</td>
                             <td class="text-center font-weight-bold" style="color: #ff8c00;">{{ $item['ten_size'] ?? '' }}</td>
-                            <td>{{ number_format($item['giasp']) }}đ</td>
+                            <td>{{ number_format($item['giasp'] + ($item['gia_cong_them'] ?? 0)) }}đ</td>
                             <td>{{ $item['giamgia'] }}%</td>
-                            <td>{{ number_format($item['giakhuyenmai']) }}đ</td>
-                            <td class="text-success font-weight-bold">{{ number_format($item['gia_cong_them'] ?? 0) }}đ</td>
+                            <td>{{ number_format(($item['giakhuyenmai'] ?? $item['giasp']) + ($item['gia_cong_them'] ?? 0)) }}đ</td>
                             <td>{{ $item['quantity'] }}</td>
                             <td><strong>{{ number_format($Thanhtien) }}đ</strong></td>
                         </tr>
@@ -361,13 +359,6 @@
                     <span class="summary-label">Giảm giá khuyến mãi:</span>
                     <span class="summary-value text-danger">- {{ number_format($totalDiscount) }}đ</span>
                 </div>
-
-                @if($totalSurcharge > 0)
-                <div class="summary-row">
-                    <span class="summary-label">Phụ phí size:</span>
-                    <span class="summary-value text-success">+ {{ number_format($totalSurcharge) }}đ</span>
-                </div>
-                @endif
 
                 <div class="summary-row">
                     <span class="summary-label">Phí vận chuyển:</span>
