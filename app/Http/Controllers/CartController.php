@@ -34,15 +34,14 @@ class CartController extends Controller
         foreach ($cart as $item) {
             $qty          = $item['quantity'] ?? 0;
             $surcharge    = $item['gia_cong_them'] ?? 0;
-            $giaGoc       = ($item['giasp'] ?? 0);
-            $giaKhuyenMai = ($item['giakhuyenmai'] ?? $giaGoc);
+            $giaGoc       = ($item['giasp'] ?? 0) + $surcharge;
+            $giaKhuyenMai = ($item['giakhuyenmai'] ?? ($item['giasp'] ?? 0)) + $surcharge;
 
             $totalOriginal  += $giaGoc       * $qty;
             $totalSalePrice += $giaKhuyenMai * $qty;
-            $totalSurcharge += $surcharge    * $qty;
         }
 
-        $totalFinal = $totalSalePrice + $totalSurcharge;
+        $totalFinal = $totalSalePrice;
         $totalDiscount = $totalOriginal - $totalSalePrice;
 
         return view('pages.cart', compact(
@@ -277,15 +276,14 @@ class CartController extends Controller
             foreach ($cart as $item) {
                 $qty          = $item['quantity'];
                 $surcharge    = $item['gia_cong_them'] ?? 0;
-                $giaGoc       = $item['giasp'];
-                $giaKM        = $item['giakhuyenmai'];
+                $giaGoc       = $item['giasp'] + $surcharge;
+                $giaKM        = $item['giakhuyenmai'] + $surcharge;
 
                 $totalOriginal  += $giaGoc * $qty;
                 $totalSalePrice += $giaKM  * $qty;
-                $totalSurcharge += $surcharge * $qty;
             }
 
-            $totalFinal = $totalSalePrice + $totalSurcharge;
+            $totalFinal = $totalSalePrice;
             $totalDiscount = $totalOriginal - $totalSalePrice;
 
             return response()->json([

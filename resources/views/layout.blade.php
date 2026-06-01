@@ -324,7 +324,6 @@
 
                 sizes.forEach(sz => {
                     const isOos = sz.qty <= 0;
-                    const surchargeText = sz.surcharge > 0 ? ` (+${sz.surcharge.toLocaleString('vi-VN')}đ)` : '';
                     sizesHtml += `
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
                             <button type="button" class="swal-size-btn ${isOos ? 'swal-size-disabled' : ''}" 
@@ -333,7 +332,7 @@
                                 ${sz.name}
                             </button>
                             <span style="font-size: 12px; font-weight: 600; color: ${isOos ? '#ef4444' : '#10b981'}">
-                                ${isOos ? 'Hết hàng' : (sz.surcharge > 0 ? surchargeText : 'Mặc định')}
+                                ${isOos ? 'Hết hàng' : 'Còn hàng'}
                             </span>
                         </div>
                     `;
