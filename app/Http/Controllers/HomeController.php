@@ -23,7 +23,7 @@ class HomeController extends Controller
         $alls      = $this->productRepository->allProduct();
         $sanphams  = $this->productRepository->featuredProducts();
 
-        $featured = Sanpham::with('images')
+        $featured = Sanpham::with(['images', 'sizes'])
             ->where('noi_bat', 1)
             ->where('trang_thai', 1)
             ->take(8)
@@ -100,7 +100,7 @@ class HomeController extends Controller
         // $viewAllPaginations = $this->productRepository->getAllByDanhMuc($request);
 
         // ===== TẠO QUERY MỚI CHO FILTER =====
-        $query = Sanpham::query()->with('images')->where('trang_thai', 1);
+        $query = Sanpham::query()->with(['images', 'sizes'])->where('trang_thai', 1);
 
         /* =============================
         1) LỌC THEO MỨC GIÁ
@@ -227,7 +227,7 @@ class HomeController extends Controller
 
     public function ajaxFilter(Request $request)
     {
-        $query = Sanpham::query()->with('images')->where('trang_thai', 1);
+        $query = Sanpham::query()->with(['images', 'sizes'])->where('trang_thai', 1);
 
         /* ===== FILTER: PRICE ===== */
         if ($request->price) {

@@ -54,7 +54,7 @@ class OrderViewController extends Controller
             return back()->with('error', 'Không thể hủy đơn hàng này!');
         }
 
-        $order->trangthai = 'Hủy';
+        $order->trangthai = 'Bị hủy';
         $order->save();
 
         return back()->with('success', 'Đơn hàng đã được hủy thành công.');
@@ -145,9 +145,9 @@ class OrderViewController extends Controller
 
         if (!empty($warningMessages)) {
             $warningText = implode(' ', $warningMessages);
-            return redirect()->route('checkout')->with('warning', $warningText);
+            return redirect()->route('cart')->with('warning', $warningText);
         }
 
-        return redirect()->route('checkout')->with('success', 'Đã tạo lại từ đơn hàng cũ thành công.');
+        return redirect()->route('cart')->with('success', 'Đã tạo lại từ đơn hàng cũ vào giỏ hàng thành công.');
     }
 }

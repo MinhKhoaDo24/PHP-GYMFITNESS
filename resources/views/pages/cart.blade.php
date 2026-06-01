@@ -12,14 +12,14 @@
         width: 100%;
         max-width: 100%;
         margin: 0;
-        padding: 0 40px 0;  
+        padding: 0 40px 0;
     }
 
     .cart-card {
-        background: transparent;   
-        border-radius: 0;     
-        box-shadow: none;         
-        padding: 0;              
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
         width: 100%;
     }
 
@@ -92,7 +92,7 @@
         background: #ffffff;
     }
 
-    .cart-table tbody tr + tr td {
+    .cart-table tbody tr+tr td {
         border-top: 1px solid #e5e7eb;
     }
 
@@ -176,51 +176,52 @@
     }
 
     .cart-quantity {
-    text-align: center;        
+        text-align: center;
     }
 
     .quantity-input {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-.quantity-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    border: none;
-    background-color: #34A4E0;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 0;
-    transition: 0.2s ease;
-}
+    .quantity-btn {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: none;
+        background-color: #34A4E0;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        transition: 0.2s ease;
+    }
 
-.quantity-btn:hover {
-    background-color: #1e8ac4;
-}
+    .quantity-btn:hover {
+        background-color: #1e8ac4;
+    }
 
-.quantity-field {
-    width: 45px;             /* vừa cột, không quá to */
-    height: 28px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-}
+    .quantity-field {
+        width: 45px;
+        /* vừa cột, không quá to */
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+    }
 
-.cart-stock-note {
-    font-size: 12px;
-    color: #777;
-    margin-top: 2px;
-}
+    .cart-stock-note {
+        font-size: 12px;
+        color: #777;
+        margin-top: 2px;
+    }
 
 
     .cart-summary {
@@ -230,7 +231,7 @@
         border-radius: 24px;
         padding: 22px 20px 20px;
         position: sticky;
-        top: 110px;   
+        top: 110px;
     }
 
     .cart-summary-title {
@@ -366,17 +367,17 @@
     }
 
     .cart-toast {
-    position: fixed;
-    top: 20px;
-    right: -300px;
-    background: #00c896;
-    color: #020617;
-    padding: 12px 22px;
-    border-radius: 12px;
-    font-weight: 600;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-    transition: all .35s ease;
-    z-index: 9999;
+        position: fixed;
+        top: 20px;
+        right: -300px;
+        background: #00c896;
+        color: #020617;
+        padding: 12px 22px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        transition: all .35s ease;
+        z-index: 9999;
     }
 
     .cart-toast.show {
@@ -384,13 +385,13 @@
     }
 
     .confirm-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
     }
 
     .confirm-box {
@@ -399,7 +400,7 @@
         border-radius: 14px;
         width: 340px;
         text-align: center;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
     }
 
     .confirm-box h3 {
@@ -414,7 +415,8 @@
         gap: 15px;
     }
 
-    .btn-yes, .btn-no {
+    .btn-yes,
+    .btn-no {
         flex: 1;
         padding: 10px 14px;
         font-weight: 600;
@@ -434,8 +436,8 @@
     }
 
     .cart-page {
-        padding: 40px 0 80px;   
-        background: #ffffff;    
+        padding: 40px 0 80px;
+        background: #ffffff;
     }
 
     .cart-wrapper,
@@ -499,55 +501,60 @@
         font-size: 14px;
     }
 
-    .btn-delete { 
-        align-self: flex-start; 
+    .btn-delete {
+        align-self: flex-start;
     }
+
     /* page-header */
-.page-header {
-    height: 300px;
-    background-image: url('/frontend/img/kick-offer-2.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;   /* 🔥 giữ ảnh đứng yên khi scroll */
-    overflow: hidden;
-    position: relative;
-}
-
-.header-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-}
-
-.header-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-
-    text-shadow:
-        0 2px 6px rgba(0,0,0,0.45),
-        0 0 12px rgba(255,255,255,0.15);
-
-    z-index: 3;
-
-    /* 🔥 Animation trượt từ dưới lên */
-    animation: slideUp 0.9s ease-out forwards;
-}
-
-/* 🎬 Animation chạy từ dưới → lên */
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -20%); /* thấp hơn */
+    .page-header {
+        height: 300px;
+        background-image: url('/frontend/img/kick-offer-2.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        /* 🔥 giữ ảnh đứng yên khi scroll */
+        overflow: hidden;
+        position: relative;
     }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%); /* vị trí chuẩn */
+
+    .header-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
     }
-}
+
+    .header-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+
+        text-shadow:
+            0 2px 6px rgba(0, 0, 0, 0.45),
+            0 0 12px rgba(255, 255, 255, 0.15);
+
+        z-index: 3;
+
+        /* 🔥 Animation trượt từ dưới lên */
+        animation: slideUp 0.9s ease-out forwards;
+    }
+
+    /* 🎬 Animation chạy từ dưới → lên */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -20%);
+            /* thấp hơn */
+        }
+
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+            /* vị trí chuẩn */
+        }
+    }
 </style>
 
 <section class="page-header">
@@ -561,9 +568,9 @@
     <div class="cart-wrapper">
 
         @if(session('success'))
-            <div class="alert alert-success mt-3">
-                {{ session('success') }}
-            </div>
+        <div class="alert alert-success mt-3">
+            {{ session('success') }}
+        </div>
         @endif
 
         <div class="cart-card">
@@ -572,125 +579,151 @@
             </div>
 
             @if(session('cart') && count(session('cart')) > 0)
-                @php $total = 0 @endphp
+            @php $total = 0 @endphp
 
-                <div class="cart-layout">
-                    <div class="cart-table-wrapper">
-                        <table id="cart" class="table table-hover table-condensed cart-table">
-                            <thead>
-                                <tr>
-                                    <th>Ảnh sp</th>
-                                    <th>Tên sp</th>
-                                    <th>Giá gốc</th>
-                                    <th>Giảm giá</th>
-                                    <th class="text-center">Giá khuyến mãi</th>
-                                    <th class="text-center">Số lượng</th>
-                                    <th class="text-right">Tổng tiền</th>
-                                </tr>
-                            </thead>
+            <div class="cart-layout">
+                <div class="cart-table-wrapper">
+                    <table id="cart" class="table table-hover table-condensed cart-table">
+                        <thead>
+                            <tr>
+                                <th>Ảnh sp</th>
+                                <th>Tên sp</th>
+                                <th>Size</th>
+                                <th>Giá gốc</th>
+                                <th>Giảm giá</th>
+                                <th class="text-center">Giá khuyến mãi</th>
+                                <th>Giá cộng thêm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-right">Tổng tiền</th>
+                            </tr>
+                        </thead>
 
-                            <tbody>
-                                @foreach(session('cart') as $id => $details)
-                                    @php $total += $details['giakhuyenmai'] * $details['quantity'] @endphp
-                                    <tr class="cart-item" data-id="{{ $id }}">
-                                        <td>
-                                            <div class="cart-product-thumb">
-                                               <img src="{{ asset($details['anhsp'] ?? 'frontend/upload/placeholder.jpg') }}"
-                                                        alt="{{ $details['tensp'] }}" class="img-responsive">
-                                            </div>
-                                        </td>
+                        <tbody>
+                            @foreach(session('cart') as $id => $details)
+                            @php $total += ($details['giakhuyenmai'] + ($details['gia_cong_them'] ?? 0)) * $details['quantity'] @endphp
+                            <tr class="cart-item" data-id="{{ $id }}">
+                                <td>
+                                    <div class="cart-product-thumb">
+                                        <img src="{{ asset($details['anhsp'] ?? 'frontend/upload/placeholder.jpg') }}"
+                                            alt="{{ $details['tensp'] }}" class="img-responsive">
+                                    </div>
+                                </td>
 
-                                        <td>
-                                            <div class="cart-product-meta">
-                                                <div class="cart-product-name">{{ $details['tensp'] }}</div>
-                                                <button type="button" class="btn-delete cart_remove">
-                                                    <i class="fa fa-trash-o"></i> Xóa
-                                                </button>
-                                            </div>
-                                        </td>
+                                <td>
+                                    <div class="cart-product-meta">
+                                        <div class="cart-product-name">{{ $details['tensp'] }}</div>
+                                        <button type="button" class="btn-delete cart_remove">
+                                            <i class="fa fa-trash-o"></i> Xóa
+                                        </button>
+                                    </div>
+                                </td>
 
-                                        <td class="cart-price-original" data-th="Price">
-                                            {{ number_format($details['giasp'], 0, ',', '.') }} VND
-                                        </td>
+                                <td class="text-center font-weight-bold" style="color: #ff8c00;">
+                                    {{ $details['ten_size'] ?? '' }}
+                                </td>
 
-                                        <td class="cart-price-discount" data-th="Price">
-                                            {{ $details['giamgia'] }}%
-                                        </td>
+                                <td class="cart-price-original" data-th="Price">
+                                    {{ number_format($details['giasp'] ?? 0, 0, ',', '.') }} VND
+                                </td>
 
-                                        <td class="cart-price-promo text-center" data-th="Subtotal">
-                                            {{ number_format($details['giakhuyenmai'], 0, ',', '.') }} VND
-                                        </td>
 
-                                        <td class="cart-quantity" data-th="Quantity">
-                                            <div class="quantity-input">
-                                                <input
-                                                    class="quantity-field quantity cart_update"
-                                                    type="number"
-                                                    min="1"
-                                                    max="{{ $stock[$id] ?? 999 }}"
-                                                    value="{{ $details['quantity'] }}"
-                                                >
+                                <td class="cart-price-discount" data-th="Price">
+                                    {{ $details['giamgia'] }}%
+                                </td>
 
-                                                @if(isset($stock[$id]))
-                                                    <div class="cart-stock-note">
-                                                        Tồn kho: {{ $stock[$id] }}
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </td>
+                                <td class="cart-price-promo text-center" data-th="Subtotal">
+                                    {{ number_format($details['giakhuyenmai'] ?? 0, 0, ',', '.') }} VND
+                                </td>
 
-                                        <td class="cart-line-total text-right product-total" data-th="Total">
-                                            {{ number_format($details['giakhuyenmai'] * $details['quantity'], 0, ',', '.') }} VND
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                <td class="cart-price-surcharge text-center font-weight-bold text-success">
+                                    {{ number_format($details['gia_cong_them'] ?? 0, 0, ',', '.') }} VND
+                                </td>
+
+                                <td class="cart-quantity" data-th="Quantity">
+                                    <div class="quantity-input">
+                                        <input
+                                            class="quantity-field quantity cart_update"
+                                            type="number"
+                                            min="1"
+                                            max="{{ $stock[$id] ?? 999 }}"
+                                            value="{{ $details['quantity'] }}">
+
+                                        @if(isset($stock[$id]))
+                                        <div class="cart-stock-note">
+                                            Tồn kho: {{ $stock[$id] }}
+                                        </div>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td class="cart-line-total text-right product-total" data-th="Total">
+                                    {{ number_format(($details['giakhuyenmai'] + ($details['gia_cong_them'] ?? 0)) * $details['quantity'], 0, ',', '.') }} VND
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <aside class="cart-summary">
+                    <div class="cart-summary-title">Tóm tắt đơn hàng</div>
+
+                    <div class="cart-summary-row">
+                        <span>Tổng tiền giá gốc</span>
+                        <span id="cart-original">
+                            {{ number_format($totalOriginal, 0, ',', '.') }} vnđ
+                        </span>
                     </div>
 
-                    <aside class="cart-summary">
-                        <div class="cart-summary-title">Tóm tắt đơn hàng</div>
+                    <div class="cart-summary-row">
+                        <span>Tổng tiền giảm giá</span>
+                        <span id="cart-discount">
+                            - {{ number_format($totalDiscount, 0, ',', '.') }} vnđ
+                        </span>
+                    </div>
 
-                        <div class="cart-summary-row">
-                            <span>Tổng tiền giá gốc</span>
-                            <span id="cart-original">
-                                {{ number_format($totalOriginal, 0, ',', '.') }} vnđ
-                            </span>
-                        </div>
+                    @if(isset($totalSurcharge) && $totalSurcharge > 0)
+                    <div class="cart-summary-row" id="surcharge-row">
+                        <span>Phụ phí size</span>
+                        <span id="cart-surcharge">
+                            + {{ number_format($totalSurcharge, 0, ',', '.') }} vnđ
+                        </span>
+                    </div>
+                    @else
+                    <div class="cart-summary-row" id="surcharge-row" style="display: none;">
+                        <span>Phụ phí size</span>
+                        <span id="cart-surcharge">
+                            0 vnđ
+                        </span>
+                    </div>
+                    @endif
 
-                        <div class="cart-summary-row">
-                            <span>Tổng tiền giảm giá</span>
-                            <span id="cart-discount">
-                                {{ number_format($totalDiscount, 0, ',', '.') }} vnđ
-                            </span>
-                        </div>
+                    <div class="cart-summary-row cart-summary-total">
+                        <span>Tổng thanh toán</span>
+                        <span id="cart-total-final">
+                            {{ number_format($totalFinal, 0, ',', '.') }} vnđ
+                        </span>
+                    </div>
 
-                        <div class="cart-summary-row cart-summary-total">
-                            <span>Tổng thanh toán</span>
-                            <span id="cart-total-final">
-                                {{ number_format($totalFinal, 0, ',', '.') }} vnđ
-                            </span>
-                        </div>
+                    <div class="cart-actions">
+                        <a href="{{ url('/') }}" class="cart-btn cart-btn-continue">
+                            <i class="fa fa-arrow-left"></i> Tiếp tục mua sắm
+                        </a>
 
-                        <div class="cart-actions">
-                            <a href="{{ url('/') }}" class="cart-btn cart-btn-continue">
-                                <i class="fa fa-arrow-left"></i> Tiếp tục mua sắm
-                            </a>
-
-                            <a href="{{ route('checkout') }}" class="cart-btn cart-btn-checkout">
-                                Tiến hành thanh toán
-                            </a>
-                        </div>
-                    </aside>
-                </div>
+                        <a href="{{ route('checkout') }}" class="cart-btn cart-btn-checkout">
+                            Tiến hành thanh toán
+                        </a>
+                    </div>
+                </aside>
+            </div>
             @else
-                <div class="cart-empty">
-                    <h2>Giỏ hàng của bạn đang trống</h2>
-                    <p>Tiếp tục mua sắm để thêm sản phẩm vào giỏ.</p>
-                    <a href="{{ url('/viewAll') }}" class="btn btn-primary mt-3">
-                        <i class="fa fa-arrow-left mr-1"></i> Về trang sản phẩm
-                    </a>
-                </div>
+            <div class="cart-empty">
+                <h2>Giỏ hàng của bạn đang trống</h2>
+                <p>Tiếp tục mua sắm để thêm sản phẩm vào giỏ.</p>
+                <a href="{{ url('/viewAll') }}" class="btn btn-primary mt-3">
+                    <i class="fa fa-arrow-left mr-1"></i> Về trang sản phẩm
+                </a>
+            </div>
             @endif
         </div>
     </div>
@@ -698,232 +731,272 @@
 
 
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    // Hàm định dạng số tiền
-    function formatPrice(price) {
-        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' vnđ';
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hàm định dạng số tiền
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' vnđ';
+        }
 
-    // Xử lý tăng số lượng
-    document.querySelectorAll('.increaseValue').forEach(function(button) {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            var row = this.closest('tr');
-            var quantityInput = row.querySelector('.quantity');
-            var value = parseInt(quantityInput.value, 10);
-            var max = parseInt(quantityInput.getAttribute('max'), 10);
+        // Xử lý tăng số lượng
+        document.querySelectorAll('.increaseValue').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                var row = this.closest('tr');
+                var quantityInput = row.querySelector('.quantity');
+                var value = parseInt(quantityInput.value, 10);
+                var max = parseInt(quantityInput.getAttribute('max'), 10);
 
-            if (isNaN(value)) value = 1;
-            if (value < max) {
-                quantityInput.value = value + 1;
-                updateCart(row, quantityInput.value, this);
-            }
+                if (isNaN(value)) value = 1;
+                if (value < max) {
+                    quantityInput.value = value + 1;
+                    updateCart(row, quantityInput.value, this);
+                }
+            });
         });
-    });
 
-    // Xử lý giảm số lượng
-    document.querySelectorAll('.decreaseValue').forEach(function(button) {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            var row = this.closest('tr');
-            var quantityInput = row.querySelector('.quantity');
-            var value = parseInt(quantityInput.value, 10);
-            var min = parseInt(quantityInput.getAttribute('min'), 10);
+        // Xử lý giảm số lượng
+        document.querySelectorAll('.decreaseValue').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                var row = this.closest('tr');
+                var quantityInput = row.querySelector('.quantity');
+                var value = parseInt(quantityInput.value, 10);
+                var min = parseInt(quantityInput.getAttribute('min'), 10);
 
-            if (value > min) {
-                quantityInput.value = value - 1;
-                updateCart(row, quantityInput.value, this);
-            }
+                if (value > min) {
+                    quantityInput.value = value - 1;
+                    updateCart(row, quantityInput.value, this);
+                }
+            });
         });
-    });
 
-    // Xử lý thay đổi số lượng trực tiếp
-    document.querySelectorAll('.cart_update').forEach(function(input) {
-        input.addEventListener('change', function(e) {
-            e.preventDefault();
-            var row = this.closest('tr');
-            var value = parseInt(this.value, 10);
-            var min = parseInt(this.getAttribute('min'), 10);
-            var max = parseInt(this.getAttribute('max'), 10);
+        // Xử lý thay đổi số lượng trực tiếp
+        document.querySelectorAll('.cart_update').forEach(function(input) {
+            input.addEventListener('change', function(e) {
+                e.preventDefault();
+                var row = this.closest('tr');
+                var value = parseInt(this.value, 10);
+                var min = parseInt(this.getAttribute('min'), 10);
+                var max = parseInt(this.getAttribute('max'), 10);
 
-            if (isNaN(value) || value < min) {
-                this.value = min;
-                value = min;
-            } else if (value > max) {
-                this.value = max;
-                value = max;
-            }
-            updateCart(row, value, this);
+                if (isNaN(value) || value < min) {
+                    this.value = min;
+                    value = min;
+                } else if (value > max) {
+                    this.value = max;
+                    value = max;
+                }
+                updateCart(row, value, this);
+            });
         });
-    });
 
+        // Xử lý xóa sản phẩm
+        document.querySelectorAll('.cart_remove').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
 
-    // Xử lý xóa sản phẩm
-    document.querySelectorAll('.cart_remove').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
+                const row = this.closest('tr');
+                const id = row.getAttribute('data-id');
 
-            const row = this.closest('tr');
-            const id  = row.getAttribute('data-id');
+                const modal = document.getElementById('confirmDeleteModal');
+                const btnYes = document.getElementById('confirmYes');
+                const btnNo = document.getElementById('confirmNo');
 
-            const modal  = document.getElementById('confirmDeleteModal');
-            const btnYes = document.getElementById('confirmYes');
-            const btnNo  = document.getElementById('confirmNo');
+                modal.style.display = 'flex';
 
-            modal.style.display = 'flex';
+                btnNo.onclick = () => {
+                    modal.style.display = 'none';
+                };
 
-            btnNo.onclick = () => {
-                modal.style.display = 'none';
-            };
+                btnYes.onclick = () => {
+                    modal.style.display = 'none';
 
-            btnYes.onclick = () => {
-                modal.style.display = 'none';
+                    fetch('/remove-from-cart/' + id, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.success) {
+                                showToast('Có lỗi khi xóa sản phẩm!');
+                                return;
+                            }
 
-                fetch('/remove-from-cart/' + id, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) {
-                        showToast('Có lỗi khi xóa sản phẩm!');
-                        return;
-                    }
+                            // Cập nhật badge số lượng ở header
+                            if (data.cart_count !== undefined) {
+                                const badge = document.querySelector('.navbar__shoppingCart span');
+                                if (badge) {
+                                    badge.textContent = data.cart_count;
+                                }
+                            }
 
-                    // Cập nhật badge số lượng ở header
-                    if (data.cart_count !== undefined) {
-                        const badge = document.querySelector('.navbar__shoppingCart span');
-                        if (badge) {
-                            badge.textContent = data.cart_count;
+                            if (data.cart_count === 0) {
+                                // Nếu giỏ hàng trống hoàn toàn, load lại trang để hiển thị giao diện giỏ hàng trống
+                                location.reload();
+                            } else {
+                                row.remove();
+                                updateCartTotal();
+                                showToast('Xóa sản phẩm thành công!');
+                            }
+                        })
+                        .catch(() => {
+                            showToast('Có lỗi khi xóa sản phẩm!');
+                        });
+                };
+            });
+        });
+
+        function showToast(message) {
+            const toast = document.createElement("div");
+            toast.className = "cart-toast";
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add("show");
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // Hàm cập nhật giỏ hàng
+        function updateCart(row, quantity, element) {
+            var button = element && element.classList.contains('quantity-btn') ? element : null;
+            if (button) {
+                button.disabled = true;
+            }
+
+            $.ajax({
+                url: '{{ route("update_cart") }}',
+                method: 'PATCH',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    id: row.getAttribute('data-id'),
+                    quantity: quantity
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        var productTotal = row.querySelector('.product-total');
+                        if (productTotal && typeof response.product_total !== 'undefined') {
+                            productTotal.textContent = formatPrice(response.product_total);
                         }
-                    }
 
-                    if (data.cart_count === 0) {
-                        // Nếu giỏ hàng trống hoàn toàn, load lại trang để hiển thị giao diện giỏ hàng trống
-                        location.reload();
+                        // Cập nhật badge số lượng ở header
+                        if (typeof response.cart_count !== 'undefined') {
+                            const badge = document.querySelector('.navbar__shoppingCart span');
+                            if (badge) {
+                                badge.textContent = response.cart_count;
+                            }
+                        }
+
+                        updateCartSummary(response);
                     } else {
-                        row.remove();
-                        updateCartTotal();
-                        showToast('Xóa sản phẩm thành công!');
+                        var quantityInput = row.querySelector('.quantity');
+                        quantityInput.value = response.quantity || quantityInput.value;
                     }
-                })
-                .catch(() => {
-                    showToast('Có lỗi khi xóa sản phẩm!');
-                });
-            };
-        });
-    });
-    function showToast(message) {
-    const toast = document.createElement("div");
-    toast.className = "cart-toast";
-    toast.textContent = message;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add("show");
-    }, 10);
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 300);
-    }, 2000);
-}
-    // Hàm cập nhật giỏ hàng
-    function updateCart(row, quantity, element) {
-        var button = element && element.classList.contains('quantity-btn') ? element : null;
-        if (button) {
-            button.disabled = true; 
+                },
+                complete: function() {
+                    if (button) {
+                        button.disabled = false;
+                    }
+                }
+            });
         }
 
-        $.ajax({
-            url: '{{ route("update_cart") }}',
-            method: 'PATCH',
-            data: {
-                _token: '{{ csrf_token() }}',
-                id: row.getAttribute('data-id'),
-                quantity: quantity
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    var productTotal = row.querySelector('.product-total');
-                    if (productTotal && typeof response.product_total !== 'undefined') {
-                        productTotal.textContent = formatPrice(response.product_total);
-                    }
+        function updateCartSummary(data) {
+            var originalEl = document.getElementById('cart-original');
+            var discountEl = document.getElementById('cart-discount');
+            var finalEl = document.getElementById('cart-total-final');
+            var surchargeEl = document.getElementById('cart-surcharge');
+            var surchargeRow = document.getElementById('surcharge-row');
 
-                    updateCartSummary(response);
-                } else {
-                    var quantityInput = row.querySelector('.quantity');
-                    quantityInput.value = response.quantity || quantityInput.value;
+            if (originalEl && typeof data.total_original !== 'undefined') {
+                originalEl.textContent = formatPrice(data.total_original);
+            }
+            if (discountEl && typeof data.total_discount !== 'undefined') {
+                discountEl.textContent = formatPrice(data.total_discount);
+            }
+            if (finalEl && typeof data.total_final !== 'undefined') {
+                finalEl.textContent = formatPrice(data.total_final);
+            }
+            if (typeof data.total_surcharge !== 'undefined') {
+                if (surchargeEl) {
+                    surchargeEl.textContent = '+' + formatPrice(data.total_surcharge);
                 }
-            },
-            complete: function() {
-                if (button) {
-                    button.disabled = false;
+                if (surchargeRow) {
+                    if (data.total_surcharge > 0) {
+                        surchargeRow.style.display = 'flex';
+                    } else {
+                        surchargeRow.style.display = 'none';
+                    }
                 }
             }
-        });
-    }
-
-    function updateCartSummary(data) {
-        var originalEl = document.getElementById('cart-original');
-        var discountEl = document.getElementById('cart-discount');
-        var finalEl    = document.getElementById('cart-total-final');
-
-        if (originalEl && typeof data.total_original !== 'undefined') {
-            originalEl.textContent = formatPrice(data.total_original);
         }
-        if (discountEl && typeof data.total_discount !== 'undefined') {
-            discountEl.textContent = formatPrice(data.total_discount);
+
+        function updateCartTotal(total) {
+            const rows = document.querySelectorAll('.cart-item');
+
+            let totalOriginal = 0;
+            let totalFinal = 0;
+            let totalSurcharge = 0;
+
+            rows.forEach(row => {
+                const qtyInput = row.querySelector('.quantity');
+                if (!qtyInput) return;
+
+                const qty = parseInt(qtyInput.value, 10) || 0;
+
+                const originalCell = row.querySelector('.cart-price-original');
+                const promoCell = row.querySelector('.cart-price-promo');
+                const surchargeCell = row.querySelector('.cart-price-surcharge');
+
+                if (!originalCell || !promoCell) return;
+
+                const originalPrice = parseInt(originalCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
+                const promoPrice = parseInt(promoCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
+                const surchargeVal = surchargeCell ? (parseInt(surchargeCell.textContent.replace(/[^\d]/g, ''), 10) || 0) : 0;
+
+                totalOriginal += originalPrice * qty;
+                totalFinal += promoPrice * qty;
+                totalSurcharge += surchargeVal * qty;
+            });
+
+            const totalDiscount = totalOriginal - totalFinal;
+
+            const originalEl = document.getElementById('cart-original');
+            const discountEl = document.getElementById('cart-discount');
+            const finalEl = document.getElementById('cart-total-final');
+            const surchargeEl = document.getElementById('cart-surcharge');
+            const surchargeRow = document.getElementById('surcharge-row');
+
+            if (originalEl) originalEl.textContent = formatPrice(totalOriginal);
+            if (discountEl) discountEl.textContent = formatPrice(totalDiscount);
+            if (finalEl) finalEl.textContent = formatPrice(totalFinal);
+
+            if (surchargeEl) {
+                surchargeEl.textContent = '+' + formatPrice(totalSurcharge);
+            }
+            if (surchargeRow) {
+                if (totalSurcharge > 0) {
+                    surchargeRow.style.display = 'flex';
+                } else {
+                    surchargeRow.style.display = 'none';
+                }
+            }
         }
-        if (finalEl && typeof data.total_final !== 'undefined') {
-            finalEl.textContent = formatPrice(data.total_final);
-        }
-    }
-
-    function updateCartTotal(total) {
-        const rows = document.querySelectorAll('.cart-item');
-
-        let totalOriginal = 0; 
-        let totalFinal    = 0; 
-
-        rows.forEach(row => {
-            const qtyInput = row.querySelector('.quantity');
-            if (!qtyInput) return;
-
-            const qty = parseInt(qtyInput.value, 10) || 0;
-
-            const originalCell = row.querySelector('.cart-price-original');
-            const promoCell    = row.querySelector('.cart-price-promo');
-
-            if (!originalCell || !promoCell) return;
-
-            const originalPrice = parseInt(originalCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
-            const promoPrice    = parseInt(promoCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
-
-            totalOriginal += originalPrice * qty;
-            totalFinal    += promoPrice    * qty;
-        });
-
-        const totalDiscount = totalOriginal - totalFinal;
-
-        const originalEl = document.getElementById('cart-original');
-        const discountEl = document.getElementById('cart-discount');
-        const finalEl    = document.getElementById('cart-total-final');
-
-        if (originalEl) originalEl.textContent = formatPrice(totalOriginal);
-        if (discountEl) discountEl.textContent = formatPrice(totalDiscount);
-        if (finalEl)    finalEl.textContent    = formatPrice(totalFinal);
-    }
-});
+    });
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const subtotalEl   = document.getElementById('cart-total');       
-        const totalFinalEl = document.getElementById('cart-total-final');  
+    document.addEventListener('DOMContentLoaded', function() {
+        const subtotalEl = document.getElementById('cart-total');
+        const totalFinalEl = document.getElementById('cart-total-final');
 
         if (!subtotalEl || !totalFinalEl) return;
 

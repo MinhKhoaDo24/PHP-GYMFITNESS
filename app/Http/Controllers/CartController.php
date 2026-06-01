@@ -26,56 +26,129 @@ class CartController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        $totalOriginal = 0; 
-        $totalFinal    = 0; 
+        $totalOriginal = 0;
+        $totalSalePrice = 0;
+        $totalSurcharge = 0;
 
         foreach ($cart as $item) {
             $qty          = $item['quantity'] ?? 0;
-            $giaGoc       = $item['giasp'] ?? 0;
-            $giaKhuyenMai = $item['giakhuyenmai'] ?? $giaGoc;
+            $surcharge    = $item['gia_cong_them'] ?? 0;
+            $giaGoc       = ($item['giasp'] ?? 0);
+            $giaKhuyenMai = ($item['giakhuyenmai'] ?? $giaGoc);
 
-            $totalOriginal += $giaGoc       * $qty;
-            $totalFinal    += $giaKhuyenMai * $qty;
+            $totalOriginal  += $giaGoc       * $qty;
+            $totalSalePrice += $giaKhuyenMai * $qty;
+            $totalSurcharge += $surcharge    * $qty;
         }
 
-        $totalDiscount = $totalOriginal - $totalFinal; 
+        $totalFinal = $totalSalePrice + $totalSurcharge;
+        $totalDiscount = $totalOriginal - $totalSalePrice;
 
         return view('pages.cart', compact(
             'cart',
             'totalOriginal',
             'totalDiscount',
-            'totalFinal'
+            'totalFinal',
+            'totalSurcharge'
         ));
     }
 
-     public function addToCart(Request $request, $id)
+    public function addToCart(Request $request, $id)
     {
-        $product = Sanpham::with('images')->findOrFail($id);
+        $product = Sanpham::with(['images', 'sizes'])->findOrFail($id);
+        $quantity = (int)$request->input('quantity', 1);
+        if ($quantity < 1) $quantity = 1;
+        $id_size = $request->input('id_size');
+
+        $sizeObj = null;
+        $ten_size = null;
+        $gia_cong_them = 0;
+
+        if ($product->co_size == 1) {
+            if (!$id_size) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Vui lòng chọn size sản phẩm!'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'Vui lòng chọn size sản phẩm!');
+            }
+
+            $sizePivot = $product->sizes()->where('sanpham_size.id_size', $id_size)->first();
+            if (!$sizePivot) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Size được chọn không hợp lệ!'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'Size được chọn không hợp lệ!');
+            }
+
+            if ($sizePivot->pivot->soluong <= 0) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Size này đã hết hàng!'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'Size này đã hết hàng!');
+            }
+
+            $sizeObj = $sizePivot;
+            $ten_size = $sizePivot->ten_size;
+            $gia_cong_them = (int) $sizePivot->pivot->gia_cong_them;
+        }
+
+        $cartKey = $product->id_sanpham;
+        if ($id_size) {
+            $cartKey .= '_' . $id_size;
+        }
 
         $firstImage = $product->images->first();
         $imagePath  = $firstImage
             ? $firstImage->duong_dan
-            : 'frontend/upload/placeholder.jpg'; 
+            : 'frontend/upload/placeholder.jpg';
 
         $cart = session()->get('cart', []);
 
-        // Lấy số lượng từ request
-        $qty = (int) $request->input('quantity', 1);
-        if ($qty < 1) {
-            $qty = 1;
-        }
-
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity'] += $qty;
+        if (isset($cart[$cartKey])) {
+            $newQty = $cart[$cartKey]['quantity'] + $quantity;
+            $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
+            if ($newQty > $maxQty) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm."
+                    ], 400);
+                }
+                return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
+            }
+            $cart[$cartKey]['quantity'] = $newQty;
         } else {
-            $cart[$id] = [
+            $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
+            if ($quantity > $maxQty) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm."
+                    ], 400);
+                }
+                return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
+            }
+
+            $cart[$cartKey] = [
                 "id_sanpham"    => $product->id_sanpham,
                 "tensp"         => $product->tensp,
-                "anhsp"         => $imagePath, 
+                "anhsp"         => $imagePath,
                 "giasp"         => $product->giasp,
                 "giamgia"       => $product->giamgia,
                 "giakhuyenmai"  => $product->giakhuyenmai,
-                "quantity"      => $qty
+                "quantity"      => $quantity,
+                "id_size"       => $id_size,
+                "ten_size"      => $ten_size,
+                "gia_cong_them" => $gia_cong_them
             ];
         }
 
@@ -94,7 +167,38 @@ class CartController extends Controller
 
     public function addGoToCart(Request $request, $id)
     {
-        $product = Sanpham::with('images')->findOrFail($id);
+        $product = Sanpham::with(['images', 'sizes'])->findOrFail($id);
+        $quantity = (int)$request->input('quantity', 1);
+        if ($quantity < 1) $quantity = 1;
+        $id_size = $request->input('id_size');
+
+        $sizeObj = null;
+        $ten_size = null;
+        $gia_cong_them = 0;
+
+        if ($product->co_size == 1) {
+            if (!$id_size) {
+                return redirect()->back()->with('error', 'Vui lòng chọn size sản phẩm!');
+            }
+
+            $sizePivot = $product->sizes()->where('sanpham_size.id_size', $id_size)->first();
+            if (!$sizePivot) {
+                return redirect()->back()->with('error', 'Size được chọn không hợp lệ!');
+            }
+
+            if ($sizePivot->pivot->soluong <= 0) {
+                return redirect()->back()->with('error', 'Size này đã hết hàng!');
+            }
+
+            $sizeObj = $sizePivot;
+            $ten_size = $sizePivot->ten_size;
+            $gia_cong_them = (int) $sizePivot->pivot->gia_cong_them;
+        }
+
+        $cartKey = $product->id_sanpham;
+        if ($id_size) {
+            $cartKey .= '_' . $id_size;
+        }
 
         $firstImage = $product->images->first();
         $imagePath  = $firstImage
@@ -103,23 +207,30 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
 
-        // Lấy số lượng từ request
-        $qty = (int) $request->input('quantity', 1);
-        if ($qty < 1) {
-            $qty = 1;
-        }
-
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity'] += $qty;
+        if (isset($cart[$cartKey])) {
+            $newQty = $cart[$cartKey]['quantity'] + $quantity;
+            $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
+            if ($newQty > $maxQty) {
+                return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
+            }
+            $cart[$cartKey]['quantity'] = $newQty;
         } else {
-            $cart[$id] = [
+            $maxQty = ($product->co_size == 1) ? $sizeObj->pivot->soluong : $product->soluong;
+            if ($quantity > $maxQty) {
+                return redirect()->back()->with('error', "Không đủ hàng trong kho! Chỉ còn {$maxQty} sản phẩm.");
+            }
+
+            $cart[$cartKey] = [
                 "id_sanpham"    => $product->id_sanpham,
                 "tensp"         => $product->tensp,
-                "anhsp"         => $imagePath, // ảnh đầu tiên
+                "anhsp"         => $imagePath,
                 "giasp"         => $product->giasp,
                 "giamgia"       => $product->giamgia,
                 "giakhuyenmai"  => $product->giakhuyenmai,
-                "quantity"      => $qty
+                "quantity"      => $quantity,
+                "id_size"       => $id_size,
+                "ten_size"      => $ten_size,
+                "gia_cong_them" => $gia_cong_them
             ];
         }
 
@@ -138,29 +249,52 @@ class CartController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Số lượng không hợp lệ.',
-                    'quantity' => $cart[$id]['quantity'] // Trả về số lượng hiện tại để khôi phục
+                    'quantity' => $cart[$id]['quantity']
                 ], 400);
+            }
+
+            // Kiểm tra tồn kho của sản phẩm/size tương ứng
+            $spId = $cart[$id]['id_sanpham'];
+            $szId = $cart[$id]['id_size'] ?? null;
+            $product = Sanpham::with('sizes')->find($spId);
+            if ($product) {
+                $maxQty = ($product->co_size == 1 && $szId)
+                    ? optional($product->sizes()->where('sanpham_size.id_size', $szId)->first())->pivot->soluong
+                    : $product->soluong;
+
+                if ($maxQty !== null && $quantity > $maxQty) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Không đủ hàng! Kho chỉ còn {$maxQty} sản phẩm.",
+                        'quantity' => $cart[$id]['quantity']
+                    ], 400);
+                }
             }
 
             // Cập nhật số lượng
             $cart[$id]['quantity'] = $quantity;
             session()->put('cart', $cart);
 
-            $productTotal = $cart[$id]['giakhuyenmai'] * $quantity;
-            // Tính tổng tiền giỏ hàng (giá gốc + khuyến mãi)
-            $totalOriginal = 0; 
-            $totalFinal    = 0; 
+            $itemSurcharge = $cart[$id]['gia_cong_them'] ?? 0;
+            $productTotal = ($cart[$id]['giakhuyenmai'] + $itemSurcharge) * $quantity;
+
+            $totalOriginal = 0;
+            $totalSalePrice = 0;
+            $totalSurcharge = 0;
 
             foreach ($cart as $item) {
                 $qty          = $item['quantity'];
+                $surcharge    = $item['gia_cong_them'] ?? 0;
                 $giaGoc       = $item['giasp'];
                 $giaKM        = $item['giakhuyenmai'];
 
-                $totalOriginal += $giaGoc * $qty;
-                $totalFinal    += $giaKM  * $qty;
+                $totalOriginal  += $giaGoc * $qty;
+                $totalSalePrice += $giaKM  * $qty;
+                $totalSurcharge += $surcharge * $qty;
             }
 
-            $totalDiscount = $totalOriginal - $totalFinal; 
+            $totalFinal = $totalSalePrice + $totalSurcharge;
+            $totalDiscount = $totalOriginal - $totalSalePrice;
 
             return response()->json([
                 'status'         => 'success',
@@ -168,6 +302,7 @@ class CartController extends Controller
                 'total_original' => $totalOriginal,
                 'total_discount' => $totalDiscount,
                 'total_final'    => $totalFinal,
+                'total_surcharge' => $totalSurcharge,
                 'message'        => 'Cập nhật giỏ hàng thành công!'
             ]);
         }
@@ -189,7 +324,7 @@ class CartController extends Controller
 
         $total = 0;
         foreach ($cart as $item) {
-            $total += $item['giakhuyenmai'] * $item['quantity'];
+            $total += ($item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0)) * $item['quantity'];
         }
 
         return response()->json([
@@ -217,16 +352,19 @@ class CartController extends Controller
             ->get();
 
         $total = 0;
+        $totalSurcharge = 0;
         foreach ($cart as $item) {
             $qty          = $item['quantity'] ?? 0;
-            $giaKM        = $item['giakhuyenmai'] ?? ($item['giasp'] ?? 0);
+            $surcharge    = $item['gia_cong_them'] ?? 0;
+            $giaKM        = ($item['giakhuyenmai'] ?? ($item['giasp'] ?? 0)) + $surcharge;
             $total       += $giaKM * $qty;
+            $totalSurcharge += $surcharge * $qty;
         }
 
-        return view('pages.checkout', compact('showusers', 'cart', 'total'));
+        return view('pages.checkout', compact('showusers', 'cart', 'total', 'totalSurcharge'));
     }
 
-// Đặt hàng
+    // Đặt hàng
 
     public function dathang(Request $request)
     {
@@ -276,7 +414,8 @@ class CartController extends Controller
 
             $today = now();
             if (($km->ngay_bat_dau && $today < $km->ngay_bat_dau) ||
-                ($km->ngay_ket_thuc && $today > $km->ngay_ket_thuc)) {
+                ($km->ngay_ket_thuc && $today > $km->ngay_ket_thuc)
+            ) {
                 return back()->with('error', 'Mã khuyến mãi đã hết hạn!');
             }
 
@@ -338,15 +477,22 @@ if ($isFreeship) {
         // KIỂM TRA TỒN KHO CHUẨN
         // -----------------------------
         foreach ($cart as $item) {
-            $sanpham = Sanpham::find($item['id_sanpham']);
+            $sanpham = Sanpham::with('sizes')->find($item['id_sanpham']);
 
             if (!$sanpham) {
                 return back()->with('error', 'Sản phẩm không tồn tại!');
             }
 
-            // tồn kho trực tiếp từ bảng sanpham
-            if ($item['quantity'] > $sanpham->soluong) {
-                return back()->with('error', "Sản phẩm {$sanpham->tensp} không đủ tồn kho!");
+            if ($sanpham->co_size == 1 && !empty($item['id_size'])) {
+                $sizePivot = $sanpham->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
+                if (!$sizePivot || $item['quantity'] > $sizePivot->pivot->soluong) {
+                    $sizeName = $sizePivot ? $sizePivot->ten_size : 'Không xác định';
+                    return back()->with('error', "Sản phẩm {$sanpham->tensp} (Size {$sizeName}) không đủ tồn kho! Chỉ còn " . ($sizePivot ? $sizePivot->pivot->soluong : 0) . " sản phẩm.");
+                }
+            } else {
+                if ($item['quantity'] > $sanpham->soluong) {
+                    return back()->with('error', "Sản phẩm {$sanpham->tensp} không đủ tồn kho! Chỉ còn {$sanpham->soluong} sản phẩm.");
+                }
             }
         }
 
@@ -384,22 +530,39 @@ if ($isFreeship) {
         // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
         // -----------------------------
         foreach ($cart as $item) {
-            
+            $orderDetailName = $item['tensp'];
+            if (!empty($item['ten_size'])) {
+                $orderDetailName .= ' (Size: ' . $item['ten_size'] . ')';
+            }
+
             ChitietDonhang::create([
-                'tensp'         => $item['tensp'],
+                'tensp'         => $orderDetailName,
                 'soluong'       => $item['quantity'],
                 'giamgia'       => $item['giamgia'],
-                'giatien'       => $item['giasp'],
-                'giakhuyenmai'  => $item['giakhuyenmai'],
+                'giatien'       => $item['giasp'] + ($item['gia_cong_them'] ?? 0),
+                'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
                 'id_nd'         => Auth::user()->id_nd,
             ]);
 
             // Trừ tồn kho
-            $sp = Sanpham::find($item['id_sanpham']);
-            $sp->soluong -= $item['quantity'];
-            $sp->save();
+            $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
+            if ($sp) {
+                if ($sp->co_size == 1 && !empty($item['id_size'])) {
+                    $sizePivot = $sp->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
+                    if ($sizePivot) {
+                        $newSizeQty = max(0, $sizePivot->pivot->soluong - $item['quantity']);
+                        $sp->sizes()->updateExistingPivot($item['id_size'], ['soluong' => $newSizeQty]);
+                    }
+                    // Tính lại tổng số lượng của sản phẩm
+                    $sp->soluong = $sp->sizes()->sum('sanpham_size.soluong');
+                    $sp->save();
+                } else {
+                    $sp->soluong -= $item['quantity'];
+                    $sp->save();
+                }
+            }
         }
 
         // -----------------------------
@@ -424,35 +587,44 @@ if ($isFreeship) {
         return view('pages.thongbaodathang');
     }
 
-
-
-
     public function thongbaodathang(Request $request)
     {
-        if ($request->has('vnp_ResponseCode') && $request->has('vnp_TransactionNo')) {
+        if ($request->has('vnp_ResponseCode') && $request->has('vnp_TxnRef')) {
             $responseCode = $request->input('vnp_ResponseCode');
+            $orderId      = $request->input('vnp_TxnRef');
 
-            if ($responseCode == '00') {
+            $order = Dathang::find($orderId);
 
-                $orderData = session()->get('order_data');
-                if ($orderData) {
-                    $fakeRequest = Request::create('/', 'POST', $orderData);
-                    $fakeRequest->setLaravelSession(app('session')->driver());
+            if ($order) {
+                if ($responseCode == '00') {
+                    // Cập nhật trạng thái thành Đã thanh toán khi giao dịch thành công
+                    $order->trangthai = 'Đã thanh toán';
+                    $order->save();
 
-                    $this->dathang($fakeRequest);
-                    session()->forget('order_data');
+                    return view('pages.thongbaodathang');
+                } else {
+                    // Cập nhật trạng thái thành Thất bại khi giao dịch thất bại
+                    $order->trangthai = 'Thất bại';
+                    $order->save();
+
+                    return redirect('/donhang')->with('error', 'Thanh toán qua cổng VNPay không thành công.');
                 }
-                return view('pages.thongbaodathang');
-            } else {
-                return redirect('/cart')->with('error', 'Thanh toán thất bại.');
             }
-        } else {
-            return redirect('/cart');
         }
+
+        return redirect('/donhang');
     }
 
     public function vnpay(Request $request)
     {
+        // -----------------------------
+        // KIỂM TRA GIỎ HÀNG
+        // -----------------------------
+        $cart = session('cart', []);
+        if (empty($cart)) {
+            return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
+        }
+
         // -----------------------------
         // XÁC THỰC THÔNG TIN NHẬN HÀNG
         // -----------------------------
@@ -470,15 +642,130 @@ if ($isFreeship) {
             'display_diachigiaohang.required' => 'Địa chỉ giao hàng không được để trống.',
         ]);
 
-        $vnp_TmnCode    = env('VNP_TMN_CODE', '4M7EXIQQ'); 
-        $vnp_HashSecret = env('VNP_HASH_SECRET', 'QKB1K3QJ7DL73O6GHQDRUNWTIJ3XQ77Q');
+        $tongtien = (int) $request->tongtien;
+        $tiengiam = (int) $request->tiengiam;
+        $tienphaitra = (int) $request->tienphaitra;
+        $id_km = $request->id_khuyenmai;
 
-        $vnp_Url        = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        // -----------------------------
+        // BẢO VỆ: CHECK KHUYẾN MÃI LẠI
+        // -----------------------------
+        if ($id_km) {
+            $km = Khuyenmai::find($id_km);
+
+            if (!$km || $km->trang_thai != 1) {
+                return back()->with('error', 'Mã khuyến mãi không hợp lệ!');
+            }
+
+            $today = now();
+            if (($km->ngay_bat_dau && $today < $km->ngay_bat_dau) ||
+                ($km->ngay_ket_thuc && $today > $km->ngay_ket_thuc)
+            ) {
+                return back()->with('error', 'Mã khuyến mãi đã hết hạn!');
+            }
+
+            // Bảo vệ số lượt dùng
+            if ($km->gioi_han_luot !== null && $km->so_luot_da_dung >= $km->gioi_han_luot) {
+                return back()->with('error', 'Mã khuyến mãi đã hết lượt sử dụng!');
+            }
+
+            $km->increment('so_luot_da_dung');
+        }
+
+        // -----------------------------
+        // KIỂM TRA TỒN KHO CHUẨN
+        // -----------------------------
+        foreach ($cart as $item) {
+            $sanpham = Sanpham::with('sizes')->find($item['id_sanpham']);
+
+            if (!$sanpham) {
+                return back()->with('error', 'Sản phẩm không tồn tại!');
+            }
+
+            if ($sanpham->co_size == 1 && !empty($item['id_size'])) {
+                $sizePivot = $sanpham->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
+                if (!$sizePivot || $item['quantity'] > $sizePivot->pivot->soluong) {
+                    $sizeName = $sizePivot ? $sizePivot->ten_size : 'Không xác định';
+                    return back()->with('error', "Sản phẩm {$sanpham->tensp} (Size {$sizeName}) không đủ tồn kho! Chỉ còn " . ($sizePivot ? $sizePivot->pivot->soluong : 0) . " sản phẩm.");
+                }
+            } else {
+                if ($item['quantity'] > $sanpham->soluong) {
+                    return back()->with('error', "Sản phẩm {$sanpham->tensp} không đủ tồn kho! Chỉ còn {$sanpham->soluong} sản phẩm.");
+                }
+            }
+        }
+
+        // -----------------------------
+        // TẠO ĐƠN HÀNG (TRẠNG THÁI: Chưa thanh toán)
+        // -----------------------------
+        $order = Dathang::create([
+            'tongtien'     => $tongtien,
+            'tiengiam'     => $tiengiam,
+            'tienphaitra'  => $tienphaitra,
+            'id_khuyenmai' => $id_km,
+            'phuongthucthanhtoan' => 'VNPAY',
+            'diachigiaohang' => $request->display_diachigiaohang,
+            'hoten'        => $request->display_hoten,
+            'email'        => $request->display_email,
+            'sdt'          => $request->display_sdt,
+            'ngaygiaohang' => now()->addDays(4),
+            'id_nd'        => Auth::user()->id_nd,
+            'trangthai'    => 'Chờ xác nhận',
+        ]);
+
+        // -----------------------------
+        // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
+        // -----------------------------
+        foreach ($cart as $item) {
+            $orderDetailName = $item['tensp'];
+            if (!empty($item['ten_size'])) {
+                $orderDetailName .= ' (Size: ' . $item['ten_size'] . ')';
+            }
+
+            ChitietDonhang::create([
+                'tensp'         => $orderDetailName,
+                'soluong'       => $item['quantity'],
+                'giamgia'       => $item['giamgia'],
+                'giatien'       => $item['giasp'] + ($item['gia_cong_them'] ?? 0),
+                'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
+                'id_sanpham'    => $item['id_sanpham'],
+                'id_dathang'    => $order->id_dathang,
+                'id_nd'         => Auth::user()->id_nd,
+            ]);
+
+            // Trừ tồn kho
+            $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
+            if ($sp) {
+                if ($sp->co_size == 1 && !empty($item['id_size'])) {
+                    $sizePivot = $sp->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
+                    if ($sizePivot) {
+                        $newSizeQty = max(0, $sizePivot->pivot->soluong - $item['quantity']);
+                        $sp->sizes()->updateExistingPivot($item['id_size'], ['soluong' => $newSizeQty]);
+                    }
+                    // Tính lại tổng số lượng của sản phẩm
+                    $sp->soluong = $sp->sizes()->sum('sanpham_size.soluong');
+                    $sp->save();
+                } else {
+                    $sp->soluong -= $item['quantity'];
+                    $sp->save();
+                }
+            }
+        }
+
+        // Xóa giỏ hàng khỏi session
+        session()->forget('cart');
+
+        // -----------------------------
+        // CẤU HÌNH VNPAY
+        // -----------------------------
+        $vnp_TmnCode    = config('services.vnpay.tmn_code');
+        $vnp_HashSecret = config('services.vnpay.hash_secret');
+        $vnp_Url        = config('services.vnpay.url');
         $vnp_Returnurl  = url('/thongbaodathang');
 
-        $vnp_TxnRef     = date("YmdHis");   // mã giao dịch
-        $vnp_Amount     = $request->tienphaitra * 100; // nhân 100 theo chuẩn VNPAY
-        $vnp_OrderInfo  = "Thanh toán hóa đơn: " . $vnp_TxnRef;
+        $vnp_TxnRef     = $order->id_dathang;
+        $vnp_Amount     = $order->tienphaitra * 100; // Nhân 100 theo chuẩn VNPAY
+        $vnp_OrderInfo  = "Thanh toán đơn hàng: #" . $vnp_TxnRef;
         $vnp_OrderType  = "other";
         $vnp_IpAddr     = request()->ip();
 
@@ -500,14 +787,10 @@ if ($isFreeship) {
             "vnp_TxnRef"     => $vnp_TxnRef
         ];
 
-        // Nếu có bankCode
         if ($request->bankCode) {
             $inputData['vnp_BankCode'] = $request->bankCode;
         }
 
-        // -------------------------------
-        // SORT KEY + TẠO QUERY & HASH
-        // -------------------------------
         ksort($inputData);
 
         $query = "";
@@ -521,27 +804,15 @@ if ($isFreeship) {
                 $hashdata .= urlencode($key) . "=" . urlencode($value);
                 $i = 1;
             }
-
             $query .= urlencode($key) . "=" . urlencode($value) . '&';
         }
 
-        // -------------------------------
-        // TẠO SECURE HASH ĐÚNG CHUẨN
-        // -------------------------------
         $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-
-        // Append vào URL
         $vnp_Url = $vnp_Url . "?" . $query . "vnp_SecureHash=" . $vnpSecureHash;
-
-        // -------------------------------
-        // LƯU ORDER TẠM (NẾU CẦN)
-        // -------------------------------
-        session()->put('order_data', $request->all());
-        session()->put('vnp_TxnRef', $vnp_TxnRef);
 
         return redirect($vnp_Url);
     }
-    
+
     public function applyPromo(Request $request)
     {
         
@@ -549,8 +820,8 @@ if ($isFreeship) {
 
         // Tìm mã khuyến mãi
         $promo = Khuyenmai::where('ma_code', $code)
-                    ->where('trang_thai', 1)
-                    ->first();
+            ->where('trang_thai', 1)
+            ->first();
 
         if (!$promo) {
             return response()->json([
@@ -562,8 +833,8 @@ if ($isFreeship) {
         // Kiểm tra ngày áp dụng
         $today = now();
         if (($promo->ngay_bat_dau && $today < $promo->ngay_bat_dau) ||
-            ($promo->ngay_ket_thuc && $today > $promo->ngay_ket_thuc)) 
-        {
+            ($promo->ngay_ket_thuc && $today > $promo->ngay_ket_thuc)
+        ) {
             return response()->json([
                 'success' => false,
                 'message' => 'Mã khuyến mãi đã hết hạn!',
@@ -574,7 +845,7 @@ if ($isFreeship) {
         $cart = session('cart', []);
         $total = 0;
         foreach ($cart as $item) {
-            $total += $item['giakhuyenmai'] * $item['quantity'];
+            $total += ($item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0)) * $item['quantity'];
         }
 
         // Kiểm tra đơn tối thiểu
@@ -671,6 +942,5 @@ if ($isFreeship) {
 
         return $feeOutside;
     }
-
-
 }
+

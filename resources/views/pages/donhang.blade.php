@@ -495,6 +495,8 @@
 
                                         'Bị hủy' => 'badge-status--warning',
                                         'Thất bại' => 'badge-status--warning',
+                                        'Chưa thanh toán' => 'badge-status--warning',
+                                        'Đã thanh toán' => 'badge-status--success',
                                     ];
 
                                     $class = $statusClass[$order->trangthai] ?? '';
@@ -595,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             Swal.fire({
                 title: "Mua lại đơn hàng?",
-                text: "Toàn bộ sản phẩm trong đơn hàng cũ này sẽ được đưa vào giỏ hàng và bạn sẽ được chuyển đến trang thanh toán.",
+                text: "Toàn bộ sản phẩm trong đơn hàng cũ này sẽ được thêm vào giỏ hàng của bạn.",
                 icon: "question",
                 showCancelButton: true,
                 confirmButtonColor: "#34A4E0",
