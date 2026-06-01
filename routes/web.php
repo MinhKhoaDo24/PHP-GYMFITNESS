@@ -195,4 +195,7 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::resource('/admin/sizes', \App\Http\Controllers\Admin\SizeController::class);
     Route::post('/admin/sizes/{id}/restore', [\App\Http\Controllers\Admin\SizeController::class, 'restore'])->name('sizes.restore');
 
+    // Quản lý đánh giá (Review/Comment Management)
+    Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
+    Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
 });

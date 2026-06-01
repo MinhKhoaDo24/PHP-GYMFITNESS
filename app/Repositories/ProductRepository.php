@@ -8,12 +8,18 @@ class ProductRepository implements IProductRepository
 {
     public function allProduct()
     {
-        return Sanpham::with(['images', 'sizes'])->where('trang_thai', 1)->get();
+        return Sanpham::with(['images', 'sizes'])
+            ->withAvg('comments', 'rating')
+            ->withCount('comments')
+            ->where('trang_thai', 1)->get();
     }
 
     public function featuredProducts()
     {
-        return Sanpham::with(['images', 'sizes'])->where('noi_bat', 1)
+        return Sanpham::with(['images', 'sizes'])
+            ->withAvg('comments', 'rating')
+            ->withCount('comments')
+            ->where('noi_bat', 1)
             ->where('trang_thai', 1)
             ->get();
     }
@@ -66,6 +72,8 @@ class ProductRepository implements IProductRepository
         $keyword = $request->input('tukhoa');
 
         return Sanpham::with(['images', 'sizes'])
+            ->withAvg('comments', 'rating')
+            ->withCount('comments')
             ->where('tensp', 'LIKE', "%$keyword%")
             ->where('trang_thai', 1)
             ->paginate(12)

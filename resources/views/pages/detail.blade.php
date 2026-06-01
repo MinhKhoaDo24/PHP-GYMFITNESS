@@ -3,6 +3,23 @@
 @endpush
 @extends('layout')
 @section('content')
+@php
+    $totalComments = $comments->count();
+    $averageRating = $totalComments > 0 ? round($comments->avg('rating'), 1) : 0;
+    
+    // Phân bổ sao
+    $starCounts = [
+        5 => $comments->where('rating', 5)->count(),
+        4 => $comments->where('rating', 4)->count(),
+        3 => $comments->where('rating', 3)->count(),
+        2 => $comments->where('rating', 2)->count(),
+        1 => $comments->where('rating', 1)->count(),
+    ];
+    $starPercentages = [];
+    foreach ($starCounts as $star => $count) {
+        $starPercentages[$star] = $totalComments > 0 ? round(($count / $totalComments) * 100) : 0;
+    }
+@endphp
 
 <section class="product-detail-section">
 
@@ -19,10 +36,11 @@
                 <img id="mainImage"
                     src="{{ asset(optional($sanpham->images->first())->duong_dan ?? 'frontend/upload/placeholder.jpg') }}"
                     class="main-image">
-                <!-- OVERLAY XEM ẢNH -->
+                <!-- OVERLAY XEM ẢNH/VIDEO -->
                 <div id="imgOverlay" class="img-overlay">
                     <span class="close-preview">&times;</span>
-                    <img id="imgOverlayDisplay" class="overlay-img">
+                    <img id="imgOverlayDisplay" class="overlay-img" style="display: none;">
+                    <video id="videoOverlayDisplay" class="overlay-img" controls style="display: none; max-width: 85%; max-height: 85%; border-radius: 8px;"></video>
                 </div>
 
             </div>
@@ -52,6 +70,31 @@
         <div class="product-info">
 
             <h1 class="product-title">{{ $sanpham->tensp }}</h1>
+            
+            <div class="product-rating-summary-top" style="margin-top: 5px; margin-bottom: 10px;">
+                @if($totalComments > 0)
+                    <div class="stars-gold" style="color: #ffb800; font-size: 15px; display: flex; align-items: center; gap: 5px;">
+                        <span>
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= round($averageRating))
+                                    <i class="bi bi-star-fill"></i>
+                                @else
+                                    <i class="bi bi-star"></i>
+                                @endif
+                            @endfor
+                        </span>
+                        <strong style="color: #333;">{{ $averageRating }} / 5</strong>
+                        <a href="#comments-section" class="scroll-to-comments" onclick="scrollToCommentsTab(event)" style="color: #34A4E0; margin-left: 5px; font-weight: 600;">({{ $totalComments }} đánh giá)</a>
+                    </div>
+                @else
+                    <div class="stars-gray" style="color: #ccc; font-size: 15px; display: flex; align-items: center; gap: 5px;">
+                        <span>
+                            <i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i>
+                        </span>
+                        <span style="color: #777; font-size: 13px;">Chưa có đánh giá</span>
+                    </div>
+                @endif
+            </div>
 
             <div class="meta">
                 <span><strong>Danh mục: </strong>
@@ -295,47 +338,85 @@
         <div id="tab3" class="tab-pane">
             <h3>Đánh giá sản phẩm</h3>
 
-            <div id="comments-list" class="comments-list">
+            <!-- Bảng Thống kê Đánh giá (Rating Dashboard) -->
+            <div class="rating-dashboard-card">
+                <div class="rating-dashboard-average">
+                    <div class="big-score">{{ $averageRating }}</div>
+                    <div class="average-stars">
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= round($averageRating))
+                                <i class="bi bi-star-fill"></i>
+                            @else
+                                <i class="bi bi-star"></i>
+                            @endif
+                        @endfor
+                    </div>
+                    <div class="total-reviews-count">{{ $totalComments }} đánh giá thực tế</div>
+                </div>
+                
+                <div class="rating-dashboard-bars">
+                    @foreach([5, 4, 3, 2, 1] as $star)
+                        <div class="star-bar-row" data-rating="{{ $star }}" style="cursor: pointer;" title="Lọc đánh giá {{ $star }} sao">
+                            <span class="star-label">{{ $star }} ★</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: {{ $starPercentages[$star] }}%;"></div>
+                            </div>
+                            <span class="percentage-label">{{ $starPercentages[$star] }}%</span>
+                            <span class="count-label">({{ $starCounts[$star] }})</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div id="comments-list" class="comments-list" style="margin-top: 25px;">
                 @if($comments->count() === 0)
                     <p class="no-comments-text">Hiện chưa có đánh giá nào.</p>
                 @else
                     @foreach($comments as $c)
-                        <div class="review-item">
+                        <div class="review-item" data-rating="{{ $c->rating ?? 5 }}">
                             <div class="review-user-info">
                                 <span class="review-author">{{ $c->user->hoten ?? $c->user->name ?? 'Khách hàng' }}</span>
                                 <span class="review-date">{{ $c->created_at ? $c->created_at->format('d-m-Y H:i') : '' }}</span>
                             </div>
+                            <div class="review-stars" style="color: #ffb800; font-size: 13px; margin-bottom: 8px;">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= ($c->rating ?? 5))
+                                        <i class="bi bi-star-fill"></i>
+                                    @else
+                                        <i class="bi bi-star"></i>
+                                    @endif
+                                @endfor
+                            </div>
                             <p class="review-content">{{ $c->content }}</p>
+
+                            @if(!empty($c->images))
+                                <div class="review-attachments-grid" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                    @foreach($c->images as $path)
+                                        @php
+                                            $extension = pathinfo($path, PATHINFO_EXTENSION);
+                                            $isVideo = in_array(strtolower($extension), ['mp4', 'webm', 'ogg', 'mov', 'qt']);
+                                        @endphp
+                                        <div class="attachment-thumbnail-wrapper" style="width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; cursor: pointer; position: relative;">
+                                            @if($isVideo)
+                                                <div class="video-thumbnail-container" onclick="openMediaOverlay('{{ asset($path) }}', true)" style="width: 100%; height: 100%;">
+                                                    <video src="{{ asset($path) }}" class="attachment-thumbnail-video" muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                                    <div class="video-play-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">
+                                                        <i class="bi bi-play-circle-fill"></i>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <img src="{{ asset($path) }}" class="attachment-thumbnail-image" onclick="openMediaOverlay('{{ asset($path) }}', false)" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" />
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 @endif
             </div>
 
-            @auth
-                @if($userHasBought)
-                    <div class="add-comment-box">
-                        <h4>Viết đánh giá của bạn</h4>
-                        <form id="commentForm">
-                            @csrf
-                            <input type="hidden" name="sanpham_id" value="{{ $sanpham->id_sanpham }}">
-                            <div class="form-group">
-                                <textarea name="content" id="commentContent" class="comment-textarea" rows="4" placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm này..." required></textarea>
-                            </div>
-                            <button type="submit" class="comment-submit-btn">Gửi đánh giá</button>
-                        </form>
-                    </div>
-                @else
-                    <div class="comment-warning-box">
-                        <i class="bi bi-info-circle-fill"></i>
-                        <span>Chỉ những khách hàng đã mua sản phẩm này tại RISE FITNESS mới có thể viết đánh giá.</span>
-                    </div>
-                @endif
-            @else
-                <div class="comment-warning-box">
-                    <i class="bi bi-person-fill-lock"></i>
-                    <span>Vui lòng <a href="/login" style="color: #ff8c00; font-weight: 700; text-decoration: underline;">Đăng nhập</a> để viết đánh giá sản phẩm.</span>
-                </div>
-            @endauth
+
         </div>
 
     </div>
@@ -557,25 +638,65 @@ function moveThumbs(direction) {
     const mainImg = document.getElementById("mainImage");
     const overlay = document.getElementById("imgOverlay");
     const overlayImg = document.getElementById("imgOverlayDisplay");
+    const overlayVid = document.getElementById("videoOverlayDisplay");
     const closeBtn = document.querySelector(".close-preview");
 
     // Click ảnh chính → mở overlay
-    mainImg.addEventListener("click", function() {
-        overlayImg.src = this.src;
+    if (mainImg) {
+        mainImg.addEventListener("click", function() {
+            overlayVid.style.display = "none";
+            overlayVid.src = "";
+            overlayImg.src = this.src;
+            overlayImg.style.display = "block";
+            overlay.style.display = "flex";
+        });
+    }
+
+    // Hàm mở xem ảnh/video đính kèm
+    function openMediaOverlay(src, isVideo) {
+        if (isVideo) {
+            overlayImg.style.display = "none";
+            overlayVid.src = src;
+            overlayVid.style.display = "block";
+        } else {
+            overlayVid.style.display = "none";
+            overlayVid.src = "";
+            overlayImg.src = src;
+            overlayImg.style.display = "block";
+        }
         overlay.style.display = "flex";
-    });
+    }
 
     // Click nút close
-    closeBtn.addEventListener("click", function() {
-        overlay.style.display = "none";
-    });
+    if (closeBtn) {
+        closeBtn.addEventListener("click", function() {
+            overlay.style.display = "none";
+            overlayVid.src = ""; // Dừng phát nhạc/video
+        });
+    }
 
     // Click ra ngoài ảnh để đóng
-    overlay.addEventListener("click", function(e) {
-        if (e.target === overlay) {
-            overlay.style.display = "none";
+    if (overlay) {
+        overlay.addEventListener("click", function(e) {
+            if (e.target === overlay) {
+                overlay.style.display = "none";
+                overlayVid.src = "";
+            }
+        });
+    }
+
+    // Hàm cuộn mượt xuống tab bình luận
+    function scrollToCommentsTab(e) {
+        e.preventDefault();
+        const tabBtn = document.querySelector('.tab-btn[data-tab="tab3"]');
+        if (tabBtn) {
+            tabBtn.click();
         }
-    });
+        const section = document.querySelector('.product-tabs-section');
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -608,78 +729,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
-@auth
-@if($userHasBought)
 <script>
-$(document).ready(function() {
-    $('#commentForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        let form = $(this);
-        let content = $('#commentContent').val().trim();
-        if (content === '') return;
+document.addEventListener("DOMContentLoaded", () => {
+    const starRows = document.querySelectorAll('.star-bar-row');
+    const reviewItems = document.querySelectorAll('.review-item');
+    let currentFilter = null; // null means no filter
 
-        $.ajax({
-            url: "{{ route('comment.post') }}",
-            type: "POST",
-            data: form.serialize(),
-            success: function(res) {
-                if (res.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Đã gửi đánh giá',
-                        text: 'Cảm ơn bạn đã đánh giá sản phẩm này!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                    
-                    // Clear the textarea
-                    $('#commentContent').val('');
-                    
-                    // Format date
-                    let formattedDate = 'Vừa xong';
-                    
-                    // Append the new comment to the comments list
-                    let newCommentHtml = `
-                        <div class="review-item" style="opacity: 0; transform: translateY(10px); transition: all 0.3s ease;">
-                            <div class="review-user-info">
-                                <span class="review-author">${res.comment.user.hoten || res.comment.user.name || 'Khách hàng'}</span>
-                                <span class="review-date">${formattedDate}</span>
-                            </div>
-                            <p class="review-content">${res.comment.content}</p>
-                        </div>
-                    `;
-                    
-                    if ($('.no-comments-text').length) {
-                        $('.no-comments-text').remove();
-                    }
-                    
-                    let $newEl = $(newCommentHtml);
-                    $('#comments-list').append($newEl);
-                    
-                    // Trigger animation
-                    setTimeout(() => {
-                        $newEl.css({
-                            'opacity': 1,
-                            'transform': 'translateY(0)'
-                        });
-                    }, 50);
+    starRows.forEach(row => {
+        row.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            
+            // Nếu click lại vào dòng đang lọc -> Hủy lọc
+            if (currentFilter === rating) {
+                currentFilter = null;
+                // Xóa hiệu ứng mờ
+                starRows.forEach(r => {
+                    r.style.opacity = '1';
+                    r.style.transform = 'scale(1)';
+                });
+            } else {
+                currentFilter = rating;
+                // Làm mờ các dòng khác, làm nổi bật dòng được chọn
+                starRows.forEach(r => {
+                    r.style.opacity = '0.4';
+                    r.style.transform = 'scale(1)';
+                    r.style.transition = 'all 0.3s ease';
+                });
+                this.style.opacity = '1';
+                this.style.transform = 'scale(1.02)';
+            }
+            
+            // Lọc các review
+            let visibleCount = 0;
+            reviewItems.forEach(item => {
+                const itemRating = item.getAttribute('data-rating');
+                if (currentFilter === null || itemRating === currentFilter) {
+                    item.style.display = 'block';
+                    visibleCount++;
                 } else {
-                    Swal.fire('Lỗi', res.message || 'Đã xảy ra lỗi khi gửi đánh giá.', 'error');
+                    item.style.display = 'none';
                 }
-            },
-            error: function(xhr) {
-                let msg = 'Đã xảy ra lỗi khi gửi đánh giá.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    msg = xhr.responseJSON.message;
+            });
+            
+            // Hiển thị thông báo nếu không có comment nào khớp
+            let noCommentsMsg = document.getElementById('no-filtered-comments');
+            if (visibleCount === 0 && reviewItems.length > 0) {
+                if (!noCommentsMsg) {
+                    noCommentsMsg = document.createElement('p');
+                    noCommentsMsg.id = 'no-filtered-comments';
+                    noCommentsMsg.className = 'no-comments-text';
+                    noCommentsMsg.style.textAlign = 'center';
+                    noCommentsMsg.style.marginTop = '20px';
+                    noCommentsMsg.style.color = '#777';
+                    document.getElementById('comments-list').appendChild(noCommentsMsg);
                 }
-                Swal.fire('Lỗi', msg, 'error');
+                noCommentsMsg.innerText = `Không có đánh giá ${currentFilter} sao nào.`;
+                noCommentsMsg.style.display = 'block';
+            } else if (noCommentsMsg) {
+                noCommentsMsg.style.display = 'none';
             }
         });
     });
 });
 </script>
-@endif
-@endauth
 
 @endsection

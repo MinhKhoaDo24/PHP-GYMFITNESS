@@ -141,7 +141,7 @@ class AuthController extends Controller
                 );
             }
 
-            return redirect('/')
+            return redirect()->intended('/')
                 ->with('thongbao', 'Đăng nhập thành công!')
                 ->withCookie(Cookie::queued('remember_token') ?? cookie()->forget('remember_token'));
         }
