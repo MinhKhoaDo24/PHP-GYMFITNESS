@@ -208,7 +208,13 @@
 
             @if($sanpham->co_size == 1)
                 <div class="size-selection-box">
-                    <span class="d-block mb-2 font-weight-bold">Chọn Kích Thước (Size):</span>
+                    <span class="d-block mb-2 font-weight-bold">
+                        @if(in_array($sanpham->id_danhmuc, [5, 6, 7]))
+                            Chọn Hương Vị / Quy Cách:
+                        @else
+                            Chọn Kích Thước (Size):
+                        @endif
+                    </span>
                     <div class="size-options">
                         @foreach($sanpham->sizes as $sz)
                             @php
@@ -229,7 +235,13 @@
                             </div>
                         @endforeach
                     </div>
-                    <div id="size-selection-error" class="size-warning-red" style="display: none;">Vui lòng chọn kích thước (size) trước khi mua!</div>
+                    <div id="size-selection-error" class="size-warning-red" style="display: none;">
+                        @if(in_array($sanpham->id_danhmuc, [5, 6, 7]))
+                            Vui lòng chọn hương vị / quy cách trước khi mua!
+                        @else
+                            Vui lòng chọn kích thước (size) trước khi mua!
+                        @endif
+                    </div>
                 </div>
             @endif
 

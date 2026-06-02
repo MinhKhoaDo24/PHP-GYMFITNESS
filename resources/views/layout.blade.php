@@ -310,6 +310,7 @@
             e.stopPropagation();
 
             const coSize = btn.getAttribute('data-co-size');
+            const isSupplement = btn.getAttribute('data-is-supplement') === '1';
             const productId = btn.getAttribute('data-id') || btn.getAttribute('data-url').split('/').pop();
             const productName = btn.getAttribute('data-name') || 'Sản phẩm';
 
@@ -325,13 +326,16 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Thông báo',
-                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình kích thước!'
+                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình!'
                     });
                     return;
                 }
 
+                const labelText = isSupplement ? 'Vui lòng chọn hương vị / quy cách của sản phẩm:' : 'Vui lòng chọn kích thước (Size) của sản phẩm:';
+                const validationText = isSupplement ? 'Vui lòng chọn hương vị / quy cách trước khi thêm vào giỏ hàng!' : 'Vui lòng chọn một size trước khi thêm vào giỏ hàng!';
+
                 let sizesHtml = `
-                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">Vui lòng chọn kích thước (Size) của sản phẩm:</p>
+                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">${labelText}</p>
                     <div class="swal-size-options" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 15px; margin-bottom: 15px;">
                 `;
 
@@ -383,7 +387,7 @@
                     preConfirm: () => {
                         const active = Swal.getHtmlContainer().querySelector('.swal-size-btn.active');
                         if (!active) {
-                            Swal.showValidationMessage('Vui lòng chọn một size trước khi thêm vào giỏ hàng!');
+                            Swal.showValidationMessage(validationText);
                             return false;
                         }
                         return active.getAttribute('data-id');

@@ -15,6 +15,7 @@
            data-id="{{ $p->id_sanpham }}"
            data-name="{{ $p->tensp }}"
            data-co-size="{{ $p->co_size }}"
+           data-is-supplement="{{ in_array($p->id_danhmuc, [5, 6, 7]) ? 1 : 0 }}"
            data-sizes="{{ $p->co_size == 1 ? json_encode($p->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
             <i class="fa fa-shopping-cart"></i>
         </a>
