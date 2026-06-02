@@ -13,7 +13,8 @@ use App\Http\Controllers\{
     ProfileController,
     EmailVerificationController,
     ChatController,
-    GuestCheckoutController
+    GuestCheckoutController,
+    GoiTapController,
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
