@@ -12,7 +12,8 @@ use App\Http\Controllers\{
     ForgotPasswordController,
     ProfileController,
     EmailVerificationController,
-    ChatController
+    ChatController,
+    GuestCheckoutController
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
@@ -90,6 +91,11 @@ Route::prefix('/')->middleware('orderview')->group(function () {
     Route::post('/donhang/repurchase/{id}', [OrderViewController::class, 'repurchase'])->name('donhang.repurchase');
 });
 Route::post('/donhang/cancel/{id}', [OrderViewController::class, 'cancel'])->name('donhang.cancel');
+
+// Guest Checkout - Tra cứu đơn hàng cho khách vãng lai
+Route::get('/tra-cuu-don-hang', [GuestCheckoutController::class, 'showSearchForm'])->name('guest.search-form');
+Route::post('/tra-cuu-don-hang', [GuestCheckoutController::class, 'search'])->name('guest.search');
+Route::get('/tra-cuu-don-hang/{id}', [GuestCheckoutController::class, 'showDetail'])->name('donhang.guest-detail');
 
 
 Route::get('/login', [AuthController::class, 'index']);

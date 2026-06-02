@@ -131,13 +131,16 @@
                             <a href="{{ route('dang-ky-tap-thu') }}" class="hover-a">Đăng ký tập thử</a>
                         </li>
 
+                        @if(Auth::check())
                         <li class="{{ request()->is('donhang') ? 'active' : '' }}">
                             <a href="{{ URL::to('/donhang') }}" class="hover-a">Đơn hàng</a>
                         </li>
-
-                        @if (Auth::check())
                         <li class="{{ request()->is('goi-tap/lich-su') ? 'active' : '' }}">
                             <a href="{{ route('goitap.history') }}" class="hover-a">Gói tập của tôi</a>
+                        </li>
+                        @else
+                        <li class="{{ request()->is('tra-cuu-don-hang') ? 'active' : '' }}">
+                            <a href="{{ URL::to('/tra-cuu-don-hang') }}" class="hover-a">Tra cứu đơn hàng</a>
                         </li>
                         @endif
                     </ul>
@@ -239,7 +242,11 @@
                         <ul>
                             <li><a href="{{ URL::to('/services') }}">Giới thiệu</a></li>
                             <li><a href="{{ URL::to('/test') }}">Dịch vụ</a></li>
+                            @if(Auth::check())
                             <li><a href="{{ URL::to('/donhang') }}">Đơn hàng</a></li>
+                            @else
+                            <li><a href="{{ URL::to('/tra-cuu-don-hang') }}">Tra cứu đơn hàng</a></li>
+                            @endif
                             <li><a href="{{ URL::to('/viewAll') }}">Sản phẩm</a></li>
                         </ul>
                         <ul>

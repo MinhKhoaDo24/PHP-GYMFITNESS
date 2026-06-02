@@ -723,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const orderId = $(this).data('order-id');
         const products = $(this).data('products');
         
-        $('#reviewModalLabel').text('Đánh giá sản phẩm - Đơn hàng #' + orderId);
+        $('#reviewModalLabel').text('Đánh giá sản phẩm - Đơn hàng #RF-' + String(orderId).padStart(5, '0'));
         
         let container = $('#modalProductsContainer');
         container.html('');
