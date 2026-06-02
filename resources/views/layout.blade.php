@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Chào mừng đến với Rise Fitness & Yoga</title>
     <link rel="shortcut icon" type="image/png" href="/frontend/img/LOGO.png" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -556,6 +557,9 @@
         }
     </script>
     <script src="/frontend/script/script.js"></script>
+
+    <!-- Chat Bubble Component -->
+    @include('components.chat-bubble')
 </body>
 
 </html>

@@ -11,7 +11,8 @@ use App\Http\Controllers\{
     CommentController,
     ForgotPasswordController,
     ProfileController,
-    EmailVerificationController
+    EmailVerificationController,
+    ChatController
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
@@ -200,3 +201,25 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
     Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
 });
+
+// ─── CHAT SYSTEM ────────────────────────────────────────────────────────────
+Route::middleware('auth')->prefix('/chat')->group(function () {
+    Route::get('/', [ChatController::class, 'getConversations'])->name('chat.conversations');
+    Route::post('/start', [ChatController::class, 'startConversation'])->name('chat.start');
+    Route::get('/{id}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::post('/{id}/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::post('/{id}/accept', [ChatController::class, 'acceptConversation'])->name('chat.accept');
+    Route::post('/{id}/close', [ChatController::class, 'closeConversation'])->name('chat.close');
+});
+// ────────────────────────────────────────────────────────────────────────────
+
+// ─── TELEGRAM WEBHOOK ────────────────────────────────────────────────────────
+// Nhận lệnh /reply từ admin trong Telegram
+Route::post('/telegram/webhook', function (\Illuminate\Http\Request $request) {
+    $update = $request->all();
+    if (!empty($update)) {
+        app(\App\Services\TelegramService::class)->handleWebhook($update);
+    }
+    return response()->json(['ok' => true]);
+})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('telegram.webhook');
+// ─────────────────────────────────────────────────────────────────────────────
