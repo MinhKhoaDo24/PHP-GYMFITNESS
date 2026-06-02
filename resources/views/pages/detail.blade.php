@@ -114,12 +114,12 @@
 
             <div class="price-box">
                 <span class="current-price">
-                    {{ number_format($sanpham->giakhuyenmai ?: $sanpham->giasp) }}đ
+                    {{ number_format($sanpham->giakhuyenmai ?: $sanpham->giasp, 0, ',', '.') }}đ
                 </span>
 
                 @if($sanpham->giakhuyenmai > 0 && $sanpham->giakhuyenmai < $sanpham->giasp)
-                    <span class="old-price">{{ number_format($sanpham->giasp) }}đ</span>
-                    <span class="save-price">Tiết kiệm: {{ number_format($sanpham->giasp - $sanpham->giakhuyenmai) }}đ</span>
+                    <span class="old-price">{{ number_format($sanpham->giasp, 0, ',', '.') }}đ</span>
+                    <span class="save-price">Tiết kiệm: {{ number_format($sanpham->giasp - $sanpham->giakhuyenmai, 0, ',', '.') }}đ</span>
                 @endif
             </div>
 
@@ -225,10 +225,6 @@
                                 </button>
                                 @if($isOutOfStock)
                                     <div class="out-of-stock-text-inline">Đang hết hàng</div>
-                                @else
-                                    @if($sz->pivot->gia_cong_them > 0)
-                                        <div class="size-surcharge-text">+{{ number_format($sz->pivot->gia_cong_them) }}đ</div>
-                                    @endif
                                 @endif
                             </div>
                         @endforeach
@@ -515,6 +511,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // Auto select first available size on page load
+    if (coSize === 1) {
+        const firstAvailableBtn = document.querySelector('.btn-size-option:not([disabled])');
+        if (firstAvailableBtn) {
+            firstAvailableBtn.click();
+        }
+    }
     
     // Add to cart click handler
     const addCartBtn = document.querySelector('.btn.add-cart');

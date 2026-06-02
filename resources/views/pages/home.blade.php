@@ -18,9 +18,10 @@
             <p class="slogan">Chinh phục vóc dáng, bứt phá giới hạn!</p>
             <div class="banner-buttons">
                 <a href="{{ route('dang-ky-tap-thu') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Đăng ký tập thử</a>
+                <a href="{{ route('services.gym') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
                 <a href="{{ route('services') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
             </div>
-        </div>
+        </div>  
     </div>
     <div class="marquee-container">
             <div class="marquee">
@@ -204,8 +205,8 @@
 
                         <!-- PRICE -->
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                            <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $sp->giamgia }}%</span>
                         </div>
 
@@ -297,8 +298,8 @@
 
                     <!-- PRICE -->
                     <div class="sale-price">
-                        <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                        <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                        <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                        <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                         <span class="discount">-{{ $sp->giamgia }}%</span>
                     </div>
 
@@ -383,8 +384,8 @@
 
                     <!-- PRICE -->
                     <div class="sale-price">
-                        <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                        <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                        <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                        <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                         <span class="discount">-{{ $sp->giamgia }}%</span>
                     </div>
 
@@ -457,8 +458,8 @@
 
                         <!-- PRICE -->
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                            <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $sp->giamgia }}%</span>
                         </div>
 

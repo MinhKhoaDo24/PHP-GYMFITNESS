@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GymZone – Nhắc nhở lịch tập thử</title>
+    <title>Rise Fitness – Nhắc nhở lịch tập thử</title>
 </head>
 <body style="font-family: 'Inter', sans-serif; line-height: 1.6; color: #222; max-width: 600px; margin: 0 auto; padding: 20px; background:#fafafa;">
     <div style="text-align:center; margin-bottom:20px;">
@@ -21,7 +21,7 @@
 
     <p>Hãy chuẩn bị trang phục thể thao, năng lượng tích cực và sẵn sàng chinh phục những thử thách mới. Chúng tôi sẽ đón chào bạn với sự nhiệt tình và chuyên nghiệp.</p>
 
-    <p>Hẹn gặp lại bạn tại <strong>GymZone</strong>!</p>
+    <p>Hẹn gặp lại bạn tại <strong>Rise Fitness</strong>!</p>
 
     <br>
     <p>Trân trọng,</p>

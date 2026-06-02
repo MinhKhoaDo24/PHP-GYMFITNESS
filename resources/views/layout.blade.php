@@ -131,9 +131,18 @@
                             <a href="{{ route('dang-ky-tap-thu') }}" class="hover-a">Đăng ký tập thử</a>
                         </li>
 
+                        @if(Auth::check())
                         <li class="{{ request()->is('donhang') ? 'active' : '' }}">
                             <a href="{{ URL::to('/donhang') }}" class="hover-a">Đơn hàng</a>
                         </li>
+                        <li class="{{ request()->is('goi-tap/lich-su') ? 'active' : '' }}">
+                            <a href="{{ route('goitap.history') }}" class="hover-a">Gói tập của tôi</a>
+                        </li>
+                        @else
+                        <li class="{{ request()->is('tra-cuu-don-hang') ? 'active' : '' }}">
+                            <a href="{{ URL::to('/tra-cuu-don-hang') }}" class="hover-a">Tra cứu đơn hàng</a>
+                        </li>
+                        @endif
                     </ul>
                 </div>
 
@@ -233,7 +242,11 @@
                         <ul>
                             <li><a href="{{ URL::to('/services') }}">Giới thiệu</a></li>
                             <li><a href="{{ URL::to('/test') }}">Dịch vụ</a></li>
+                            @if(Auth::check())
                             <li><a href="{{ URL::to('/donhang') }}">Đơn hàng</a></li>
+                            @else
+                            <li><a href="{{ URL::to('/tra-cuu-don-hang') }}">Tra cứu đơn hàng</a></li>
+                            @endif
                             <li><a href="{{ URL::to('/viewAll') }}">Sản phẩm</a></li>
                         </ul>
                         <ul>
@@ -281,7 +294,7 @@
             </div>
 
             <div class="site-footer__bottom">
-                <span>Rise Fitness © All Rights Reserved – 2025</span>
+                <span>Rise Fitness © All Rights Reserved – 2026</span>
             </div>
         </div>
     </footer>
@@ -324,7 +337,6 @@
 
                 sizes.forEach(sz => {
                     const isOos = sz.qty <= 0;
-                    const surchargeText = sz.surcharge > 0 ? ` (+${sz.surcharge.toLocaleString('vi-VN')}đ)` : '';
                     sizesHtml += `
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
                             <button type="button" class="swal-size-btn ${isOos ? 'swal-size-disabled' : ''}" 
@@ -333,7 +345,7 @@
                                 ${sz.name}
                             </button>
                             <span style="font-size: 12px; font-weight: 600; color: ${isOos ? '#ef4444' : '#10b981'}">
-                                ${isOos ? 'Hết hàng' : (sz.surcharge > 0 ? surchargeText : 'Mặc định')}
+                                ${isOos ? 'Hết hàng' : 'Còn hàng'}
                             </span>
                         </div>
                     `;

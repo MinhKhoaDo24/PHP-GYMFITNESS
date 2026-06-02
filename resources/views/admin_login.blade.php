@@ -166,7 +166,7 @@
         </div>
 
         {{-- FORM ĐĂNG NHẬP --}}
-        <form action="{{ URL::to('/signinDashboard') }}" method="POST" autocomplete="off">
+        <form action="/signinDashboard" method="POST" autocomplete="off">
             @csrf
 
             {{-- Email --}}

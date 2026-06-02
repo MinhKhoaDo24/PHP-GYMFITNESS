@@ -111,6 +111,7 @@
 /* phần dưới: nội dung */
 .rf-package-body {
     padding: 0.7rem 1.2rem 0.8rem;
+    text-align: center;
 }
 
 .rf-package-name {
@@ -123,9 +124,33 @@
 .rf-package-subtitle {
     font-size: 0.95rem;
     font-weight: 600;
-    text-align: center;
     color: #000;
     margin-bottom: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* Styling cho từng loại gói */
+.rf-package-type-diamond {
+    background: linear-gradient(135deg, #db2777 0%, #e94b8f 100%);
+    color: #fff !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.rf-package-type-gold {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    color: #fff !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.rf-package-type-silver {
+    background: linear-gradient(135deg, #9ca3af 0%, #d1d5db 100%);
+    color: #fff !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .rf-package-list {
@@ -152,6 +177,34 @@
     color: #34A4E0;            /* xanh dương */
     font-size: 0.9rem;
     font-weight: 700;
+}
+
+/* Nút đăng ký */
+.rf-package-button {
+    margin-top: auto;        /* Đẩy nút xuống dưới cùng */
+    padding: 1rem 1.2rem 1.2rem;
+    text-align: center;
+}
+
+.rf-package-button a {
+    display: inline-block;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #34A4E0;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rf-package-button a:hover {
+    background-color: #108fd4;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(52, 164, 224, 0.4);
+    color: #ffffff;
 }
 
 /* Arrow buttons */

@@ -26,8 +26,8 @@
     <h3 class="sale-name">{{ $p->tensp }}</h3>
 
     <div class="sale-price">
-        <span class="new-price">{{ number_format($p->giakhuyenmai) }}đ</span>
-        <span class="old-price">{{ number_format($p->giasp) }}đ</span>
+        <span class="new-price">{{ number_format($p->giakhuyenmai, 0, ',', '.') }}đ</span>
+        <span class="old-price">{{ number_format($p->giasp, 0, ',', '.') }}đ</span>
         <span class="discount">-{{ $p->giamgia }}%</span>
     </div>
 
@@ -47,7 +47,7 @@
     </div>
 
     <div class="benefit">🔥 Giá tốt nhất thị trường</div>
-    <div class="gift">🎁 Quà tặng trị giá {{ rand(100000,200000) }}đ</div>
+    <div class="gift">🎁 Quà tặng trị giá {{ number_format(rand(100, 200) * 1000, 0, ',', '.') }}đ</div>
 
     <div class="progress-bar">
         <div class="progress" style="width: {{ rand(40,80) }}%"></div>

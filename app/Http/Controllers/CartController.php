@@ -31,18 +31,42 @@ class CartController extends Controller
         $totalSalePrice = 0;
         $totalSurcharge = 0;
 
-        foreach ($cart as $item) {
+        $stock = [];
+        $sizes = [];
+
+        foreach ($cart as $id => $item) {
             $qty          = $item['quantity'] ?? 0;
             $surcharge    = $item['gia_cong_them'] ?? 0;
-            $giaGoc       = ($item['giasp'] ?? 0);
-            $giaKhuyenMai = ($item['giakhuyenmai'] ?? $giaGoc);
+            $giaGoc       = ($item['giasp'] ?? 0) + $surcharge;
+            $giaKhuyenMai = ($item['giakhuyenmai'] ?? ($item['giasp'] ?? 0)) + $surcharge;
 
             $totalOriginal  += $giaGoc       * $qty;
             $totalSalePrice += $giaKhuyenMai * $qty;
             $totalSurcharge += $surcharge    * $qty;
+
+            // Load product sizes and stock
+            $product = Sanpham::with('sizes')->find($item['id_sanpham']);
+            if ($product) {
+                if ($product->co_size == 1) {
+                    $sizes[$id] = $product->sizes;
+                } else {
+                    $sizes[$id] = [];
+                }
+
+                $szId = $item['id_size'] ?? null;
+                if ($product->co_size == 1 && $szId) {
+                    $sizePivot = $product->sizes()->where('sanpham_size.id_size', $szId)->first();
+                    $stock[$id] = $sizePivot ? $sizePivot->pivot->soluong : 0;
+                } else {
+                    $stock[$id] = $product->soluong;
+                }
+            } else {
+                $sizes[$id] = [];
+                $stock[$id] = 0;
+            }
         }
 
-        $totalFinal = $totalSalePrice + $totalSurcharge;
+        $totalFinal = $totalSalePrice;
         $totalDiscount = $totalOriginal - $totalSalePrice;
 
         return view('pages.cart', compact(
@@ -50,7 +74,9 @@ class CartController extends Controller
             'totalOriginal',
             'totalDiscount',
             'totalFinal',
-            'totalSurcharge'
+            'totalSurcharge',
+            'stock',
+            'sizes'
         ));
     }
 
@@ -277,15 +303,14 @@ class CartController extends Controller
             foreach ($cart as $item) {
                 $qty          = $item['quantity'];
                 $surcharge    = $item['gia_cong_them'] ?? 0;
-                $giaGoc       = $item['giasp'];
-                $giaKM        = $item['giakhuyenmai'];
+                $giaGoc       = $item['giasp'] + $surcharge;
+                $giaKM        = $item['giakhuyenmai'] + $surcharge;
 
                 $totalOriginal  += $giaGoc * $qty;
                 $totalSalePrice += $giaKM  * $qty;
-                $totalSurcharge += $surcharge * $qty;
             }
 
-            $totalFinal = $totalSalePrice + $totalSurcharge;
+            $totalFinal = $totalSalePrice;
             $totalDiscount = $totalOriginal - $totalSalePrice;
 
             return response()->json([
@@ -303,6 +328,118 @@ class CartController extends Controller
             'status' => 'error',
             'message' => 'Sản phẩm không tồn tại trong giỏ hàng.'
         ], 400);
+    }
+
+    public function updateSize(Request $request)
+    {
+        $id = $request->id;
+        $newSizeId = $request->id_size;
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$id])) {
+            $item = $cart[$id];
+            $productId = $item['id_sanpham'];
+            $product = Sanpham::with('sizes')->find($productId);
+
+            if (!$product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Sản phẩm không tồn tại.'
+                ], 404);
+            }
+
+            if ($product->co_size != 1) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Sản phẩm này không hỗ trợ chọn size.'
+                ], 400);
+            }
+
+            $sizePivot = $product->sizes()->where('sanpham_size.id_size', $newSizeId)->first();
+            if (!$sizePivot) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Size được chọn không hợp lệ.'
+                ], 400);
+            }
+
+            $newMaxQty = (int)$sizePivot->pivot->soluong;
+            if ($newMaxQty <= 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Size này đã hết hàng.'
+                ], 400);
+            }
+
+            $qty = $item['quantity'];
+            $warning = null;
+            if ($qty > $newMaxQty) {
+                $qty = $newMaxQty;
+                $warning = "Đã điều chỉnh số lượng thành {$newMaxQty} do giới hạn tồn kho của size mới.";
+            }
+
+            $newCartKey = $productId . '_' . $newSizeId;
+
+            unset($cart[$id]);
+
+            if (isset($cart[$newCartKey])) {
+                $mergedQty = $cart[$newCartKey]['quantity'] + $qty;
+                if ($mergedQty > $newMaxQty) {
+                    $mergedQty = $newMaxQty;
+                    $warning = "Đã gộp giỏ hàng và điều chỉnh số lượng thành {$newMaxQty} (tối đa tồn kho của size này).";
+                }
+                $cart[$newCartKey]['quantity'] = $mergedQty;
+            } else {
+                $cart[$newCartKey] = [
+                    "id_sanpham"    => $productId,
+                    "tensp"         => $product->tensp,
+                    "anhsp"         => $item['anhsp'],
+                    "giasp"         => $product->giasp,
+                    "giamgia"       => $product->giamgia,
+                    "giakhuyenmai"  => $product->giakhuyenmai,
+                    "quantity"      => $qty,
+                    "id_size"       => (int)$newSizeId,
+                    "ten_size"      => $sizePivot->ten_size,
+                    "gia_cong_them" => (int)$sizePivot->pivot->gia_cong_them
+                ];
+            }
+
+            session()->put('cart', $cart);
+
+            $totalOriginal = 0;
+            $totalSalePrice = 0;
+            $totalSurcharge = 0;
+
+            foreach ($cart as $cartItem) {
+                $q            = $cartItem['quantity'];
+                $surcharge    = $cartItem['gia_cong_them'] ?? 0;
+                $giaGoc       = $cartItem['giasp'];
+                $giaKM        = $cartItem['giakhuyenmai'];
+
+                $totalOriginal  += $giaGoc * $q;
+                $totalSalePrice += $giaKM  * $q;
+                $totalSurcharge += $surcharge * $q;
+            }
+
+            $totalFinal = $totalSalePrice + $totalSurcharge;
+            $totalDiscount = $totalOriginal - $totalSalePrice;
+
+            return response()->json([
+                'status'          => 'success',
+                'warning'         => $warning,
+                'total_original'  => $totalOriginal,
+                'total_discount'  => $totalDiscount,
+                'total_final'     => $totalFinal,
+                'total_surcharge' => $totalSurcharge,
+                'message'         => 'Thay đổi size thành công!',
+                'redirect'        => route('cart')
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Không tìm thấy sản phẩm tương ứng trong giỏ hàng.'
+        ], 404);
     }
 
     public function remove($id)
@@ -329,20 +466,19 @@ class CartController extends Controller
     public function checkout()
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->guest('/login')->with('needLogin', true);
-        }
-
+        
         $buyNow = session()->get('buy_now');
         $cart = !empty($buyNow) ? $buyNow : session()->get('cart', []);
         if (empty($cart)) {
             return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
 
-        $showusers = DB::table('nguoidung')
-            ->select('nguoidung.*')
-            ->where('nguoidung.id_nd', $user->id_nd)
-            ->get();
+        $showusers = $user 
+            ? DB::table('nguoidung')
+                ->select('nguoidung.*')
+                ->where('nguoidung.id_nd', $user->id_nd)
+                ->get()
+            : collect();
 
         $total = 0;
         $totalSurcharge = 0;
@@ -418,7 +554,7 @@ class CartController extends Controller
             // Kiểm tra điều kiện mã Freeship
             if ($km->kieu_giam === 'freeship') {
                 if ($km->don_toi_thieu != null && $tongtien < $km->don_toi_thieu) {
-                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!");
+                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu, 0, ',', '.') . "đ trở lên mới được miễn phí vận chuyển!");
                 }
             }
 
@@ -514,7 +650,7 @@ if ($isFreeship) {
             'sdt'          => $request->display_sdt,
             'ngaydathang'  => now(),
             'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::user()->id_nd,
+            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
         ]);
 
         // -----------------------------
@@ -534,7 +670,7 @@ if ($isFreeship) {
                 'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::user()->id_nd,
+                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
             // Trừ tồn kho
@@ -576,7 +712,7 @@ if ($isFreeship) {
             session()->forget('cart');
         }
 
-        return view('pages.thongbaodathang');
+        return view('pages.thongbaodathang', compact('order'));
     }
 
     public function thongbaodathang(Request $request)
@@ -593,7 +729,7 @@ if ($isFreeship) {
                     $order->trangthai = 'Đã thanh toán';
                     $order->save();
 
-                    return view('pages.thongbaodathang');
+                    return view('pages.thongbaodathang', compact('order'));
                 } else {
                     // Cập nhật trạng thái thành Thất bại khi giao dịch thất bại
                     $order->trangthai = 'Thất bại';
@@ -699,7 +835,7 @@ if ($isFreeship) {
             'email'        => $request->display_email,
             'sdt'          => $request->display_sdt,
             'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::user()->id_nd,
+            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
             'trangthai'    => 'Chờ xác nhận',
         ]);
 
@@ -720,7 +856,7 @@ if ($isFreeship) {
                 'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::user()->id_nd,
+                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
             // Trừ tồn kho
@@ -847,7 +983,7 @@ if ($isFreeship) {
         if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
             return response()->json([
                 'success' => false,
-                'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã khuyến mãi!',
+                'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã khuyến mãi (tối thiểu ' . number_format($promo->don_toi_thieu, 0, ',', '.') . 'đ)!',
             ]);
         }
 
@@ -864,7 +1000,7 @@ if ($isFreeship) {
             if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!",
+                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu, 0, ',', '.') . "đ trở lên mới được miễn phí vận chuyển!",
                 ]);
             }
         }
