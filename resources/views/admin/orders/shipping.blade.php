@@ -164,7 +164,7 @@
         <tbody>
         @forelse($orders as $order)
             <tr>
-                <td>#{{ $order->id_dathang }}</td>
+                <td>#RF-{{ str_pad($order->id_dathang, 5, '0', STR_PAD_LEFT) }}</td>
                 <td>{{ \Carbon\Carbon::parse($order->ngaydathang)->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->hoten }}</td>
                 <td>{{ number_format($order->tongtien) }} đ</td>

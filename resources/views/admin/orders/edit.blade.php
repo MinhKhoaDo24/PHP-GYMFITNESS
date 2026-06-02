@@ -152,7 +152,7 @@
 {{-- ======================= TITLE ======================= --}}
 <div class="order-title mb-3">
     <i class="bi bi-receipt-cutoff"></i>
-    Chỉnh sửa đơn hàng #{{ $order->id_dathang }}
+    Chỉnh sửa đơn hàng #RF-{{ str_pad($order->id_dathang, 5, '0', STR_PAD_LEFT) }}
 </div>
 
 {{-- ERROR --}}

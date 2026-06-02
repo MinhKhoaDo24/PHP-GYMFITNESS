@@ -80,7 +80,7 @@
 {{-- TITLE --}}
 <div class="detail-title mb-3">
     <i class="bi bi-eye"></i>
-    Chi tiết đơn hàng #{{ $order->id_dathang }}
+    Chi tiết đơn hàng #RF-{{ str_pad($order->id_dathang, 5, '0', STR_PAD_LEFT) }}
 </div>
 
 {{-- THÔNG TIN KHÁCH HÀNG --}}

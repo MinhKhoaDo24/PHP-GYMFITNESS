@@ -115,11 +115,11 @@
 
             <div class="form-group mb-4">
                 <label for="ma_don_hang"><i class="bi bi-hash text-primary"></i> Mã đơn hàng <span class="text-danger">*</span></label>
-                <input type="number" 
+                <input type="text" 
                        name="ma_don_hang" 
                        id="ma_don_hang" 
                        class="form-control form-control-premium" 
-                       placeholder="Ví dụ: 15" 
+                       placeholder="Nhập mã đơn hàng..." 
                        value="{{ old('ma_don_hang') }}"
                        required>
             </div>
@@ -130,7 +130,7 @@
                        name="sdt" 
                        id="sdt" 
                        class="form-control form-control-premium" 
-                       placeholder="Ví dụ: 0987654321" 
+                       placeholder="Nhập số điện thoại..." 
                        value="{{ old('sdt') }}"
                        pattern="^0\d{9}$"
                        maxlength="10"

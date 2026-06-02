@@ -22,16 +22,16 @@ class GuestCheckoutController extends Controller
     {
         // Xác thực dữ liệu đầu vào
         $request->validate([
-            'ma_don_hang' => ['required', 'numeric', 'min:1'],
+            'ma_don_hang' => ['required'],
             'sdt'         => ['required', 'regex:/^(0\d{9}|\d{9})$/'],
         ], [
             'ma_don_hang.required' => 'Mã đơn hàng không được để trống.',
-            'ma_don_hang.numeric'  => 'Mã đơn hàng phải là số.',
             'sdt.required'         => 'Số điện thoại không được để trống.',
             'sdt.regex'            => 'Số điện thoại không hợp lệ.',
         ]);
 
-        $maDonHang = $request->input('ma_don_hang');
+        // Lọc bỏ tiền tố RF- và các số 0 ở đầu (nếu khách nhập đúng định dạng mã mới)
+        $maDonHang = preg_replace('/[^0-9]/', '', $request->input('ma_don_hang'));
         $sdt       = $request->input('sdt');
 
         // Tìm đơn hàng theo id_dathang + sdt

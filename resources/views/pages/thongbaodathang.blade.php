@@ -202,7 +202,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">Mã đơn hàng:</span>
-                    <span class="info-val text-primary" style="font-size: 16px;">#{{ $order->id_dathang }}</span>
+                    <span class="info-val text-primary" style="font-size: 16px;">#RF-{{ str_pad($order->id_dathang, 5, '0', STR_PAD_LEFT) }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Khách hàng nhận:</span>
@@ -229,7 +229,7 @@
                     </div>
                     <div class="guest-warning-text">
                         <strong>Lưu ý quan trọng cho Khách vãng lai:</strong> <br>
-                        Vui lòng lưu lại <strong>Mã đơn hàng (#{{ $order->id_dathang }})</strong> và <strong>Số điện thoại (0{{ ltrim($order->sdt, '0') }})</strong> để có thể tra cứu hành trình và trạng thái đơn hàng của bạn.
+                        Vui lòng lưu lại <strong>Mã đơn hàng (#RF-{{ str_pad($order->id_dathang, 5, '0', STR_PAD_LEFT) }})</strong> và <strong>Số điện thoại (0{{ ltrim($order->sdt, '0') }})</strong> để có thể tra cứu hành trình và trạng thái đơn hàng của bạn.
                     </div>
                 </div>
             @endif
