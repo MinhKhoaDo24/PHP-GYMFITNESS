@@ -336,7 +336,11 @@
         </div>
 
 
-        <a href="{{ URL::to('/donhang') }}" class="btn btn-outline-main mt-4">← Quay lại</a>
+        @if(Auth::check())
+            <a href="{{ URL::to('/donhang') }}" class="btn btn-outline-main mt-4">← Quay lại</a>
+        @else
+            <a href="{{ URL::to('/tra-cuu-don-hang') }}" class="btn btn-outline-main mt-4">← Quay lại</a>
+        @endif
 
     </div>
 </div>

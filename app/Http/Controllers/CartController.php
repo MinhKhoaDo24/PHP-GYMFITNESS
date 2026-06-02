@@ -327,20 +327,19 @@ class CartController extends Controller
     public function checkout()
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->guest('/login')->with('needLogin', true);
-        }
-
+        
         $buyNow = session()->get('buy_now');
         $cart = !empty($buyNow) ? $buyNow : session()->get('cart', []);
         if (empty($cart)) {
             return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
 
-        $showusers = DB::table('nguoidung')
-            ->select('nguoidung.*')
-            ->where('nguoidung.id_nd', $user->id_nd)
-            ->get();
+        $showusers = $user 
+            ? DB::table('nguoidung')
+                ->select('nguoidung.*')
+                ->where('nguoidung.id_nd', $user->id_nd)
+                ->get()
+            : collect();
 
         $total = 0;
         $totalSurcharge = 0;
@@ -512,7 +511,7 @@ if ($isFreeship) {
             'sdt'          => $request->display_sdt,
             'ngaydathang'  => now(),
             'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::user()->id_nd,
+            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
         ]);
 
         // -----------------------------
@@ -532,7 +531,7 @@ if ($isFreeship) {
                 'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::user()->id_nd,
+                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
             // Trừ tồn kho
@@ -574,7 +573,7 @@ if ($isFreeship) {
             session()->forget('cart');
         }
 
-        return view('pages.thongbaodathang');
+        return view('pages.thongbaodathang', compact('order'));
     }
 
     public function thongbaodathang(Request $request)
@@ -591,7 +590,7 @@ if ($isFreeship) {
                     $order->trangthai = 'Đã thanh toán';
                     $order->save();
 
-                    return view('pages.thongbaodathang');
+                    return view('pages.thongbaodathang', compact('order'));
                 } else {
                     // Cập nhật trạng thái thành Thất bại khi giao dịch thất bại
                     $order->trangthai = 'Thất bại';
@@ -697,7 +696,7 @@ if ($isFreeship) {
             'email'        => $request->display_email,
             'sdt'          => $request->display_sdt,
             'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::user()->id_nd,
+            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
             'trangthai'    => 'Chờ xác nhận',
         ]);
 
@@ -718,7 +717,7 @@ if ($isFreeship) {
                 'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::user()->id_nd,
+                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
             // Trừ tồn kho
