@@ -258,7 +258,7 @@
 
 <section class="top-sell-section">
     <div class="container">
-        <h2 class="top-sell-title">Top sản phẩm bán chạy!</h2>
+        <h2 class="top-sell-title">Sản phẩm nổi bật!</h2>
 
         <div class="top-sell-grid">
             @foreach($sanphams as $sp)
@@ -755,8 +755,18 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
 </script>
 
 <script>
-    // Set ngày kết thúc
-    const endDate = new Date("2025-12-31 23:59:59").getTime();
+    // Tự động thiết lập ngày kết thúc là Chủ Nhật tuần này lúc 23:59:59
+    function getNextSundayEnd() {
+        const now = new Date();
+        const resultDate = new Date(now);
+        const day = now.getDay();
+        const diff = (day === 0 ? 0 : 7 - day); // Số ngày đến Chủ Nhật
+        resultDate.setDate(now.getDate() + diff);
+        resultDate.setHours(23, 59, 59, 999);
+        return resultDate.getTime();
+    }
+
+    const endDate = getNextSundayEnd();
 
     const timer = setInterval(function () {
         const now = new Date().getTime();
@@ -777,11 +787,13 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        // Hiển thị
-        document.getElementById("days").innerHTML = days;
-        document.getElementById("hours").innerHTML = hours;
-        document.getElementById("minutes").innerHTML = minutes;
-        document.getElementById("seconds").innerHTML = seconds;
+        // Hiển thị dạng 2 chữ số
+        const formatNumber = num => String(num).padStart(2, '0');
+
+        document.getElementById("days").innerHTML = formatNumber(days);
+        document.getElementById("hours").innerHTML = formatNumber(hours);
+        document.getElementById("minutes").innerHTML = formatNumber(minutes);
+        document.getElementById("seconds").innerHTML = formatNumber(seconds);
 
     }, 1000);
 

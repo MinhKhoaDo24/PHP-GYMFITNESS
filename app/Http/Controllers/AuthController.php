@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules\Password;
+use App\Helpers\CartHelper;
 
 class AuthController extends Controller
 {
@@ -120,6 +121,11 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, false)) {
             $request->session()->regenerate();
+
+            // ── Khôi phục giỏ hàng từ CSDL (Không gộp giỏ hàng khách) ───────
+            $loggedInUser = Auth::user();
+            $dbCart = $loggedInUser->cart_data ?? [];
+            session()->put('cart', $dbCart);
 
             // ── Remember Me bằng Sanctum token ghi vào cookie ──────────────
             if ($request->boolean('remember')) {
