@@ -618,66 +618,10 @@
 
 
 
-<div id="cart-toast" class="cart-toast">
-    <span class="cart-toast__text"></span>
-</div>
 @push('scripts')
 <script src="{{ asset('frontend/script/about.js') }}"></script>
 @endpush
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const buttons = document.querySelectorAll('.js-add-to-cart');
-    const toast = document.getElementById('cart-toast');
-    const toastText = toast.querySelector('.cart-toast__text');
-    let toastTimeout;
-
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const url = this.dataset.url;
-            if (!url) return;
-
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            })
-            .then(async res => {
-                // Tránh lỗi JSON.parse khi Laravel trả HTML
-                let data = {};
-                try {
-                    data = await res.json();
-                } catch (e) {
-                    data = { message: "Đã thêm sản phẩm vào giỏ hàng!" };
-                }
-                showCartToast(data.message);
-
-                // Cập nhật số lượng giỏ hàng ở header
-                if (data.cart_count !== undefined) {
-                    const badge = document.querySelector('.navbar__shoppingCart span');
-                    if (badge) {
-                        badge.textContent = data.cart_count;
-                    }
-                }
-            })
-            .catch(() => {
-                showCartToast('Có lỗi xảy ra, vui lòng thử lại!');
-            });
-        });
-    });
-
-    function showCartToast(message) {
-        toastText.textContent = message;
-        toast.classList.add('show');
-
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-});
 
 
 

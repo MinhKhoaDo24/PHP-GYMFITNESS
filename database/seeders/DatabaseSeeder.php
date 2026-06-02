@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
             KhuyenMaiSeeder::class,
             SanphamSeeder::class,
             ImageSeeder::class,
-            SizeSeeder::class
+            SizeSeeder::class,
+            SupplementSeeder::class
         ]);
     }
 }
