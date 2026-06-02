@@ -555,7 +555,7 @@ class CartController extends Controller
             // Kiểm tra điều kiện mã Freeship
             if ($km->kieu_giam === 'freeship') {
                 if ($km->don_toi_thieu != null && $tongtien < $km->don_toi_thieu) {
-                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!");
+                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu, 0, ',', '.') . "đ trở lên mới được miễn phí vận chuyển!");
                 }
             }
 
@@ -984,7 +984,7 @@ if ($isFreeship) {
         if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
             return response()->json([
                 'success' => false,
-                'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã khuyến mãi!',
+                'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã khuyến mãi (tối thiểu ' . number_format($promo->don_toi_thieu, 0, ',', '.') . 'đ)!',
             ]);
         }
 
@@ -1001,7 +1001,7 @@ if ($isFreeship) {
             if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!",
+                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu, 0, ',', '.') . "đ trở lên mới được miễn phí vận chuyển!",
                 ]);
             }
         }

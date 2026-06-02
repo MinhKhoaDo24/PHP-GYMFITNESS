@@ -130,21 +130,21 @@
                 <input type="number" name="gia_tri_giam"
                        class="form-control promo-input"
                        id="gia_tri_giam_edit"
-                       value="{{ $km->gia_tri_giam }}">
+                       value="{{ (int)$km->gia_tri_giam }}">
             </div>
 
             <div>
-                <label class="promo-label">Giảm tối đa (VNĐ)</label>
+                <label class="promo-label">Giảm tối đa (đ)</label>
                 <input type="number" name="giam_toi_da"
                        class="form-control promo-input"
-                       value="{{ $km->giam_toi_da }}">
+                       value="{{ $km->giam_toi_da !== null ? (int)$km->giam_toi_da : '' }}">
             </div>
 
             <div>
-                <label class="promo-label">Đơn hàng tối thiểu</label>
+                <label class="promo-label">Đơn hàng tối thiểu (đ) *</label>
                 <input type="number" name="don_toi_thieu"
                        class="form-control promo-input"
-                       value="{{ $km->don_toi_thieu }}">
+                       value="{{ $km->don_toi_thieu !== null ? (int)$km->don_toi_thieu : '' }}">
             </div>
 
             <div>

@@ -38,7 +38,7 @@
                                 <span class="Price">
                                     <bdi>
                                         {{ number_format($search->giasp, 0, ',', '.') }}
-                                        <span class="currencySymbol">₫</span>
+                                        <span class="currencySymbol">đ</span>
                                     </bdi>
                                 </span>
                             </div>
@@ -47,7 +47,7 @@
                                 <span class="Price">
                                     <bdi>
                                         {{ number_format($search->giakhuyenmai, 0, ',', '.') }}
-                                        <span class="currencySymbol">₫</span>
+                                        <span class="currencySymbol">đ</span>
                                     </bdi>
                                 </span>
                             </div>

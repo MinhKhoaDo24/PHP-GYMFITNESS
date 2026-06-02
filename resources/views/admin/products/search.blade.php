@@ -31,7 +31,7 @@
             <td>{{$product->tensp}}</td>
             <td><img src="{{ asset($product->anhsp)}}" width="120" height="120" alt=""></td>
             <td>{{$product->soluong}}</td>
-            <td>{{$product->giasp}}</td>
+            <td>{{ number_format($product->giasp, 0, ',', '.') }}đ</td>
             <td colspan="2">
                 <a href="{{ route('product.edit', ['product' => $product]) }}" class="btn btn-warning mb-2">Edit</a>
                 <form method="post" action="{{route('product.destroy', ['product' => $product])}}">

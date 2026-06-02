@@ -204,8 +204,8 @@
 
                         <!-- PRICE -->
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                            <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $sp->giamgia }}%</span>
                         </div>
 
@@ -297,8 +297,8 @@
 
                     <!-- PRICE -->
                     <div class="sale-price">
-                        <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                        <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                        <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                        <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                         <span class="discount">-{{ $sp->giamgia }}%</span>
                     </div>
 
@@ -383,8 +383,8 @@
 
                     <!-- PRICE -->
                     <div class="sale-price">
-                        <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                        <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                        <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                        <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                         <span class="discount">-{{ $sp->giamgia }}%</span>
                     </div>
 
@@ -457,8 +457,8 @@
 
                         <!-- PRICE -->
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                            <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $sp->giamgia }}%</span>
                         </div>
 

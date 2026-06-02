@@ -260,13 +260,15 @@
             <td>
                 @if($km->kieu_giam == 'percent')
                     <strong>{{ $km->gia_tri_giam }}%</strong>
+                @elseif($km->kieu_giam == 'freeship')
+                    <strong>Miễn phí ship</strong>
                 @else
-                    <strong>{{ number_format($km->gia_tri_giam) }}%</strong>
+                    <strong>{{ number_format($km->gia_tri_giam, 0, ',', '.') }}đ</strong>
                 @endif
             </td>
 
             {{-- ĐƠN TỐI THIỂU --}}
-            <td>{{ $km->don_toi_thieu ? number_format($km->don_toi_thieu).' VNĐ' : '—' }}</td>
+            <td>{{ $km->don_toi_thieu ? number_format($km->don_toi_thieu, 0, ',', '.').'đ' : '—' }}</td>
 
             {{-- SỬ DỤNG --}}
             <td>{{ $km->so_lan_su_dung ?? 0 }}</td>

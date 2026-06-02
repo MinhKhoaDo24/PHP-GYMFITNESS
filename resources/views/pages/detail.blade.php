@@ -114,12 +114,12 @@
 
             <div class="price-box">
                 <span class="current-price">
-                    {{ number_format($sanpham->giakhuyenmai ?: $sanpham->giasp) }}đ
+                    {{ number_format($sanpham->giakhuyenmai ?: $sanpham->giasp, 0, ',', '.') }}đ
                 </span>
 
                 @if($sanpham->giakhuyenmai > 0 && $sanpham->giakhuyenmai < $sanpham->giasp)
-                    <span class="old-price">{{ number_format($sanpham->giasp) }}đ</span>
-                    <span class="save-price">Tiết kiệm: {{ number_format($sanpham->giasp - $sanpham->giakhuyenmai) }}đ</span>
+                    <span class="old-price">{{ number_format($sanpham->giasp, 0, ',', '.') }}đ</span>
+                    <span class="save-price">Tiết kiệm: {{ number_format($sanpham->giasp - $sanpham->giakhuyenmai, 0, ',', '.') }}đ</span>
                 @endif
             </div>
 

@@ -668,16 +668,8 @@
                                     @endif
                                 </td>
 
-                                <td class="cart-price-original" data-th="Price">
-                                    @if(($details['giamgia'] ?? 0) > 0)
-                                        <span style="text-decoration: line-through;">
-                                            {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }}đ
-                                        </span>
-                                    @else
-                                        <span>
-                                            {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }}đ
-                                        </span>
-                                    @endif
+                                <td class="cart-price-original" data-th="Price" data-raw-price="{{ ($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0) }}">
+                                    {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }}đ
                                 </td>
 
                                 <td class="cart-price-discount" data-th="Discount">
@@ -690,7 +682,7 @@
                                     @endif
                                 </td>
 
-                                <td class="cart-price-promo" data-th="Subtotal">
+                                <td class="cart-price-promo" data-th="Subtotal" data-raw-price="{{ ($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0) }}">
                                     {{ number_format(($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }}đ
                                 </td>
 
@@ -733,14 +725,14 @@
                     <div class="cart-summary-row">
                         <span>Tổng tiền giá gốc</span>
                         <span id="cart-original">
-                            {{ number_format($totalOriginal, 0, ',', '.') }} vnđ
+                            {{ number_format($totalOriginal, 0, ',', '.') }}đ
                         </span>
                     </div>
 
                     <div class="cart-summary-row">
                         <span>Tổng tiền giảm giá</span>
                         <span id="cart-discount">
-                            - {{ number_format($totalDiscount, 0, ',', '.') }} vnđ
+                            - {{ number_format($totalDiscount, 0, ',', '.') }}đ
                         </span>
                     </div>
 
@@ -749,7 +741,7 @@
                     <div class="cart-summary-row cart-summary-total">
                         <span>Tổng thanh toán</span>
                         <span id="cart-total-final">
-                            {{ number_format($totalFinal, 0, ',', '.') }} vnđ
+                            {{ number_format($totalFinal, 0, ',', '.') }}đ
                         </span>
                     </div>
 
@@ -782,7 +774,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Hàm định dạng số tiền
         function formatPrice(price) {
-            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' vnđ';
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
         }
 
         // Xử lý tăng số lượng
@@ -1006,8 +998,8 @@
 
                 if (!originalCell || !promoCell) return;
 
-                const originalPrice = parseInt(originalCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
-                const promoPrice = parseInt(promoCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
+                const originalPrice = parseInt(originalCell.getAttribute('data-raw-price'), 10) || parseInt(originalCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
+                const promoPrice = parseInt(promoCell.getAttribute('data-raw-price'), 10) || parseInt(promoCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
                 const surchargeVal = surchargeCell ? (parseInt(surchargeCell.textContent.replace(/[^\d]/g, ''), 10) || 0) : 0;
 
                 totalOriginal += originalPrice * qty;

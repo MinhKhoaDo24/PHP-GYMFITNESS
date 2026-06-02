@@ -143,7 +143,7 @@
 <div class="grid-2 mb-4">
     <div>
         <label class="detail-label">Tổng tiền hàng (Tiền sản phẩm)</label>
-        <div class="detail-box">{{ number_format($order->tongtien) }} đ</div>
+        <div class="detail-box">{{ number_format($order->tongtien, 0, ',', '.') }} đ</div>
     </div>
 
     <div>
@@ -164,18 +164,18 @@
             }
             if ($phi_ship < 0) $phi_ship = 0;
         @endphp
-        <div class="detail-box">{{ number_format($phi_ship) }} đ</div>
+        <div class="detail-box">{{ number_format($phi_ship, 0, ',', '.') }} đ</div>
     </div>
 
     <div>
         <label class="detail-label">Tiền giảm (khuyến mãi)</label>
-        <div class="detail-box">{{ number_format($order->tiengiam ?? 0) }} đ</div>
+        <div class="detail-box">{{ number_format($order->tiengiam ?? 0, 0, ',', '.') }} đ</div>
     </div>
 
     <div>
         <label class="detail-label" style="color: #0ea5e9; font-weight: 700;">Tổng thanh toán (Tiền phải trả)</label>
         <div class="detail-box fw-bold" style="border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff;">
-            {{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0))) }} đ
+            {{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0)), 0, ',', '.') }} đ
         </div>
     </div>
 </div>
@@ -200,10 +200,10 @@
             <tr>
                 <td>{{ $item->tensp }}</td>
                 <td>{{ $item->soluong }}</td>
-                <td>{{ number_format($item->giatien) }} đ</td>
+                <td>{{ number_format($item->giatien, 0, ',', '.') }} đ</td>
                 <td>{{ $item->giamgia }}%</td>
-                <td>{{ number_format($item->giakhuyenmai) }} đ</td>
-                <td>{{ number_format($item->soluong * $item->giakhuyenmai) }} đ</td>
+                <td>{{ number_format($item->giakhuyenmai, 0, ',', '.') }} đ</td>
+                <td>{{ number_format($item->soluong * $item->giakhuyenmai, 0, ',', '.') }} đ</td>
             </tr>
         @endforeach
         </tbody>

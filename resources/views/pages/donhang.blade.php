@@ -5,6 +5,11 @@
 @section('content')
 
 <style>
+/* Fix z-index for SweetAlert2 when used inside Bootstrap Modals */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
 .orders-hero {
     width: 100%;
     height: 300px;

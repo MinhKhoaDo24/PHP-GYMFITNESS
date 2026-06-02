@@ -94,7 +94,7 @@ class AdminController extends Controller
 
             $values[] = DB::table('dathang')
                 ->whereDate('ngaydathang', $d->format('Y-m-d'))
-                ->where('trangthai', '!=', 'Đã hủy') // Không đếm đơn hủy
+                ->where('trangthai', '!=', 'Bị hủy') // Không đếm đơn hủy
                 ->count();
         }
 

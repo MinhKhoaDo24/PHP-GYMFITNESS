@@ -162,29 +162,31 @@ class AdminRepository implements IAdminRepository
 
     public function getDashboardData($range)
     {
+        $now = Carbon::now();
+
         if ($range == "today") {
-            $start = Carbon::today();
-            $end = Carbon::now()->endOfDay();
-            $prevStart = Carbon::yesterday();
-            $prevEnd = Carbon::yesterday()->endOfDay();
+            $start     = $now->copy()->startOfDay();
+            $end       = $now->copy()->endOfDay();
+            $prevStart = $now->copy()->subDay()->startOfDay();
+            $prevEnd   = $now->copy()->subDay()->endOfDay();
 
         } elseif ($range == "week") {
-            $start = Carbon::now()->startOfWeek();
-            $end = Carbon::now()->endOfDay();
-            $prevStart = Carbon::now()->subWeek()->startOfWeek();
-            $prevEnd = Carbon::now()->subWeek()->endOfWeek();
+            $start     = $now->copy()->startOfWeek();
+            $end       = $now->copy()->endOfDay();
+            $prevStart = $now->copy()->subWeek()->startOfWeek();
+            $prevEnd   = $now->copy()->subWeek()->endOfWeek();
 
         } elseif ($range == "month") {
-            $start = Carbon::now()->startOfMonth();
-            $end = Carbon::now()->endOfDay();
-            $prevStart = Carbon::now()->subMonth()->startOfMonth();
-            $prevEnd = Carbon::now()->subMonth()->endOfMonth();
+            $start     = $now->copy()->startOfMonth();
+            $end       = $now->copy()->endOfDay();
+            $prevStart = $now->copy()->subMonth()->startOfMonth();
+            $prevEnd   = $now->copy()->subMonth()->endOfMonth();
 
         } else { // year
-            $start = Carbon::now()->startOfYear();
-            $end = Carbon::now()->endOfDay();
-            $prevStart = Carbon::now()->subYear()->startOfYear();
-            $prevEnd = Carbon::now()->subYear()->endOfYear();
+            $start     = $now->copy()->startOfYear();
+            $end       = $now->copy()->endOfDay();
+            $prevStart = $now->copy()->subYear()->startOfYear();
+            $prevEnd   = $now->copy()->subYear()->endOfYear();
         }
 
         // CURRENT DATA
@@ -194,20 +196,20 @@ class AdminRepository implements IAdminRepository
         $soldNow      = $this->getSoldProducts($start->copy(), $end->copy());
 
         // PREVIOUS DATA
-        $revenuePrev   = $this->getRevenue($prevStart->copy(), $prevEnd->copy());
-        $ordersPrev    = $this->getOrders($prevStart->copy(), $prevEnd->copy());
-        $trialsPrev    = $this->getTrialRegisters($prevStart->copy(), $prevEnd->copy());
-        $soldPrev      = $this->getSoldProducts($prevStart->copy(), $prevEnd->copy());
+        $revenuePrev  = $this->getRevenue($prevStart->copy(), $prevEnd->copy());
+        $ordersPrev   = $this->getOrders($prevStart->copy(), $prevEnd->copy());
+        $trialsPrev   = $this->getTrialRegisters($prevStart->copy(), $prevEnd->copy());
+        $soldPrev     = $this->getSoldProducts($prevStart->copy(), $prevEnd->copy());
 
         return [
-            "revenue"         => $revenueNow,
-            "revenueGrowth"   => $this->calcGrowth($revenueNow, $revenuePrev),
-            "orders"          => $ordersNow,
-            "ordersGrowth"    => $this->calcGrowth($ordersNow, $ordersPrev),
-            "trials"          => $trialsNow,
-            "trialsGrowth"    => $this->calcGrowth($trialsNow, $trialsPrev),
-            "soldProducts"    => $soldNow,
-            "soldGrowth"      => $this->calcGrowth($soldNow, $soldPrev),
+            "revenue"       => $revenueNow,
+            "revenueGrowth" => $this->calcGrowth($revenueNow, $revenuePrev),
+            "orders"        => $ordersNow,
+            "ordersGrowth"  => $this->calcGrowth($ordersNow, $ordersPrev),
+            "trials"        => $trialsNow,
+            "trialsGrowth"  => $this->calcGrowth($trialsNow, $trialsPrev),
+            "soldProducts"  => $soldNow,
+            "soldGrowth"    => $this->calcGrowth($soldNow, $soldPrev),
         ];
     }
 }
