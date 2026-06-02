@@ -102,10 +102,12 @@ class AuthController extends Controller
         // ── 2. Kiểm tra tài khoản ─────────────────────────────────────────
         $user = NguoiDung::where('email', $request->email)->first();
 
+        // Nếu không tìm thấy user
         if (!$user) {
             return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
         }
 
+        // Nếu trạng thái = 0 -> báo lỗi
         if ($user->trang_thai == 0) {
             return back()->with('error', 'Tài khoản đang bị khóa. Vui lòng liên hệ quản trị viên!');
         }

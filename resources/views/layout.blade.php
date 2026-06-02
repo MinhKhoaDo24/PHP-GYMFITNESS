@@ -134,6 +134,12 @@
                         <li class="{{ request()->is('donhang') ? 'active' : '' }}">
                             <a href="{{ URL::to('/donhang') }}" class="hover-a">Đơn hàng</a>
                         </li>
+
+                        @if (Auth::check())
+                        <li class="{{ request()->is('goi-tap/lich-su') ? 'active' : '' }}">
+                            <a href="{{ route('goitap.history') }}" class="hover-a">Gói tập của tôi</a>
+                        </li>
+                        @endif
                     </ul>
                 </div>
 
@@ -281,7 +287,7 @@
             </div>
 
             <div class="site-footer__bottom">
-                <span>Rise Fitness © All Rights Reserved – 2025</span>
+                <span>Rise Fitness © All Rights Reserved – 2026</span>
             </div>
         </div>
     </footer>
