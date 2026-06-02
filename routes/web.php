@@ -11,8 +11,8 @@ use App\Http\Controllers\{
     CommentController,
     ForgotPasswordController,
     ProfileController,
-    GoiTapController
-    EmailVerificationController
+    EmailVerificationController,
+    ChatController
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
