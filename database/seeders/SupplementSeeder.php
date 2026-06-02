@@ -377,16 +377,8 @@ class SupplementSeeder extends Seeder
                 ]);
             }
 
-            // Sync images (delete old and insert new to prevent duplicates)
+            // Sync images: Clear preset images so that admin manually uploads them (showing placeholder by default)
             DB::table('images')->where('id_sanpham', $productId)->delete();
-            foreach ($prod['images'] as $imgUrl) {
-                DB::table('images')->insert([
-                    'id_sanpham' => $productId,
-                    'duong_dan' => $imgUrl,
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ]);
-            }
 
             // Sync flavors/sizes
             // Support both indexed array ['Socola', 'Vani'] and associative ['120 Viên' => 0, '240 Viên' => 850000]
