@@ -126,12 +126,12 @@
             </div>
 
             <div>
-                <label class="promo-label">Giảm tối đa (VNĐ)</label>
+                <label class="promo-label">Giảm tối đa (đ)</label>
                 <input type="number" name="giam_toi_da" class="form-control promo-input">
             </div>
 
             <div>
-                <label class="promo-label">Đơn hàng tối thiểu (VNĐ) *</label>
+                <label class="promo-label">Đơn hàng tối thiểu (đ) *</label>
                 <input type="number" name="don_toi_thieu" class="form-control promo-input" value="0" required>
             </div>
 

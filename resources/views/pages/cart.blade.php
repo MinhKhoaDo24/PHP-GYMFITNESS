@@ -69,158 +69,207 @@
         margin-bottom: 0;
         border-collapse: separate;
         border-spacing: 0;
-        border-radius: 18px;
+        border-radius: 20px;
         overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
     }
 
     .cart-table thead tr {
-        background: #020617;
+        background: #1e293b;
     }
 
     .cart-table thead th {
-        padding: 14px 16px;
+        padding: 16px 20px;
         font-size: 13px;
-        letter-spacing: .08em;
-        font-weight: 600;
+        letter-spacing: .05em;
+        font-weight: 700;
         text-transform: uppercase;
-        color: #f9fafb;
+        color: #f8fafc;
         border-bottom: none;
         white-space: nowrap;
     }
 
     .cart-table tbody tr {
         background: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    .cart-table tbody tr:hover {
+        background: #f8fafc;
     }
 
     .cart-table tbody tr+tr td {
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid #f1f5f9;
     }
 
     .cart-table tbody td {
-        padding: 16px;
+        padding: 20px;
         vertical-align: middle;
         font-size: 14px;
-        color: #111827;
-    }
-
-    .cart-product-info {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .cart-product-thumb {
-        flex-shrink: 0;
+        color: #334155;
     }
 
     .cart-product-thumb img {
-        width: 80px;
-        height: 80px;
+        width: 85px;
+        height: 85px;
         object-fit: cover;
-        border-radius: 16px;
-        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.25);
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s ease;
+    }
+
+    .cart-product-thumb img:hover {
+        transform: scale(1.05);
     }
 
     .cart-product-meta {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: flex-start;
     }
 
     .cart-product-name {
         font-size: 15px;
-        font-weight: 600;
+        font-weight: 700;
         color: #0f172a;
         margin-bottom: 4px;
+        line-height: 1.4;
     }
 
     .cart-remove {
-        padding: 0;
-        border: none;
-        background: transparent;
-        color: #ef4444;
-        font-size: 13px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
+        padding: 6px 12px !important;
+        border: 1px solid #fee2e2 !important;
+        border-radius: 8px !important;
+        background: #fef2f2 !important;
+        color: #ef4444 !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        width: fit-content !important;
+        margin-top: 8px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    .cart-remove:hover {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #ef4444 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+    }
+
+    .cart-remove:active {
+        transform: translateY(0);
     }
 
     .cart-remove i {
         font-size: 12px;
     }
 
-    .cart-price-original,
-    .cart-price-discount,
-    .cart-price-promo,
-    .cart-line-total {
+    .cart-size-select {
+        border-radius: 10px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 30px 6px 12px !important;
+        font-weight: 700 !important;
+        color: #f97316 !important;
+        background: #ffffff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23f97316' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 10px center !important;
+        background-size: 12px !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        cursor: pointer;
+        font-size: 14px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        display: inline-block;
+        width: auto;
+    }
+
+    .cart-size-select:hover {
+        border-color: #f97316 !important;
+        background-color: #fff7ed !important;
+    }
+
+    .cart-price-original {
+        font-size: 14px;
+        color: #94a3b8;
+        font-weight: 500;
+        text-align: center;
         white-space: nowrap;
     }
 
-    td.cart-price-discount {
-        color: #41c0a0 !important;
-        font-weight: 600;
+    .cart-price-discount {
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .cart-price-promo {
+        font-size: 14px;
+        color: #0f172a;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
     }
 
     .cart-line-total {
-        font-weight: 600;
-        color: #111827;
-    }
-
-    .quantity-input {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        flex-wrap: wrap;
+        font-size: 16px;
+        color: #34A4E0;
+        font-weight: 700;
+        text-align: right;
+        white-space: nowrap;
     }
 
     .cart-quantity {
         text-align: center;
     }
 
-    .quantity-input {
-        display: flex;
-        align-items: center;
-        gap: 6px;
+    /* Hide input number spinner arrows */
+    .quantity-field::-webkit-inner-spin-button,
+    .quantity-field::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .quantity-field {
+        -moz-appearance: textfield;
+        width: 36px;
+        border: none;
+        text-align: center;
+        font-weight: 700;
+        font-size: 14px;
+        outline: none;
+        background: transparent;
     }
 
     .quantity-btn {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         border: none;
-        background-color: #34A4E0;
-        color: #fff;
-        font-size: 14px;
-        font-weight: 600;
+        background-color: transparent;
+        color: #64748b;
+        font-size: 13px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         padding: 0;
-        transition: 0.2s ease;
+        transition: all 0.2s ease;
     }
 
     .quantity-btn:hover {
-        background-color: #1e8ac4;
+        background-color: #f1f5f9;
+        color: #0f172a;
     }
 
-    .quantity-field {
-        width: 45px;
-        /* vừa cột, không quá to */
-        height: 28px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .cart-stock-note {
-        font-size: 12px;
-        color: #777;
-        margin-top: 2px;
+    .quantity-btn:active {
+        transform: scale(0.9);
     }
 
 
@@ -480,30 +529,7 @@
         text-decoration: none;
     }
 
-    .btn-delete {
-        background: #e53935;
-        color: #fff;
-        padding: 6px 14px;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: 0.2s;
-        display: inline-flex;
-        width: auto;
-    }
-
-    .btn-delete:hover {
-        background: #c62828;
-    }
-
-    .btn-delete i {
-        font-size: 14px;
-    }
-
-    .btn-delete {
-        align-self: flex-start;
-    }
+    /* .btn-delete styles migrated to .cart-remove */
 
     /* page-header */
     .page-header {
@@ -588,9 +614,9 @@
                             <tr>
                                 <th>Ảnh sp</th>
                                 <th>Tên sp</th>
-                                <th>Size</th>
-                                <th>Giá gốc</th>
-                                <th>Giảm giá</th>
+                                <th class="text-center">Size</th>
+                                <th class="text-center">Giá gốc</th>
+                                <th class="text-center">Giảm giá</th>
                                 <th class="text-center">Giá khuyến mãi</th>
                                 <th class="text-center">Số lượng</th>
                                 <th class="text-right">Tổng tiền</th>
@@ -611,7 +637,7 @@
                                 <td>
                                     <div class="cart-product-meta">
                                         <div class="cart-product-name">{{ $details['tensp'] }}</div>
-                                        <button type="button" class="btn-delete cart_remove">
+                                        <button type="button" class="cart-remove cart_remove">
                                             <i class="fa fa-trash-o"></i> Xóa
                                         </button>
                                     </div>
@@ -619,7 +645,7 @@
 
                                 <td class="text-center font-weight-bold">
                                     @if(isset($sizes[$id]) && count($sizes[$id]) > 0)
-                                        <select class="form-control cart-size-select" data-id="{{ $id }}" style="border-radius: 8px; border: 1px solid #ccc; padding: 4px 8px; font-weight: 600; color: #ff8c00; width: auto; display: inline-block; cursor: pointer;">
+                                        <select class="form-control cart-size-select" data-id="{{ $id }}">
                                             @foreach($sizes[$id] as $sizeOption)
                                                 @php 
                                                     $isAvailable = $sizeOption->pivot->soluong > 0 || ($details['id_size'] == $sizeOption->id_size);
@@ -638,42 +664,54 @@
                                             @endforeach
                                         </select>
                                     @else
-                                        <span style="color: #777;">—</span>
+                                        <span style="color: #94a3b8; font-weight: 500;">—</span>
                                     @endif
                                 </td>
 
-                                <td class="cart-price-original" data-th="Price">
-                                    {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }} VND
+                                <td class="cart-price-original" data-th="Price" data-raw-price="{{ ($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0) }}">
+                                    {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }}đ
                                 </td>
 
-
-                                <td class="cart-price-discount" data-th="Price">
-                                    {{ $details['giamgia'] }}%
+                                <td class="cart-price-discount" data-th="Discount">
+                                    @if(($details['giamgia'] ?? 0) > 0)
+                                        <span class="badge" style="background-color: #d1fae5; color: #065f46; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block;">
+                                            -{{ $details['giamgia'] }}%
+                                        </span>
+                                    @else
+                                        <span style="color: #94a3b8; font-weight: 500;">0%</span>
+                                    @endif
                                 </td>
 
-                                <td class="cart-price-promo text-center" data-th="Subtotal">
-                                    {{ number_format(($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }} VND
+                                <td class="cart-price-promo" data-th="Subtotal" data-raw-price="{{ ($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0) }}">
+                                    {{ number_format(($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }}đ
                                 </td>
 
                                 <td class="cart-quantity" data-th="Quantity">
-                                    <div class="quantity-input">
-                                        <input
-                                            class="quantity-field quantity cart_update"
-                                            type="number"
-                                            min="1"
-                                            max="{{ $stock[$id] ?? 999 }}"
-                                            value="{{ $details['quantity'] }}">
-
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                        <div class="quantity-input-group" style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 999px; background: #ffffff; padding: 2px 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); width: fit-content; margin: 0 auto;">
+                                            <button type="button" class="quantity-btn decreaseValue">
+                                                <i class="fa fa-minus"></i>
+                                            </button>
+                                            <input
+                                                class="quantity-field quantity cart_update"
+                                                type="number"
+                                                min="1"
+                                                max="{{ $stock[$id] ?? 999 }}"
+                                                value="{{ $details['quantity'] }}">
+                                            <button type="button" class="quantity-btn increaseValue">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
                                         @if(isset($stock[$id]))
-                                        <div class="cart-stock-note">
-                                            Tồn kho: {{ $stock[$id] }}
+                                        <div class="cart-stock-note" style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                                            Tồn kho: <span style="font-weight: 600; color: #64748b;">{{ $stock[$id] }}</span>
                                         </div>
                                         @endif
                                     </div>
                                 </td>
 
-                                <td class="cart-line-total text-right product-total" data-th="Total">
-                                    {{ number_format(($details['giakhuyenmai'] + ($details['gia_cong_them'] ?? 0)) * $details['quantity'], 0, ',', '.') }} VND
+                                <td class="cart-line-total product-total" data-th="Total">
+                                    {{ number_format(($details['giakhuyenmai'] + ($details['gia_cong_them'] ?? 0)) * $details['quantity'], 0, ',', '.') }}đ
                                 </td>
                             </tr>
                             @endforeach
@@ -687,14 +725,14 @@
                     <div class="cart-summary-row">
                         <span>Tổng tiền giá gốc</span>
                         <span id="cart-original">
-                            {{ number_format($totalOriginal, 0, ',', '.') }} vnđ
+                            {{ number_format($totalOriginal, 0, ',', '.') }}đ
                         </span>
                     </div>
 
                     <div class="cart-summary-row">
                         <span>Tổng tiền giảm giá</span>
                         <span id="cart-discount">
-                            - {{ number_format($totalDiscount, 0, ',', '.') }} vnđ
+                            - {{ number_format($totalDiscount, 0, ',', '.') }}đ
                         </span>
                     </div>
 
@@ -703,7 +741,7 @@
                     <div class="cart-summary-row cart-summary-total">
                         <span>Tổng thanh toán</span>
                         <span id="cart-total-final">
-                            {{ number_format($totalFinal, 0, ',', '.') }} vnđ
+                            {{ number_format($totalFinal, 0, ',', '.') }}đ
                         </span>
                     </div>
 
@@ -736,7 +774,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Hàm định dạng số tiền
         function formatPrice(price) {
-            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' vnđ';
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
         }
 
         // Xử lý tăng số lượng
@@ -960,8 +998,8 @@
 
                 if (!originalCell || !promoCell) return;
 
-                const originalPrice = parseInt(originalCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
-                const promoPrice = parseInt(promoCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
+                const originalPrice = parseInt(originalCell.getAttribute('data-raw-price'), 10) || parseInt(originalCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
+                const promoPrice = parseInt(promoCell.getAttribute('data-raw-price'), 10) || parseInt(promoCell.textContent.replace(/[^\d]/g, ''), 10) || 0;
                 const surchargeVal = surchargeCell ? (parseInt(surchargeCell.textContent.replace(/[^\d]/g, ''), 10) || 0) : 0;
 
                 totalOriginal += originalPrice * qty;

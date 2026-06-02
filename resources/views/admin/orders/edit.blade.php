@@ -6,14 +6,14 @@
     $allowedStatuses = [$currentStatus];
     
     if ($currentStatus === 'Chờ xác nhận') {
-        $allowedStatuses = ['Chờ xác nhận', 'Chờ giao hàng', 'Hủy'];
+        $allowedStatuses = ['Chờ xác nhận', 'Chờ giao hàng', 'Bị hủy'];
     } elseif ($currentStatus === 'Chờ giao hàng') {
-        $allowedStatuses = ['Chờ giao hàng', 'Đang giao hàng', 'Hủy'];
+        $allowedStatuses = ['Chờ giao hàng', 'Đang giao hàng', 'Bị hủy'];
     } elseif ($currentStatus === 'Đang giao hàng') {
         $allowedStatuses = ['Đang giao hàng', 'Hoàn thành', 'Thất bại'];
     }
     
-    $isClosed = in_array($currentStatus, ['Hoàn thành', 'Hủy', 'Thất bại']);
+    $isClosed = in_array($currentStatus, ['Hoàn thành', 'Bị hủy', 'Thất bại']);
 @endphp
 
 <style>
@@ -221,7 +221,7 @@
         <div>
             <label class="order-label">Tổng tiền hàng (Tiền sản phẩm)</label>
             <input type="text" class="form-control order-input"
-                   value="{{ number_format($order->tongtien) }} đ" readonly>
+                   value="{{ number_format($order->tongtien, 0, ',', '.') }} đ" readonly>
         </div>
 
         <div>
@@ -243,19 +243,19 @@
             if ($phi_ship < 0) $phi_ship = 0;
         @endphp
             <input type="text" class="form-control order-input"
-                   value="{{ number_format($phi_ship) }} đ" readonly>
+                   value="{{ number_format($phi_ship, 0, ',', '.') }} đ" readonly>
         </div>
 
         <div>
             <label class="order-label">Tiền giảm (khuyến mãi)</label>
             <input type="text" class="form-control order-input"
-                   value="{{ number_format($order->tiengiam ?? 0) }} đ" readonly>
+                   value="{{ number_format($order->tiengiam ?? 0, 0, ',', '.') }} đ" readonly>
         </div>
 
         <div>
             <label class="order-label" style="color: #0ea5e9;">Tổng thanh toán (Tiền phải trả)</label>
             <input type="text" class="form-control order-input fw-bold" style="border-color: #0ea5e9; color: #0ea5e9;"
-                   value="{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0))) }} đ"
+                   value="{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0)), 0, ',', '.') }} đ"
                    readonly>
         </div>
     </div>
@@ -279,10 +279,10 @@
                     <tr>
                         <td class="fw-semibold">{{ $item->tensp }}</td>
                         <td>{{ $item->soluong }}</td>
-                        <td>{{ number_format($item->giatien) }} đ</td>
+                        <td>{{ number_format($item->giatien, 0, ',', '.') }} đ</td>
                         <td>{{ $item->giamgia }}%</td>
-                        <td>{{ number_format($item->giakhuyenmai) }} đ</td>
-                        <td>{{ number_format($item->soluong * $item->giakhuyenmai) }} đ</td>
+                        <td>{{ number_format($item->giakhuyenmai, 0, ',', '.') }} đ</td>
+                        <td>{{ number_format($item->soluong * $item->giakhuyenmai, 0, ',', '.') }} đ</td>
                     </tr>
                 @endforeach
             </tbody>

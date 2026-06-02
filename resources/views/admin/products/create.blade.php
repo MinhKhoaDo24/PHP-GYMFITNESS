@@ -172,7 +172,7 @@
 
         <!-- Giá gốc -->
         <div>
-            <label class="promo-label">Giá gốc (VNĐ) *</label>
+            <label class="promo-label">Giá gốc (đ) *</label>
             <input type="number" name="giasp" class="form-control promo-input" required>
         </div>
 
@@ -192,7 +192,7 @@
 
             <!-- Tiền giảm -->
                 <div>
-                    <label class="promo-label">Giá khuyến mãi (VNĐ)</label>
+                    <label class="promo-label">Giá khuyến mãi (đ)</label>
                     <input type="number"
                         name="gia_duoc_giam" 
                         class="form-control promo-input"
@@ -203,7 +203,7 @@
         </div>
 
         <div>
-            <label class="promo-label">Giá bán (VNĐ) *</label>
+            <label class="promo-label">Giá bán (đ) *</label>
             <input type="number" name="giakhuyenmai" class="form-control promo-input" readonly>
         </div>
 

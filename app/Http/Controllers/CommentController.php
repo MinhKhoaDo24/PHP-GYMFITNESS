@@ -19,6 +19,9 @@ class CommentController extends Controller
     // Hàm kiểm tra từ ngữ thô tục
     private function containsBadWords($content)
     {
+        if (empty($content)) {
+            return false;
+        }
         $badwords = file(storage_path('app/dstucam.txt'), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($badwords as $word) {
             if (stripos($content, $word) !== false) {  // không phân biệt hoa thường
@@ -34,7 +37,7 @@ class CommentController extends Controller
         $request->validate([
             'sanpham_id' => 'required|exists:sanpham,id_sanpham',
             'id_dathang' => 'required|exists:dathang,id_dathang',
-            'content' => 'required|string|max:1000',
+            'content' => 'nullable|string|max:1000',
             'rating' => 'required|integer|between:1,5',
             'attachments' => 'nullable|array|max:5',
             'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,webp,mp4,mov,ogg,qt,webm|max:20480',
@@ -110,7 +113,7 @@ class CommentController extends Controller
             'user_id' => Auth::user()->id_nd,
             'sanpham_id' => $request->sanpham_id,
             'id_dathang' => $request->id_dathang,
-            'content' => $request->content,
+            'content' => $request->content ?? '',
             'rating' => (int)$request->rating,
             'images' => !empty($attachments) ? $attachments : null,
         ]);
@@ -124,7 +127,7 @@ class CommentController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'content' => 'required|string|max:1000',
+            'content' => 'nullable|string|max:1000',
         ]);
 
         $comment = Comment::findOrFail($id);
@@ -138,7 +141,7 @@ class CommentController extends Controller
             return response()->json(['success' => false, 'message' => 'Vi phạm ngôn ngữ cộng đồng'], 422);
         }
 
-        $comment->content = $request->content;
+        $comment->content = $request->content ?? '';
         $comment->save();
 
         return response()->json(['success' => true, 'comment' => $comment]);

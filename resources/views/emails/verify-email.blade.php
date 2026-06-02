@@ -178,7 +178,7 @@
             <p class="greeting">Xin chào, {{ $hoten }}! 👋</p>
 
             <p class="message">
-                Cảm ơn bạn đã đăng ký tài khoản tại <strong>GymZone</strong>.<br>
+                Cảm ơn bạn đã đăng ký tài khoản tại <strong>Rise Fitness</strong>.<br>
                 Bạn chỉ còn <strong>một bước nữa</strong> để bắt đầu hành trình chinh phục mục tiêu hình thể!
             </p>
 
@@ -231,9 +231,9 @@
         <!-- Footer -->
         <div class="footer">
             <p>
-                © {{ date('Y') }} <strong>GymZone</strong> – Tất cả quyền được bảo lưu.<br>
+                © {{ date('Y') }} <strong>Rise Fitness</strong> – Tất cả quyền được bảo lưu.<br>
                 Email này được gửi tự động, vui lòng không trả lời.<br>
-                <a href="{{ url('/') }}">Trang chủ GymZone</a>
+                <a href="{{ url('/') }}">Trang chủ Rise Fitness</a>
             </p>
         </div>
     </div>

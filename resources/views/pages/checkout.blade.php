@@ -227,7 +227,7 @@
                                 </div>
                                 <div>
                                     <div style="font-size: 11px; color: #b45309; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Phí vận chuyển</div>
-                                    <div class="info-value" id="display_phi_ship" style="font-size: 16px; font-weight: 800; color: #78350f;">{{ number_format((int)env('SHIPPING_FEE_INSIDE',20000)) }}đ</div>
+                                    <div class="info-value" id="display_phi_ship" style="font-size: 16px; font-weight: 800; color: #78350f;">{{ number_format((int)env('SHIPPING_FEE_INSIDE',20000), 0, ',', '.') }}đ</div>
                                 </div>
                             </div>
                         </div>
@@ -291,11 +291,11 @@
                             <td><img src="{{ asset($item['anhsp']) }}" width="90"></td>
                             <td>{{ $item['tensp'] }}</td>
                             <td class="text-center font-weight-bold" style="color: #ff8c00;">{{ $item['ten_size'] ?? '' }}</td>
-                            <td>{{ number_format($item['giasp'] + ($item['gia_cong_them'] ?? 0)) }}đ</td>
+                            <td>{{ number_format($item['giasp'] + ($item['gia_cong_them'] ?? 0), 0, ',', '.') }}đ</td>
                             <td>{{ $item['giamgia'] }}%</td>
-                            <td>{{ number_format(($item['giakhuyenmai'] ?? $item['giasp']) + ($item['gia_cong_them'] ?? 0)) }}đ</td>
+                            <td>{{ number_format(($item['giakhuyenmai'] ?? $item['giasp']) + ($item['gia_cong_them'] ?? 0), 0, ',', '.') }}đ</td>
                             <td>{{ $item['quantity'] }}</td>
-                            <td><strong>{{ number_format($Thanhtien) }}đ</strong></td>
+                            <td><strong>{{ number_format($Thanhtien, 0, ',', '.') }}đ</strong></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -352,17 +352,17 @@
             <div class="checkout-summary-box">
                 <div class="summary-row">
                     <span class="summary-label">Giá gốc (Sản phẩm):</span>
-                    <span class="summary-value">{{ number_format($totalOriginal) }}đ</span>
+                    <span class="summary-value">{{ number_format($totalOriginal, 0, ',', '.') }}đ</span>
                 </div>
 
                 <div class="summary-row">
                     <span class="summary-label">Giảm giá khuyến mãi:</span>
-                    <span class="summary-value text-danger">- {{ number_format($totalDiscount) }}đ</span>
+                    <span class="summary-value text-danger">- {{ number_format($totalDiscount, 0, ',', '.') }}đ</span>
                 </div>
 
                 <div class="summary-row">
                     <span class="summary-label">Phí vận chuyển:</span>
-                    <span class="summary-value" id="shipping_fee_display">{{ number_format((int)env('SHIPPING_FEE_INSIDE', 20000)) }}đ</span>
+                    <span class="summary-value" id="shipping_fee_display">{{ number_format((int)env('SHIPPING_FEE_INSIDE', 20000), 0, ',', '.') }}đ</span>
                 </div>
 
                 <div class="summary-row">
@@ -379,7 +379,7 @@
 
                 <div class="summary-row">
                     <span class="summary-label">Tổng thanh toán:</span>
-                    <span class="summary-total" id="total_amount">{{ number_format($total + (int)env('SHIPPING_FEE_INSIDE', 20000)) }}đ</span>
+                    <span class="summary-total" id="total_amount">{{ number_format($total + (int)env('SHIPPING_FEE_INSIDE', 20000), 0, ',', '.') }}đ</span>
                 </div>
             </div>
 
@@ -503,8 +503,8 @@
                                 <option value="Yên Bái">Yên Bái</option>
                             </select>
                             <small class="text-muted mt-1 d-block">
-                                Nội thành <strong>{{ number_format((int)env('SHIPPING_FEE_INSIDE',20000)) }}đ</strong>
-                                &nbsp;|&nbsp; Ngoại tỉnh <strong>{{ number_format((int)env('SHIPPING_FEE_OUTSIDE',35000)) }}đ</strong>
+                                Nội thành <strong>{{ number_format((int)env('SHIPPING_FEE_INSIDE',20000), 0, ',', '.') }}đ</strong>
+                                &nbsp;|&nbsp; Ngoại tỉnh <strong>{{ number_format((int)env('SHIPPING_FEE_OUTSIDE',35000), 0, ',', '.') }}đ</strong>
                             </small>
                         </div>
                     </div>
@@ -539,8 +539,8 @@ function refreshTotal() {
     const fee     = getShippingFee(city);
     const newTotal = originalTotal + fee;
 
-    $('#shipping_fee_display').text(fee.toLocaleString() + 'đ');
-    $('#total_amount').text(newTotal.toLocaleString() + 'đ');
+    $('#shipping_fee_display').text(fee.toLocaleString('vi-VN') + 'đ');
+    $('#total_amount').text(newTotal.toLocaleString('vi-VN') + 'đ');
     $('#tienphaitra').val(newTotal);
     $('#thanh_pho_hidden').val(city);
 
@@ -589,7 +589,7 @@ $('#saveInfoBtn').on('click', function() {
 
     // Hiển thị phí ship mới ở card thông tin
     const fee = getShippingFee(city);
-    $('#display_phi_ship').text(fee.toLocaleString() + 'đ');
+    $('#display_phi_ship').text(fee.toLocaleString('vi-VN') + 'đ');
 
     // Đóng modal và thông báo
     $('#updateInfoModal').modal('hide');
@@ -618,21 +618,21 @@ $('#apply_promo').click(function() {
             if (res.is_freeship) {
     const remainFee = fee - res.discount;
     if (remainFee <= 0) {
-        $('#shipping_fee_display').html('<del>' + fee.toLocaleString() + 'đ</del> <span class="text-success fw-bold">Miễn phí</span>');
+        $('#shipping_fee_display').html('<del>' + fee.toLocaleString('vi-VN') + 'đ</del> <span class="text-success fw-bold">Miễn phí</span>');
     } else {
-        $('#shipping_fee_display').html('<del>' + fee.toLocaleString() + 'đ</del> <span class="text-warning fw-bold">' + remainFee.toLocaleString() + 'đ</span>');
+        $('#shipping_fee_display').html('<del>' + fee.toLocaleString('vi-VN') + 'đ</del> <span class="text-warning fw-bold">' + remainFee.toLocaleString('vi-VN') + 'đ</span>');
     }
     $('#shipping_discount_row').show();
-    $('#shipping_discount_amount').text('-' + res.discount.toLocaleString() + 'đ');
+    $('#shipping_discount_amount').text('-' + res.discount.toLocaleString('vi-VN') + 'đ');
     $('#discount_amount').text('0đ');
 } else {
                 // Mã giảm giá thường
-                $('#shipping_fee_display').text(fee.toLocaleString() + 'đ');
+                $('#shipping_fee_display').text(fee.toLocaleString('vi-VN') + 'đ');
                 $('#shipping_discount_row').hide();
-                $('#discount_amount').text('-' + res.discount.toLocaleString() + 'đ');
+                $('#discount_amount').text('-' + res.discount.toLocaleString('vi-VN') + 'đ');
             }
             
-            $('#total_amount').text(res.new_total.toLocaleString() + 'đ');
+            $('#total_amount').text(res.new_total.toLocaleString('vi-VN') + 'đ');
             $('#id_khuyenmai').val(res.id_khuyenmai);
             $('#tiengiam').val(res.discount);
             $('#tienphaitra').val(res.new_total);

@@ -130,6 +130,9 @@ Route::post('/mail', [MailController::class, 'subscribe'])
 Route::prefix('/')->group(function () {
     Route::get('/admin', [AdminController::class, 'index']);
     Route::post('/signinDashboard', [AdminController::class, 'signin_dashboard']);
+    Route::get('/signinDashboard', function () {
+        return redirect('/admin');
+    });
 });
 
 Route::prefix('/admin')->group(function () {

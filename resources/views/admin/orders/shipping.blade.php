@@ -167,7 +167,7 @@
                 <td>#{{ $order->id_dathang }}</td>
                 <td>{{ \Carbon\Carbon::parse($order->ngaydathang)->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->hoten }}</td>
-                <td>{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : $order->tongtien) }} đ</td>
+                <td>{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : $order->tongtien, 0, ',', '.') }} đ</td>
 
                 {{-- PAYMENT --}}
                 <td>
