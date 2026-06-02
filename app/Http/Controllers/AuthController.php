@@ -86,7 +86,8 @@ class AuthController extends Controller
 
         // Nếu đã sai 5 lần, chặn đăng nhập
         if ($loginAttempts >= 5) {
-            return back()->with('error', 'Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng đặt lại mật khẩu!');
+            return redirect()->route('password.forgot')
+                ->with('error', 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để tiếp tục!');
         }
 
         // ── 1. Validate reCAPTCHA ──────────────────────────────────────────
@@ -117,7 +118,9 @@ class AuthController extends Controller
 
             $newAttempts = $loginAttempts + 1;
             if ($newAttempts >= 5) {
-                return back()->with('error', 'Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng đặt lại mật khẩu!');
+                session(["login_attempts.{$email}" => $newAttempts]);
+                return redirect()->route('password.forgot')
+                    ->with('error', 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để tiếp tục!');
             } elseif ($newAttempts >= 3) {
                 return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu! (Lần nhập sai: ' . $newAttempts . '/5 - Lần thứ 5 sẽ bị khóa)');
             } else {
@@ -173,7 +176,8 @@ class AuthController extends Controller
         session(["login_attempts.{$email}" => $newAttempts]);
 
         if ($newAttempts >= 5) {
-            return back()->with('error', 'Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng đặt lại mật khẩu!');
+            return redirect()->route('password.forgot')
+                ->with('error', 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để tiếp tục!');
         } elseif ($newAttempts >= 3) {
             return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu! (Lần nhập sai: ' . $newAttempts . '/5 - Lần thứ 5 sẽ bị khóa)');
         } else {
