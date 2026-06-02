@@ -33,17 +33,26 @@
 
                 <div class="form-group">
                     <label>Họ và tên <span>*</span></label>
-                    <input type="text" name="ho_ten" placeholder="Nhập tên của bạn" required>
+                    <input type="text" name="ho_ten" placeholder="Nhập tên của bạn" value="{{ auth()->check() ? auth()->user()->hoten : '' }}" required>
+                    @error('ho_ten')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" placeholder="Nhập email của bạn">
+                    <input type="email" name="email" placeholder="Nhập email của bạn" value="{{ auth()->check() ? auth()->user()->email : '' }}">
+                    @error('email')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label>Số điện thoại <span>*</span></label>
-                    <input type="text" name="so_dien_thoai" placeholder="Nhập số điện thoại" required>
+                    <input type="text" name="so_dien_thoai" placeholder="Nhập số điện thoại" value="{{ auth()->check() ? auth()->user()->sdt : '' }}" required>
+                    @error('so_dien_thoai')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
                 <div class="form-group">
@@ -54,6 +63,9 @@
                             <option value="{{ $m }}">{{ ucfirst($m) }}</option>
                         @endforeach
                     </select>
+                    @error('mon_ua_thich')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
 
@@ -65,6 +77,9 @@
                             <option value="{{ $cs }}">{{ $cs }}</option>
                         @endforeach
                     </select>
+                    @error('co_so_tap')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
 
@@ -76,12 +91,18 @@
                             <option value="{{ $g }}">{{ $g }}</option>
                         @endforeach
                     </select>
+                    @error('gio_mong_muon')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
 
                 <div class="form-group">
                     <label>Ngày muốn tập thử <span>*</span></label>
                     <input type="date" name="ngay_mong_muon" required>
+                    @error('ngay_mong_muon')
+                        <small class="text-danger" style="color: red; font-style: italic;">{{ $message }}</small>
+                    @enderror
                 </div>
 
 
@@ -110,6 +131,15 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     @endif
 
+    @if($errors->any())
+        Swal.fire({
+            icon: "error",
+            title: "Thông báo",
+            text: "{{ $errors->first() }}",
+            confirmButtonColor: "#ef4444",
+            confirmButtonText: "OK"
+        });
+    @endif
 });
 </script>
 <script>

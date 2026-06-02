@@ -12,6 +12,7 @@ use App\Http\Controllers\{
     ForgotPasswordController,
     ProfileController,
     GoiTapController
+    EmailVerificationController
 };
 use App\Repositories\DangkidichvuRepository;;
 use App\Http\Controllers\MailController;
@@ -45,7 +46,6 @@ Route::get('/congiong', [HomeController::class, 'congiong']);
 Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/viewAll', [HomeController::class, 'viewAll'])->name('viewAll');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
-Route::get('/dang-ky-tap-thu', [HomeController::class, 'dangKyTapThu'])->name('dang-ky-tap-thu');
 // Hiển thị form
 Route::get('/dang-ky-tap-thu', [DangkidichvuController::class, 'showForm'])->name('dang-ky-tap-thu');
 // Lưu form
@@ -68,6 +68,7 @@ Route::get('cart', [CartController::class, 'cart'])->name('cart');
 Route::get('add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add_to_cart');
 Route::get('add-go-to-cart/{id}', [CartController::class, 'addGoToCart'])->name('add_go_to_cart');
 Route::patch('update-cart', [CartController::class, 'update'])->name('update_cart');
+Route::patch('update-cart-size', [CartController::class, 'updateSize'])->name('update_cart_size');
 Route::get('/remove-from-cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 Route::post('/capnhat-thongtin', [OrderViewController::class, 'capnhatThongTin'])->name('donhang.update');
@@ -98,6 +99,14 @@ Route::post('/register', [AuthController::class, 'registerPost'])->name('registe
 Route::post('/kiem-tra-email', [AuthController::class, 'kiemTraEmail'])->name('kiemtra.email');
 
 Route::delete('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ─── Email Verification ─────────────────────────────────────────────────────
+Route::get('/email/notice', [EmailVerificationController::class, 'notice'])->name('email.notice');
+Route::get('/email/verify/{token}', [EmailVerificationController::class, 'verify'])->name('email.verify');
+Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:3,1')  // tối đa 3 lần/phút
+    ->name('email.resend');
+// ────────────────────────────────────────────────────────────────────────────
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('password.forgot');
 
 // Gửi email khôi phục mật khẩu
@@ -127,7 +136,7 @@ Route::prefix('/admin')->group(function () {
     // API cho biểu đồ KHÔNG nên để trong admin.login
     Route::get('/chart/revenue', [AdminController::class, 'revenueChart']);
     Route::get('/chart/orders', [AdminController::class, 'orderChart']);
-    Route::get('/chart/customers', [AdminController::class, 'customerChart']);
+    Route::get('/chart/trials', [AdminController::class, 'trialChart']);
     Route::get('/chart/sold', [AdminController::class, 'soldChart']);
 });
 

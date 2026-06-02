@@ -115,7 +115,7 @@
         <input type="text"
                name="search"
                class="form-control"
-               placeholder="🔍 Tìm theo tên, số điện thoại, mã đơn..."
+               placeholder="Tìm theo tên, số điện thoại, mã đơn..."
                value="{{ request('search') }}"
                onkeydown="if(event.key==='Enter') this.form.submit();">
     </form>
@@ -127,7 +127,7 @@
             <input type="hidden" name="search" value="{{ request('search') }}">
 
             <select name="status" class="form-select" onchange="this.form.submit()">
-                <option value="">📚 Trạng thái đơn</option>
+                <option value="">Trạng thái đơn</option>
 
                 <option value="Hoàn thành"
                     {{ request('status') == 'Hoàn thành' ? 'selected' : '' }}>
@@ -165,7 +165,7 @@
                 <td>#{{ $order->id_dathang }}</td>
                 <td>{{ \Carbon\Carbon::parse($order->ngaydathang)->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->hoten }}</td>
-                <td>{{ number_format($order->tongtien) }} đ</td>
+                <td>{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : $order->tongtien) }} đ</td>
 
                 {{-- PAYMENT --}}
                 <td>

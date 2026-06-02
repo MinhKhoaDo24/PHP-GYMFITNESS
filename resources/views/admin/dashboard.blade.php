@@ -45,33 +45,45 @@
 
     <div class="col-md-3">
         <div class="kpi-box">
-            <p>Doanh Thu</p>
-            <div class="kpi-value">{{ number_format($stats['revenue'], 0, ',', '.') }} đ</div>
-            <div class="kpi-growth">↑ {{ $stats['revenueGrowth'] }}%</div>
+            <p class="text-muted mb-2 font-semibold">Doanh Thu</p>
+            <div class="kpi-value mb-2">{{ number_format($stats['revenue'], 0, ',', '.') }} đ</div>
+            <div class="kpi-growth {{ $stats['revenueGrowth'] >= 0 ? 'text-success' : 'text-danger' }}">
+                <i class="bi {{ $stats['revenueGrowth'] >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                {{ abs($stats['revenueGrowth']) }}%
+            </div>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="kpi-box">
-            <p>Đơn Hàng</p>
-            <div class="kpi-value">{{ $stats['orders'] }}</div>
-            <div class="kpi-growth">↑ {{ $stats['ordersGrowth'] }}%</div>
+            <p class="text-muted mb-2 font-semibold">Đơn Hàng</p>
+            <div class="kpi-value mb-2">{{ $stats['orders'] }}</div>
+            <div class="kpi-growth {{ $stats['ordersGrowth'] >= 0 ? 'text-success' : 'text-danger' }}">
+                <i class="bi {{ $stats['ordersGrowth'] >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                {{ abs($stats['ordersGrowth']) }}%
+            </div>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="kpi-box">
-            <p>Khách Hàng</p>
-            <div class="kpi-value">{{ $stats['customers'] }}</div>
-            <div class="kpi-growth">↑ {{ $stats['customersGrowth'] }}%</div>
+            <p class="text-muted mb-2 font-semibold">Đăng Ký Tập Thử</p>
+            <div class="kpi-value mb-2">{{ $stats['trials'] }}</div>
+            <div class="kpi-growth {{ $stats['trialsGrowth'] >= 0 ? 'text-success' : 'text-danger' }}">
+                <i class="bi {{ $stats['trialsGrowth'] >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                {{ abs($stats['trialsGrowth']) }}%
+            </div>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="kpi-box">
-            <p>Sản Phẩm Đã Bán</p>
-            <div class="kpi-value">{{ $stats['soldProducts'] }}</div>
-            <div class="kpi-growth">↑ {{ $stats['soldGrowth'] }}%</div>
+            <p class="text-muted mb-2 font-semibold">Sản Phẩm Đã Bán</p>
+            <div class="kpi-value mb-2">{{ $stats['soldProducts'] }}</div>
+            <div class="kpi-growth {{ $stats['soldGrowth'] >= 0 ? 'text-success' : 'text-danger' }}">
+                <i class="bi {{ $stats['soldGrowth'] >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short' }}"></i>
+                {{ abs($stats['soldGrowth']) }}%
+            </div>
         </div>
     </div>
 
@@ -99,9 +111,9 @@
 
     <div class="col-lg-6 mb-4">
         <div class="card">
-            <div class="card-header fw-bold">Khách Hàng Mới</div>
+            <div class="card-header fw-bold">Lượt Đăng Ký Tập Thử Mới</div>
             <div class="card-body">
-                <canvas id="customerChart" height="130"></canvas>
+                <canvas id="trialChart" height="130"></canvas>
             </div>
         </div>
     </div>
@@ -164,16 +176,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
-    // 3. Customers
-    fetch("/admin/chart/customers")
+    // 3. Trial Registrations
+    fetch("/admin/chart/trials")
         .then(r => r.json())
         .then(data => {
-            new Chart(customerChart, {
+            new Chart(trialChart, {
                 type: "line",
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: "Khách hàng mới",
+                        label: "Lượt đăng ký mới",
                         data: data.values,
                         borderColor: "#36b9cc",
                         backgroundColor: "rgba(54,185,204,0.15)",

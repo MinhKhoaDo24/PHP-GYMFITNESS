@@ -1,6 +1,10 @@
 @extends('admin_layout')
 @section('admin_content')
 
+<!-- Cropper.js CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
 <style>
     /* ===================== TITLE ===================== */
     .promo-title {
@@ -106,7 +110,9 @@
 
     .preview-box {
         position: relative;
-        display: inline-block;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .preview-box img {
@@ -398,20 +404,130 @@
 </div>
 @endif
 
+<!-- Modal Cắt Ảnh -->
+<div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div class="modal-header bg-dark text-white border-0">
+                <h5 class="modal-title" id="cropperModalLabel"><i class="bi bi-crop"></i> Cắt ảnh sản phẩm (Tỉ lệ 1:1)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" style="max-height: 500px; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #111;">
+                <img id="cropperImage" src="" style="max-width: 100%; max-height: 450px; display: block;">
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                <button type="button" class="btn btn-primary" id="cropConfirmBtn" style="border-radius: 8px; background: linear-gradient(to right, #0284c7, #0ea5e9); border: none;">Xác nhận cắt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     let selectedFilesEdit = [];
+    let cropperInstance = null;
+    let currentCropIndex = null;
+    let cropQueueEdit = [];
+
+    function processCropQueueEdit() {
+        if (cropQueueEdit.length === 0) return;
+        const nextIndex = cropQueueEdit.shift();
+        if (nextIndex < selectedFilesEdit.length) {
+            openCropperEdit(nextIndex);
+        } else {
+            processCropQueueEdit();
+        }
+    }
 
     function previewImagesEdit(event) {
         const files = Array.from(event.target.files);
+        const startIndex = selectedFilesEdit.length;
         selectedFilesEdit = selectedFilesEdit.concat(files);
-
         renderPreviewEdit();
+
+        // Tự động kiểm tra và đưa vào hàng đợi cắt ảnh nếu kích thước vượt chuẩn
+        let loadedCount = 0;
+        let tempQueue = [];
+
+        files.forEach((file, i) => {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = function() {
+                if (img.width > 600 || img.height > 600 || img.width !== img.height) {
+                    tempQueue.push(startIndex + i);
+                }
+                loadedCount++;
+                if (loadedCount === files.length) {
+                    tempQueue.sort((a, b) => a - b);
+                    cropQueueEdit = cropQueueEdit.concat(tempQueue);
+                    if (cropQueueEdit.length > 0) {
+                        processCropQueueEdit();
+                    }
+                }
+            };
+        });
     }
 
     function removeImageEdit(index) {
         selectedFilesEdit.splice(index, 1);
         renderPreviewEdit();
     }
+
+    function openCropperEdit(index) {
+        currentCropIndex = index;
+        const file = selectedFilesEdit[index];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const cropperImage = document.getElementById('cropperImage');
+            cropperImage.src = e.target.result;
+            
+            const modalEl = document.getElementById('cropperModal');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+            
+            modalEl.addEventListener('shown.bs.modal', function onShown() {
+                if (cropperInstance) {
+                    cropperInstance.destroy();
+                }
+                cropperInstance = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.9,
+                    responsive: true,
+                    restore: false,
+                    checkCrossOrigin: false
+                });
+                modalEl.removeEventListener('shown.bs.modal', onShown);
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById('cropConfirmBtn').addEventListener('click', function() {
+        if (!cropperInstance || currentCropIndex === null) return;
+        
+        const canvas = cropperInstance.getCroppedCanvas({
+            width: 600,
+            height: 600
+        });
+        
+        canvas.toBlob(function(blob) {
+            const originalFile = selectedFilesEdit[currentCropIndex];
+            const croppedFile = new File([blob], originalFile.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+            });
+            
+            selectedFilesEdit[currentCropIndex] = croppedFile;
+            
+            const modalEl = document.getElementById('cropperModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            
+            renderPreviewEdit();
+        }, 'image/jpeg', 0.9);
+    });
 
     function renderPreviewEdit() {
         const wrapper = document.getElementById('preview-wrapper');
@@ -429,8 +545,20 @@
             removeBtn.innerHTML = "&times;";
             removeBtn.onclick = () => removeImageEdit(index);
 
+            const cropBtn = document.createElement('button');
+            cropBtn.type = 'button';
+            cropBtn.classList.add('btn', 'btn-outline-primary', 'mt-1');
+            cropBtn.style.fontSize = '11px';
+            cropBtn.style.padding = '2px 8px';
+            cropBtn.style.borderRadius = '8px';
+            cropBtn.style.width = '120px';
+            cropBtn.innerHTML = '<i class="bi bi-crop"></i> Cắt ảnh';
+            cropBtn.onclick = () => openCropperEdit(index);
+
             box.appendChild(img);
             box.appendChild(removeBtn);
+            box.appendChild(cropBtn);
+
             wrapper.appendChild(box);
         });
 
@@ -441,12 +569,21 @@
         const input = document.getElementById("anhspInput");
         const dt = new DataTransfer();
         selectedFilesEdit.forEach(f => dt.items.add(f));
-
         input.files = dt.files;
     }
 
 
     document.addEventListener("DOMContentLoaded", function() {
+        const modalEl = document.getElementById('cropperModal');
+        if (modalEl) {
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                if (cropperInstance) {
+                    cropperInstance.destroy();
+                    cropperInstance = null;
+                }
+                setTimeout(processCropQueueEdit, 300);
+            });
+        }
 
         const giaGoc = document.querySelector("input[name='giasp']");
         const giamPT = document.getElementById("giam_pt");

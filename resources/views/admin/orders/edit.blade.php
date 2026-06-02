@@ -1,6 +1,21 @@
 @extends('admin_layout')
 @section('admin_content')
 
+@php
+    $currentStatus = $order->trangthai;
+    $allowedStatuses = [$currentStatus];
+    
+    if ($currentStatus === 'Chờ xác nhận') {
+        $allowedStatuses = ['Chờ xác nhận', 'Chờ giao hàng', 'Hủy'];
+    } elseif ($currentStatus === 'Chờ giao hàng') {
+        $allowedStatuses = ['Chờ giao hàng', 'Đang giao hàng', 'Hủy'];
+    } elseif ($currentStatus === 'Đang giao hàng') {
+        $allowedStatuses = ['Đang giao hàng', 'Hoàn thành', 'Thất bại'];
+    }
+    
+    $isClosed = in_array($currentStatus, ['Hoàn thành', 'Hủy', 'Thất bại']);
+@endphp
+
 <style>
 /* ===================== FORM STYLE (GIỐNG KHUYẾN MÃI) ===================== */
 
@@ -162,32 +177,73 @@
 <form method="POST" action="{{ route('orders.update', $order->id_dathang) }}">
     @csrf
     @method('PUT')
+    @if(request('redirect'))
+        <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+    @endif
 
 
-    {{-- THÔNG TIN KHÁCH HÀNG + VẬN CHUYỂN --}}
+    {{-- THÔNG TIN KHÁCH HÀNG & LIÊN HỆ --}}
     <div class="grid-2 mb-3">
+        <div>
+            <label class="order-label">Tên khách hàng </label>
+            <input type="text" name="hoten"
+                   class="form-control order-input"
+                   value="{{ old('hoten', $order->hoten) }}" readonly>
+        </div>
+
         <div>
             <label class="order-label">Số điện thoại </label>
             <input type="text" name="sdt"
                    class="form-control order-input"
                    value="{{ old('sdt', $order->sdt) }}" readonly>
         </div>
+    </div>
 
-
+    {{-- VẬN CHUYỂN & THANH TOÁN --}}
+    <div class="grid-2 mb-3">
         <div>
             <label class="order-label">Địa chỉ giao hàng </label>
             <input type="text" name="diachigiaohang"
                    class="form-control order-input"
                    value="{{ old('diachigiaohang', $order->diachigiaohang) }}" readonly>
         </div>
+
+        <div>
+            <label class="order-label">Phương thức thanh toán </label>
+            <input type="text" name="phuongthucthanhtoan"
+                   class="form-control order-input"
+                   value="{{ old('phuongthucthanhtoan', $order->phuongthucthanhtoan) }}" readonly>
+        </div>
     </div>
 
     {{-- TỔNG TIỀN / GIẢM GIÁ (READONLY) --}}
     <div class="grid-2 mb-4">
         <div>
-            <label class="order-label">Tổng tiền hàng</label>
+            <label class="order-label">Tổng tiền hàng (Tiền sản phẩm)</label>
             <input type="text" class="form-control order-input"
                    value="{{ number_format($order->tongtien) }} đ" readonly>
+        </div>
+
+        <div>
+            <label class="order-label">Phí vận chuyển</label>
+        @php
+            $phi_ship = 0;
+            if ($order->tienphaitra > 0) {
+                $phi_ship = $order->tienphaitra - $order->tongtien + ($order->tiengiam ?? 0);
+            } else {
+                $storeCity = env('STORE_CITY', 'Hà Nội');
+                $isInside = false;
+                if ($order->diachigiaohang) {
+                    if (mb_strpos(mb_strtolower($order->diachigiaohang), mb_strtolower($storeCity)) !== false) {
+                        $isInside = true;
+                    }
+                }
+                $phi_ship = $isInside ? (int)env('SHIPPING_FEE_INSIDE', 20000) : (int)env('SHIPPING_FEE_OUTSIDE', 35000);
+            }
+            if ($phi_ship < 0) $phi_ship = 0;
+        @endphp
+            <input type="text" class="form-control order-input"
+                   value="{{ number_format($phi_ship) }} đ" readonly>
         </div>
 
         <div>
@@ -197,9 +253,9 @@
         </div>
 
         <div>
-            <label class="order-label">Tiền phải trả</label>
-            <input type="text" class="form-control order-input"
-                   value="{{ number_format($order->tienphaitra ?? $order->tongtien - ($order->tiengiam ?? 0)) }} đ"
+            <label class="order-label" style="color: #0ea5e9;">Tổng thanh toán (Tiền phải trả)</label>
+            <input type="text" class="form-control order-input fw-bold" style="border-color: #0ea5e9; color: #0ea5e9;"
+                   value="{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0))) }} đ"
                    readonly>
         </div>
     </div>
@@ -250,64 +306,33 @@
         </div>
     </div>
 
-    {{-- THÔNG TIN ĐƠN HÀNG: PTTT + TRẠNG THÁI --}}
-    <div class="grid-2 mb-3">
-
-        {{-- PHƯƠNG THỨC THANH TOÁN --}}
-        <div>
-            <label class="order-label">Phương thức thanh toán </label>
-            <input type="text" name="phuongthucthanhtoan"
-                   class="form-control order-input"
-                   value="{{ old('phuongthucthanhtoan', $order->phuongthucthanhtoan) }}" readonly>
-        </div>
-
-        {{-- TRẠNG THÁI ĐƠN HÀNG --}}
-        <div>
+    {{-- THÔNG TIN TRẠNG THÁI --}}
+    <div class="row mb-3">
+        <div class="col-md-6">
             <label class="order-label">
                 Trạng thái đơn hàng <span class="text-danger">*</span>
             </label>
 
             <select name="trangthai"
                     class="form-select order-select order-status-select"
+                    {{ $isClosed ? 'disabled' : '' }}
                     required>
-
-                <option value="Chờ xác nhận"
-                    {{ old('trangthai', $order->trangthai) == 'Chờ xác nhận' ? 'selected' : '' }}>
-                    Chờ xác nhận
-                </option>
-
-                <option value="Chờ giao hàng"
-                    {{ old('trangthai', $order->trangthai) == 'Chờ giao hàng' ? 'selected' : '' }}>
-                    Chờ giao hàng
-                </option>
-
-                <option value="Đang giao hàng"
-                    {{ old('trangthai', $order->trangthai) == 'Đang giao hàng' ? 'selected' : '' }}>
-                    Đang giao hàng
-                </option>
-
-                <option value="Hoàn thành"
-                    {{ old('trangthai', $order->trangthai) == 'Hoàn thành' ? 'selected' : '' }}>
-                    Hoàn thành
-                </option>
-
-                <option value="Hủy"
-                    {{ old('trangthai', $order->trangthai) == 'Hủy' ? 'selected' : '' }}>
-                    Hủy
-                </option>
-
-                <option value="Thất bại"
-                    {{ old('trangthai', $order->trangthai) == 'Thất bại' ? 'selected' : '' }}>
-                    Thất bại
-                </option>
+                @foreach($allowedStatuses as $status)
+                    <option value="{{ $status }}"
+                        {{ old('trangthai', $order->trangthai) == $status ? 'selected' : '' }}>
+                        {{ $status }}
+                    </option>
+                @endforeach
             </select>
+            @if($isClosed)
+                <input type="hidden" name="trangthai" value="{{ $order->trangthai }}">
+            @endif
         </div>
-
     </div>
 
     {{-- BUTTONS --}}
     <div class="d-flex justify-content-between mt-3">
-        <a href="{{ route('orders.pending') }}" class="btn-cancel">Quay lại</a>
+        <a href="{{ request('redirect') ?? route('orders.pending') }}" class="btn-cancel">Quay lại</a>
         <button type="submit" class="btn-submit">Cập nhật đơn hàng</button>
     </div>
 

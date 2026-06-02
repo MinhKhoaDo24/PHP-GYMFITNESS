@@ -141,13 +141,27 @@
             {{-- Trạng thái (chỉ trường được sửa) --}}
             <div>
                 <label class="promo-label">Trạng thái <span style="color:red">*</span></label>
-                <select name="trangthai" class="form-select promo-select">
-
-                    <option value="0" {{ $trial->trangthai == 0 ? 'selected':'' }}>Mới đăng ký</option>
-                    <option value="1" {{ $trial->trangthai == 1 ? 'selected':'' }}>Đã xác nhận</option>
-                    <option value="2" {{ $trial->trangthai == 2 ? 'selected':'' }}>Hoàn thành</option>
-                    <option value="3" {{ $trial->trangthai == 3 ? 'selected':'' }}>Hủy</option>
+                @if($errors->has('trangthai'))
+                    <br><small class="text-danger" style="color:red; font-style:italic;">{{ $errors->first('trangthai') }}</small>
+                @endif
+                <select name="trangthai" class="form-select promo-select" @if(in_array($trial->trangthai, [2, 3])) disabled @endif>
+                    @if($trial->trangthai == 0)
+                        <option value="0" selected>Mới đăng ký</option>
+                        <option value="1">Đã xác nhận</option>
+                        <option value="3">Hủy</option>
+                    @elseif($trial->trangthai == 1)
+                        <option value="1" selected>Đã xác nhận</option>
+                        <option value="2">Hoàn thành</option>
+                        <option value="3">Hủy</option>
+                    @elseif($trial->trangthai == 2)
+                        <option value="2" selected>Hoàn thành</option>
+                    @elseif($trial->trangthai == 3)
+                        <option value="3" selected>Hủy</option>
+                    @endif
                 </select>
+                @if(in_array($trial->trangthai, [2, 3]))
+                    <small class="text-muted" style="display:block; margin-top:5px; font-size:12px;">(Trạng thái này đã bị đóng băng)</small>
+                @endif
             </div>
 
         </div>

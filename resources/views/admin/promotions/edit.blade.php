@@ -2,10 +2,6 @@
 @section('admin_content')
 
 <style>
-/* ===================== KHUNG FORM (GIỐNG CREATE) ===================== */
-
-
-/* TITLE */
 .promo-title {
     font-size: 22px;
     font-weight: 700;
@@ -23,7 +19,6 @@
     font-size: 18px;
 }
 
-/* LABEL */
 .promo-label {
     font-weight: 600;
     font-size: 14px;
@@ -31,7 +26,6 @@
     color: #374151;
 }
 
-/* INPUT */
 .promo-input,
 .promo-select {
     border-radius: 12px;
@@ -49,7 +43,6 @@
     outline: none;
 }
 
-/* TEXTAREA */
 .promo-textarea {
     border-radius: 12px;
     padding: 12px;
@@ -58,19 +51,16 @@
     resize: none;
 }
 
-/* GRID */
 .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .grid-2 { grid-template-columns: 1fr; }
 }
 
-/* BUTTONS */
 .btn-footer-cancel {
     background: #e5e7eb;
     color: #374151;
@@ -99,8 +89,6 @@
 }
 </style>
 
-<!-- ========================= FORM EDIT ========================= -->
-
 <div class="promo-modal">
 
     <div class="promo-title mb-3">
@@ -113,7 +101,6 @@
     @method('PUT')
 
         <div class="grid-2">
-
 
             <div>
                 <label class="promo-label">Tên chương trình <span style='color: red;'>*</span></label>
@@ -131,17 +118,19 @@
 
             <div>
                 <label class="promo-label">Loại giảm giá <span style='color: red;'>*</span></label>
-                <select name="kieu_giam" class="form-select promo-select">
+                <select name="kieu_giam" class="form-select promo-select" id="kieu_giam_edit">
                     <option value="percent" {{ $km->kieu_giam=='percent'?'selected':'' }}>% Phần trăm</option>
                     <option value="money" {{ $km->kieu_giam=='money'?'selected':'' }}>Giảm tiền</option>
+                    <option value="freeship" {{ $km->kieu_giam=='freeship'?'selected':'' }}>Miễn phí vận chuyển</option>
                 </select>
             </div>
 
-            <div>
+            <div id="gia_tri_wrap">
                 <label class="promo-label">Giá trị giảm <span style='color: red;'>*</span></label>
                 <input type="number" name="gia_tri_giam"
                        class="form-control promo-input"
-                       value="{{ $km->gia_tri_giam }}" required>
+                       id="gia_tri_giam_edit"
+                       value="{{ $km->gia_tri_giam }}">
             </div>
 
             <div>
@@ -152,17 +141,17 @@
             </div>
 
             <div>
-                <label class="promo-label">Đơn hàng tối thiểu </label>
+                <label class="promo-label">Đơn hàng tối thiểu</label>
                 <input type="number" name="don_toi_thieu"
                        class="form-control promo-input"
-                       value="{{ $km->don_toi_thieu }}" >
+                       value="{{ $km->don_toi_thieu }}">
             </div>
 
             <div>
-                <label class="promo-label">Giới hạn sử dụng </label>
+                <label class="promo-label">Giới hạn sử dụng</label>
                 <input type="number" name="gioi_han_luot"
                        class="form-control promo-input"
-                       value="{{ $km->gioi_han_luot }}" >
+                       value="{{ $km->gioi_han_luot }}">
             </div>
 
             <div>
@@ -201,5 +190,27 @@
 
     </form>
 </div>
+
+<script>
+function toggleGiaTri(val) {
+    const input = document.getElementById('gia_tri_giam_edit');
+    if (val === 'freeship') {
+        input.value = 0;
+        input.readOnly = true;        // ← đổi disabled thành readOnly
+        input.style.background = '#f3f4f6';
+    } else {
+        input.readOnly = false;       // ← đổi disabled thành readOnly
+        input.style.background = '#fff';
+    }
+}
+
+document.getElementById('kieu_giam_edit').addEventListener('change', function() {
+    toggleGiaTri(this.value);
+});
+
+window.onload = function() {
+    toggleGiaTri(document.getElementById('kieu_giam_edit').value);
+};
+</script>
 
 @endsection

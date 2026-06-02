@@ -58,8 +58,8 @@ class KhuyenmaiController extends Controller
         $request->validate([
             'ten_khuyenmai'   => 'required|max:150',
             'ma_code'         => 'required|unique:khuyenmai,ma_code',
-            'gia_tri_giam'    => 'required|numeric|min:1',
-            'kieu_giam'       => 'required|in:percent,money',
+           'gia_tri_giam'    => 'required|numeric|min:0',
+'kieu_giam'       => 'required|in:percent,money,freeship',
             'don_toi_thieu'   => 'nullable|numeric|min:0',
             'giam_toi_da'     => 'nullable|numeric|min:0',
             'ngay_bat_dau'    => 'required|date',
@@ -91,8 +91,8 @@ class KhuyenmaiController extends Controller
     {
         $request->validate([
             'ten_khuyenmai'   => 'required|max:150',
-            'gia_tri_giam'    => 'required|numeric|min:1',
-            'kieu_giam'       => 'required|in:percent,money',
+            'gia_tri_giam'    => 'required|numeric|min:0',
+'kieu_giam'       => 'required|in:percent,money,freeship',
             'don_toi_thieu'   => 'nullable|numeric|min:0',
             'giam_toi_da'     => 'nullable|numeric|min:0',
             'ngay_bat_dau'    => 'required|date',

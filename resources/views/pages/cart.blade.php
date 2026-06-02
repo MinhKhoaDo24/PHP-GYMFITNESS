@@ -592,7 +592,6 @@
                                 <th>Giá gốc</th>
                                 <th>Giảm giá</th>
                                 <th class="text-center">Giá khuyến mãi</th>
-                                <th>Giá cộng thêm</th>
                                 <th class="text-center">Số lượng</th>
                                 <th class="text-right">Tổng tiền</th>
                             </tr>
@@ -618,12 +617,33 @@
                                     </div>
                                 </td>
 
-                                <td class="text-center font-weight-bold" style="color: #ff8c00;">
-                                    {{ $details['ten_size'] ?? '' }}
+                                <td class="text-center font-weight-bold">
+                                    @if(isset($sizes[$id]) && count($sizes[$id]) > 0)
+                                        <select class="form-control cart-size-select" data-id="{{ $id }}" style="border-radius: 8px; border: 1px solid #ccc; padding: 4px 8px; font-weight: 600; color: #ff8c00; width: auto; display: inline-block; cursor: pointer;">
+                                            @foreach($sizes[$id] as $sizeOption)
+                                                @php 
+                                                    $isAvailable = $sizeOption->pivot->soluong > 0 || ($details['id_size'] == $sizeOption->id_size);
+                                                @endphp
+                                                <option value="{{ $sizeOption->id_size }}" 
+                                                    {{ ($details['id_size'] == $sizeOption->id_size) ? 'selected' : '' }}
+                                                    {{ !$isAvailable ? 'disabled' : '' }}>
+                                                    {{ $sizeOption->ten_size }} 
+                                                    @if($sizeOption->pivot->gia_cong_them > 0)
+                                                        (+{{ number_format($sizeOption->pivot->gia_cong_them, 0, ',', '.') }}đ)
+                                                    @endif
+                                                    @if($sizeOption->pivot->soluong <= 0 && $details['id_size'] != $sizeOption->id_size)
+                                                        (Hết hàng)
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        <span style="color: #777;">—</span>
+                                    @endif
                                 </td>
 
                                 <td class="cart-price-original" data-th="Price">
-                                    {{ number_format($details['giasp'] ?? 0, 0, ',', '.') }} VND
+                                    {{ number_format(($details['giasp'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }} VND
                                 </td>
 
 
@@ -632,11 +652,7 @@
                                 </td>
 
                                 <td class="cart-price-promo text-center" data-th="Subtotal">
-                                    {{ number_format($details['giakhuyenmai'] ?? 0, 0, ',', '.') }} VND
-                                </td>
-
-                                <td class="cart-price-surcharge text-center font-weight-bold text-success">
-                                    {{ number_format($details['gia_cong_them'] ?? 0, 0, ',', '.') }} VND
+                                    {{ number_format(($details['giakhuyenmai'] ?? 0) + ($details['gia_cong_them'] ?? 0), 0, ',', '.') }} VND
                                 </td>
 
                                 <td class="cart-quantity" data-th="Quantity">
@@ -682,21 +698,7 @@
                         </span>
                     </div>
 
-                    @if(isset($totalSurcharge) && $totalSurcharge > 0)
-                    <div class="cart-summary-row" id="surcharge-row">
-                        <span>Phụ phí size</span>
-                        <span id="cart-surcharge">
-                            + {{ number_format($totalSurcharge, 0, ',', '.') }} vnđ
-                        </span>
-                    </div>
-                    @else
-                    <div class="cart-summary-row" id="surcharge-row" style="display: none;">
-                        <span>Phụ phí size</span>
-                        <span id="cart-surcharge">
-                            0 vnđ
-                        </span>
-                    </div>
-                    @endif
+
 
                     <div class="cart-summary-row cart-summary-total">
                         <span>Tổng thanh toán</span>
@@ -790,7 +792,6 @@
             });
         });
 
-
         // Xử lý xóa sản phẩm
         document.querySelectorAll('.cart_remove').forEach(button => {
             button.addEventListener('click', function(e) {
@@ -825,11 +826,22 @@
                                 return;
                             }
 
-                            row.remove();
+                            // Cập nhật badge số lượng ở header
+                            if (data.cart_count !== undefined) {
+                                const badge = document.querySelector('.navbar__shoppingCart span');
+                                if (badge) {
+                                    badge.textContent = data.cart_count;
+                                }
+                            }
 
-                            updateCartTotal();
-
-                            showToast('Xóa sản phẩm thành công!');
+                            if (data.cart_count === 0) {
+                                // Nếu giỏ hàng trống hoàn toàn, load lại trang để hiển thị giao diện giỏ hàng trống
+                                location.reload();
+                            } else {
+                                row.remove();
+                                updateCartTotal();
+                                showToast('Xóa sản phẩm thành công!');
+                            }
                         })
                         .catch(() => {
                             showToast('Có lỗi khi xóa sản phẩm!');
@@ -854,6 +866,7 @@
                 setTimeout(() => toast.remove(), 300);
             }, 2000);
         }
+
         // Hàm cập nhật giỏ hàng
         function updateCart(row, quantity, element) {
             var button = element && element.classList.contains('quantity-btn') ? element : null;
@@ -874,6 +887,14 @@
                         var productTotal = row.querySelector('.product-total');
                         if (productTotal && typeof response.product_total !== 'undefined') {
                             productTotal.textContent = formatPrice(response.product_total);
+                        }
+
+                        // Cập nhật badge số lượng ở header
+                        if (typeof response.cart_count !== 'undefined') {
+                            const badge = document.querySelector('.navbar__shoppingCart span');
+                            if (badge) {
+                                badge.textContent = response.cart_count;
+                            }
                         }
 
                         updateCartSummary(response);
@@ -971,6 +992,53 @@
                 }
             }
         }
+
+        // Xử lý thay đổi size trực tiếp
+        document.querySelectorAll('.cart-size-select').forEach(function(select) {
+            select.addEventListener('change', function(e) {
+                e.preventDefault();
+                var cartId = this.getAttribute('data-id');
+                var newSizeId = this.value;
+
+                $.ajax({
+                    url: '{{ route("update_cart_size") }}',
+                    method: 'PATCH',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: cartId,
+                        id_size: newSizeId
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            showToast(response.message);
+                            if (response.warning) {
+                                alert(response.warning);
+                            }
+                            if (response.redirect) {
+                                setTimeout(function() {
+                                    window.location.href = response.redirect;
+                                }, 800);
+                            }
+                        } else {
+                            showToast(response.message || 'Có lỗi khi cập nhật size!');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        }
+                    },
+                    error: function(xhr) {
+                        var msg = 'Có lỗi xảy ra!';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        showToast(msg);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    }
+                });
+            });
+        });
     });
 </script>
 

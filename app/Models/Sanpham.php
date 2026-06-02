@@ -45,6 +45,11 @@ class SanPham extends Model
             ->withPivot('soluong', 'gia_cong_them');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'sanpham_id', 'id_sanpham');
+    }
+
 
     public function getSoldAttribute()
     {
