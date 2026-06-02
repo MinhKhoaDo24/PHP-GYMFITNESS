@@ -17,17 +17,17 @@
             <h1>Chào mừng đến với Rise Fitness & Yoga</h1>
             <p class="slogan">Chinh phục vóc dáng, bứt phá giới hạn!</p>
             <div class="banner-buttons">
-                <a href="#trial-signup" class="cta-button highlighted rect-button animated" style="color: #fff;">Đăng ký tập thử</a>
-                <a href="#products" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
+                <a href="{{ route('dang-ky-tap-thu') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Đăng ký tập thử</a>
+                <a href="{{ route('services') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
             </div>
         </div>
     </div>
     <div class="marquee-container">
             <div class="marquee">
-                <a href="pages/gym.html">Gym</a>  <a href="pages/swimming.html">Swimming</a>  <a href="pages/kickboxing.html">Kick Boxing</a>  <a href="pages/dance.html">Dance</a>  <a href="pages/yoga.html">Yoga</a>
-                <a href="pages/gym.html">Gym</a>  <a href="pages/swimming.html">Swimming</a>  <a href="pages/kickboxing.html">Kick Boxing</a>  <a href="pages/dance.html">Dance</a>  <a href="pages/yoga.html">Yoga</a>
-                <a href="pages/gym.html">Gym</a>  <a href="pages/swimming.html">Swimming</a>  <a href="pages/kickboxing.html">Kick Boxing</a>  <a href="pages/dance.html">Dance</a>  <a href="pages/yoga.html">Yoga</a>
-                <a href="pages/gym.html">Gym</a>  <a href="pages/swimming.html">Swimming</a>  <a href="pages/kickboxing.html">Kick Boxing</a>  <a href="pages/dance.html">Dance</a>  <a href="pages/yoga.html">Yoga</a>
+                <a href="{{ route('services.gym') }}">Gym</a>  <a href="{{ route('services.swimming') }}">Swimming</a>  <a href="{{ route('services.kickboxing') }}">Kick Boxing</a>  <a href="{{ route('services.dance') }}">Dance</a>  <a href="{{ route('services.yoga') }}">Yoga</a>
+                <a href="{{ route('services.gym') }}">Gym</a>  <a href="{{ route('services.swimming') }}">Swimming</a>  <a href="{{ route('services.kickboxing') }}">Kick Boxing</a>  <a href="{{ route('services.dance') }}">Dance</a>  <a href="{{ route('services.yoga') }}">Yoga</a>
+                <a href="{{ route('services.gym') }}">Gym</a>  <a href="{{ route('services.swimming') }}">Swimming</a>  <a href="{{ route('services.kickboxing') }}">Kick Boxing</a>  <a href="{{ route('services.dance') }}">Dance</a>  <a href="{{ route('services.yoga') }}">Yoga</a>
+                <a href="{{ route('services.gym') }}">Gym</a>  <a href="{{ route('services.swimming') }}">Swimming</a>  <a href="{{ route('services.kickboxing') }}">Kick Boxing</a>  <a href="{{ route('services.dance') }}">Dance</a>  <a href="{{ route('services.yoga') }}">Yoga</a>
             </div>
         </div>
     </div>
@@ -183,7 +183,11 @@
                         <!-- ICON HOVER -->
                         <div class="hover-icons">
                             <!-- Nút thêm vào giỏ hàng -->
-                            <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}">
+                            <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}"
+                               data-id="{{ $sp->id_sanpham }}"
+                               data-name="{{ $sp->tensp }}"
+                               data-co-size="{{ $sp->co_size }}"
+                               data-sizes="{{ $sp->co_size == 1 ? json_encode($sp->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
 
@@ -206,6 +210,20 @@
                         </div>
 
                         <!-- INFO -->
+                        <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 4px 0 6px; text-align: left;">
+                            @php
+                                $avgRating = $sp->comments_avg_rating ?? 5;
+                                $cntRating = $sp->comments_count ?? 0;
+                            @endphp
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= round($avgRating))
+                                    <i class="fa fa-star"></i>
+                                @else
+                                    <i class="fa fa-star-o"></i>
+                                @endif
+                            @endfor
+                            <span style="color: #aaa; font-size: 11px; margin-left: 4px;">({{ $cntRating }})</span>
+                        </div>
                         <div class="benefit">🔥 Giá tốt nhất thị trường</div>
                         <div class="gift">🎁 Quà tặng trị giá 100.000đ</div>
 
@@ -258,7 +276,11 @@
                     <div class="hover-icons">
 
                         <!-- Nút thêm vào giỏ hàng -->
-                        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}">
+                        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}"
+                           data-id="{{ $sp->id_sanpham }}"
+                           data-name="{{ $sp->tensp }}"
+                           data-co-size="{{ $sp->co_size }}"
+                           data-sizes="{{ $sp->co_size == 1 ? json_encode($sp->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
                             <i class="fa fa-shopping-cart"></i>
                         </a>
 
@@ -281,6 +303,20 @@
                     </div>
 
                     <!-- INFO -->
+                    <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 4px 0 6px; text-align: left;">
+                        @php
+                            $avgRating = $sp->comments_avg_rating ?? 5;
+                            $cntRating = $sp->comments_count ?? 0;
+                        @endphp
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= round($avgRating))
+                                <i class="fa fa-star"></i>
+                            @else
+                                <i class="fa fa-star-o"></i>
+                            @endif
+                        @endfor
+                        <span style="color: #aaa; font-size: 11px; margin-left: 4px;">({{ $cntRating }})</span>
+                    </div>
                     <div class="benefit">🔥 Giá tốt nhất thị trường</div>
                     <div class="gift">🎁 Quà tặng trị giá 100.000đ</div>
 
@@ -326,7 +362,11 @@
                     <div class="hover-icons">
 
                         <!-- Nút thêm vào giỏ hàng -->
-                        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}">
+                        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}"
+                           data-id="{{ $sp->id_sanpham }}"
+                           data-name="{{ $sp->tensp }}"
+                           data-co-size="{{ $sp->co_size }}"
+                           data-sizes="{{ $sp->co_size == 1 ? json_encode($sp->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
                             <i class="fa fa-shopping-cart"></i>
                         </a>
 
@@ -396,7 +436,11 @@
                         <div class="hover-icons">
 
                             <!-- Nút thêm vào giỏ hàng -->
-                            <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}">
+                            <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart', $sp->id_sanpham) }}"
+                               data-id="{{ $sp->id_sanpham }}"
+                               data-name="{{ $sp->tensp }}"
+                               data-co-size="{{ $sp->co_size }}"
+                               data-sizes="{{ $sp->co_size == 1 ? json_encode($sp->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
 

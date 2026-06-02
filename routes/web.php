@@ -76,6 +76,7 @@ Route::get('cart', [CartController::class, 'cart'])->name('cart');
 Route::get('add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add_to_cart');
 Route::get('add-go-to-cart/{id}', [CartController::class, 'addGoToCart'])->name('add_go_to_cart');
 Route::patch('update-cart', [CartController::class, 'update'])->name('update_cart');
+Route::patch('update-cart-size', [CartController::class, 'updateSize'])->name('update_cart_size');
 Route::get('/remove-from-cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 Route::post('/capnhat-thongtin', [OrderViewController::class, 'capnhatThongTin'])->name('donhang.update');
@@ -192,5 +193,10 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     ->name('users.restore');
 
     Route::resource('/admin/dangki', DangkidichvuController::class);
+    Route::resource('/admin/sizes', \App\Http\Controllers\Admin\SizeController::class);
+    Route::post('/admin/sizes/{id}/restore', [\App\Http\Controllers\Admin\SizeController::class, 'restore'])->name('sizes.restore');
 
+    // Quản lý đánh giá (Review/Comment Management)
+    Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
+    Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
 });

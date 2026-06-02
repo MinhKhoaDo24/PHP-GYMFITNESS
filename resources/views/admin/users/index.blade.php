@@ -117,7 +117,7 @@
     {{-- SEARCH --}}
     <form class="w-50" method="GET">
         <input type="text" name="q" class="form-control"
-               placeholder="🔍 Tìm theo tên, email, SĐT..."
+               placeholder="Tìm theo tên, email, SĐT..."
                value="{{ request('q') }}">
     </form>
 
@@ -129,7 +129,7 @@
             <input type="hidden" name="status" value="{{ request('status') }}">
             
             <select name="role" class="form-select" onchange="this.form.submit()">
-                <option value="">📌 Tất cả quyền</option>
+                <option value="">Tất cả quyền</option>
                 <option value="1" {{ request('role')==1 ? 'selected':'' }}>Admin</option>
                 <option value="2" {{ request('role')==2 ? 'selected':'' }}>User</option>
             </select>
@@ -141,7 +141,7 @@
             <input type="hidden" name="role" value="{{ request('role') }}">
             
             <select name="status" class="form-select" onchange="this.form.submit()">
-                <option value="">📚 Trạng thái</option>
+                <option value="">Trạng thái</option>
                 <option value="1" {{ request('status')==1 ? 'selected':'' }}>Hoạt động</option>
                 <option value="0" {{ request('status')==='0' ? 'selected':'' }}>Vô hiệu</option>
             </select>

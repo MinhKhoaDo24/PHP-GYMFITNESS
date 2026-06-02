@@ -117,6 +117,13 @@
                     </a>
                 </li>
 
+                {{-- SIZE --}}
+                <li class="sidebar-item {{ request()->is('admin/sizes*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="{{ url('/admin/sizes') }}">
+                        <i class="bi bi-aspect-ratio me-2"></i> Quản lý Size
+                    </a>
+                </li>
+
                 {{-- NGƯỜI DÙNG --}}
                 <li class="sidebar-item {{ request()->is('admin/users*') ? 'active' : '' }}">
                     <a class="sidebar-link" href="{{ url('/admin/users') }}">
@@ -124,8 +131,12 @@
                     </a>
                 </li>
 
-
-
+                {{-- ĐÁNH GIÁ --}}
+                <li class="sidebar-item {{ request()->is('admin/comments*') ? 'active' : '' }}">
+                    <a class="sidebar-link" href="{{ url('/admin/comments') }}">
+                        <i class="bi bi-chat-left-text me-2"></i> Quản lý Đánh giá
+                    </a>
+                </li>
             </ul>
 
 
@@ -192,6 +203,18 @@
 
 {{-- =================== CUSTOM CSS =================== --}}
 <style>
+/* ================== SCROLL OVERRIDES ================== */
+html, body {
+    height: auto !important;
+}
+.wrapper {
+    overflow: visible !important;
+}
+.main {
+    overflow-y: auto !important;
+    min-height: 100vh;
+}
+
 /* ================== THEME COLORS ================== */
 :root {
     --gym-primary: #34A4E0;

@@ -11,7 +11,11 @@
     </div>
 
     <div class="hover-icons">
-        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart',$p->id_sanpham) }}">
+        <a href="#" class="icon-btn js-add-to-cart" data-url="{{ route('add_to_cart',$p->id_sanpham) }}"
+           data-id="{{ $p->id_sanpham }}"
+           data-name="{{ $p->tensp }}"
+           data-co-size="{{ $p->co_size }}"
+           data-sizes="{{ $p->co_size == 1 ? json_encode($p->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
             <i class="fa fa-shopping-cart"></i>
         </a>
         <a href="{{ route('detail', $p->id_sanpham) }}" class="icon-btn">
@@ -25,6 +29,21 @@
         <span class="new-price">{{ number_format($p->giakhuyenmai) }}đ</span>
         <span class="old-price">{{ number_format($p->giasp) }}đ</span>
         <span class="discount">-{{ $p->giamgia }}%</span>
+    </div>
+
+    <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 5px 0 8px; text-align: left;">
+        @php
+            $avg = $p->comments_avg_rating ?? 5;
+            $count = $p->comments_count ?? 0;
+        @endphp
+        @for($i = 1; $i <= 5; $i++)
+            @if($i <= round($avg))
+                <i class="fa fa-star"></i>
+            @else
+                <i class="fa fa-star-o"></i>
+            @endif
+        @endfor
+        <span style="color: #777; font-size: 11px; margin-left: 4px;">({{ $count }})</span>
     </div>
 
     <div class="benefit">🔥 Giá tốt nhất thị trường</div>

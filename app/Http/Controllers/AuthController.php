@@ -80,6 +80,15 @@ class AuthController extends Controller
      */
     public function loginPost(Request $request)
     {
+        // ── Track số lần đăng nhập sai ─────────────────────────────────────
+        $email = $request->email;
+        $loginAttempts = session("login_attempts.{$email}", 0);
+
+        // Nếu đã sai 5 lần, chặn đăng nhập
+        if ($loginAttempts >= 5) {
+            return back()->with('error', 'Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng đặt lại mật khẩu!');
+        }
+
         // ── 1. Validate reCAPTCHA ──────────────────────────────────────────
         $recaptchaToken = $request->input('g-recaptcha-response');
 
@@ -103,7 +112,17 @@ class AuthController extends Controller
         $user = NguoiDung::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+            // Tăng counter
+            session(["login_attempts.{$email}" => $loginAttempts + 1]);
+
+            $newAttempts = $loginAttempts + 1;
+            if ($newAttempts >= 5) {
+                return back()->with('error', 'Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng đặt lại mật khẩu!');
+            } elseif ($newAttempts >= 3) {
+                return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu! (Lần nhập sai: ' . $newAttempts . '/5 - Lần thứ 5 sẽ bị khóa)');
+            } else {
+                return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+            }
         }
 
         if ($user->trang_thai == 0) {
@@ -117,6 +136,9 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($credentials, false)) {
+            // Reset counter khi đăng nhập thành công
+            session()->forget("login_attempts.{$email}");
+            
             $request->session()->regenerate();
 
             // ── Remember Me bằng Sanctum token ghi vào cookie ──────────────
@@ -141,12 +163,22 @@ class AuthController extends Controller
                 );
             }
 
-            return redirect('/')
+            return redirect()->intended('/')
                 ->with('thongbao', 'Đăng nhập thành công!')
                 ->withCookie(Cookie::queued('remember_token') ?? cookie()->forget('remember_token'));
         }
 
-        return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+        // Tăng counter khi đăng nhập thất bại
+        $newAttempts = $loginAttempts + 1;
+        session(["login_attempts.{$email}" => $newAttempts]);
+
+        if ($newAttempts >= 5) {
+            return back()->with('error', 'Bạn đã nhập sai mật khẩu quá nhiều lần. Vui lòng đặt lại mật khẩu!');
+        } elseif ($newAttempts >= 3) {
+            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu! (Lần nhập sai: ' . $newAttempts . '/5 - Lần thứ 5 sẽ bị khóa)');
+        } else {
+            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+        }
     }
 
     public function logout(Request $request)

@@ -136,7 +136,7 @@
 
     <form method="GET" class="w-50">
         <input type="text" name="q" class="form-control"
-               placeholder="🔍 Tìm kiếm sản phẩm..."
+               placeholder="Tìm kiếm sản phẩm..."
                value="{{ request('q') }}">
     </form>
 
@@ -148,7 +148,7 @@
         <input type="hidden" name="q" value="{{ request('q') }}">
 
         <select name="cate" class="form-select" onchange="this.form.submit()">
-            <option value="">📦 Tất cả danh mục</option>
+            <option value="">Tất cả danh mục</option>
             @foreach($danhmucs as $dm)
                 <option value="{{ $dm->id_danhmuc }}"
                     {{ request('cate') == $dm->id_danhmuc ? 'selected' : '' }}>
@@ -164,7 +164,7 @@
         <input type="hidden" name="q" value="{{ request('q') }}">
 
         <select name="trang_thai" class="form-select" onchange="this.form.submit()">
-            <option value="">📚 Tất cả trạng thái</option>
+            <option value="">Tất cả trạng thái</option>
             <option value="1" {{ request('trang_thai') === '1' ? 'selected' : '' }}>Hiển thị</option>
             <option value="0" {{ request('trang_thai') === '0' ? 'selected' : '' }}>Ẩn</option>
         </select>
@@ -175,7 +175,8 @@
 </div>
 
 {{-- ======================= BẢNG SẢN PHẨM ======================= --}}
-<table class="table table-hover product-table">
+<div class="card p-0 shadow-sm table-responsive">
+    <table class="table table-hover product-table mb-0">
     <thead>
         <tr>
             <!-- <th>ẢNH</th> -->
@@ -256,6 +257,7 @@
         @endforeach
     </tbody>
 </table>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

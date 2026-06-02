@@ -208,14 +208,14 @@
 
     <form method="GET" class="w-50">
         <input type="text" name="q" class="form-control"
-               placeholder="🔍 Tìm kiếm theo tên hoặc mã khuyến mãi..."
+               placeholder="Tìm kiếm theo tên hoặc mã khuyến mãi..."
                value="{{ request('q') }}">
     </form>
 
     <div class="d-flex">
         <form method="GET" class="me-2">
             <select name="status" class="form-select" onchange="this.form.submit()">
-                <option value="">📚 Tất cả trạng thái</option>
+                <option value="">Tất cả trạng thái</option>
                 <option value="1" {{ request('status')==1 ? 'selected' : '' }}>Hoạt động</option>
                 <option value="0" {{ request('status')==='0' ? 'selected' : '' }}>Tạm ngưng</option>
                 <option value="0" {{ request('status')==='2' ? 'selected' : '' }}>Hết hạn</option>
@@ -224,7 +224,7 @@
 
         <form method="GET">
             <select name="type" class="form-select" onchange="this.form.submit()">
-                <option value="">💰 Tất cả loại</option>
+                <option value="">Tất cả loại</option>
                 <option value="percent" {{ request('type')=='percent' ? 'selected' : '' }}>Giảm %</option>
                 <option value="money" {{ request('type')=='money' ? 'selected' : '' }}>Giảm tiền</option>
             </select>

@@ -112,7 +112,7 @@ class AdminRepository implements IAdminRepository
     public function getRevenue($start, $end)
     {
         return DB::table('dathang')
-            ->whereBetween('ngaydathang', [
+            ->whereBetween('ngay_hoan_thanh', [
                 $start->format('Y-m-d H:i:s'),
                 $end->format('Y-m-d H:i:s')
             ])
@@ -123,7 +123,7 @@ class AdminRepository implements IAdminRepository
     public function getOrders($start, $end)
     {
         return DB::table('dathang')
-            ->whereBetween('ngaydathang', [
+            ->whereBetween('ngay_hoan_thanh', [
                 $start->format('Y-m-d H:i:s'),
                 $end->format('Y-m-d H:i:s')
             ])
@@ -149,7 +149,7 @@ class AdminRepository implements IAdminRepository
         return DB::table('chitiet_donhang')
             ->join('dathang', 'chitiet_donhang.id_dathang', '=', 'dathang.id_dathang')
             ->where('dathang.trangthai', 'Hoàn thành')
-            ->whereBetween('dathang.ngaydathang', [
+            ->whereBetween('dathang.ngay_hoan_thanh', [
                 $start->format('Y-m-d H:i:s'),
                 $end->format('Y-m-d H:i:s')
             ])

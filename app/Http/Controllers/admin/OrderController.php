@@ -193,6 +193,11 @@ public function update(Request $request, $id)
     $order->trangthai    = $data['trangthai'];
     $order->ngaygiaohang = $data['ngaygiaohang'] ?? null;
 
+    // Tự động lưu ngày hoàn thành thực tế khi chuyển sang Hoàn thành
+    if ($data['trangthai'] === 'Hoàn thành') {
+        $order->ngay_hoan_thanh = now();
+    }
+
     $order->save();
     if ($request->has('redirect')) {
         return redirect($request->redirect)

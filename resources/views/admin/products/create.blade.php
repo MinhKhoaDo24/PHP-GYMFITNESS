@@ -1,6 +1,10 @@
 @extends('admin_layout')
 @section('admin_content')
 
+<!-- Cropper.js CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
 <style>
 /* ===================== TITLE ===================== */
 .promo-title {
@@ -113,7 +117,9 @@
 }
 .preview-box {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .preview-box img {
@@ -234,6 +240,32 @@
                 Sản phẩm nổi bật
             </label>
         </div>
+        <!-- Có Size -->
+        <div>
+            <label class="promo-label d-flex align-items-center" style="gap: 8px; cursor:pointer;">
+                <input type="checkbox" 
+                    name="co_size" 
+                    id="co_size"
+                    value="1"
+                    style="width:18px; height:18px; cursor:pointer;">
+                Sản phẩm có kích thước (Size)
+            </label>
+        </div>
+    </div>
+
+    <!-- Cấu hình các Size cho sản phẩm -->
+    <div id="size-section" style="display: none;" class="mt-4 card p-3 border shadow-sm" data-sizes="{{ json_encode($sizes) }}">
+        <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-aspect-ratio text-primary"></i> Cấu hình Size sản phẩm
+        </h5>
+        <div id="size-rows-container">
+            <!-- Dòng size sẽ được thêm động vào đây -->
+        </div>
+        <div class="mt-2">
+            <button type="button" class="btn btn-sm btn-primary" id="add-size-btn" style="border-radius: 8px;">
+                <i class="bi bi-plus-circle"></i> Thêm Size
+            </button>
+        </div>
     </div>
 
     <!-- Mô tả ngắn-->
@@ -266,20 +298,130 @@
 @endif
 
 
+<!-- Modal Cắt Ảnh -->
+<div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div class="modal-header bg-dark text-white border-0">
+                <h5 class="modal-title" id="cropperModalLabel"><i class="bi bi-crop"></i> Cắt ảnh sản phẩm (Tỉ lệ 1:1)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" style="max-height: 500px; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #111;">
+                <img id="cropperImage" src="" style="max-width: 100%; max-height: 450px; display: block;">
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                <button type="button" class="btn btn-primary" id="cropConfirmBtn" style="border-radius: 8px; background: linear-gradient(to right, #0284c7, #0ea5e9); border: none;">Xác nhận cắt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let selectedFiles = []; 
+let cropperInstance = null;
+let currentCropIndex = null;
+let cropQueue = [];
+
+function processCropQueue() {
+    if (cropQueue.length === 0) return;
+    const nextIndex = cropQueue.shift();
+    if (nextIndex < selectedFiles.length) {
+        openCropper(nextIndex);
+    } else {
+        processCropQueue();
+    }
+}
 
 function previewImages(event) {
     const files = Array.from(event.target.files);
+    const startIndex = selectedFiles.length;
     selectedFiles = selectedFiles.concat(files);
-
     renderPreview();
+
+    // Tự động kiểm tra và đưa vào hàng đợi cắt ảnh nếu kích thước vượt chuẩn
+    let loadedCount = 0;
+    let tempQueue = [];
+
+    files.forEach((file, i) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = function() {
+            if (img.width > 600 || img.height > 600 || img.width !== img.height) {
+                tempQueue.push(startIndex + i);
+            }
+            loadedCount++;
+            if (loadedCount === files.length) {
+                tempQueue.sort((a, b) => a - b);
+                cropQueue = cropQueue.concat(tempQueue);
+                if (cropQueue.length > 0) {
+                    processCropQueue();
+                }
+            }
+        };
+    });
 }
 
 function removeImage(index) {
     selectedFiles.splice(index, 1);
     renderPreview();
 }
+
+function openCropper(index) {
+    currentCropIndex = index;
+    const file = selectedFiles[index];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const cropperImage = document.getElementById('cropperImage');
+        cropperImage.src = e.target.result;
+        
+        const modalEl = document.getElementById('cropperModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        
+        modalEl.addEventListener('shown.bs.modal', function onShown() {
+            if (cropperInstance) {
+                cropperInstance.destroy();
+            }
+            cropperInstance = new Cropper(cropperImage, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 0.9,
+                responsive: true,
+                restore: false,
+                checkCrossOrigin: false
+            });
+            modalEl.removeEventListener('shown.bs.modal', onShown);
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+document.getElementById('cropConfirmBtn').addEventListener('click', function() {
+    if (!cropperInstance || currentCropIndex === null) return;
+    
+    const canvas = cropperInstance.getCroppedCanvas({
+        width: 600,
+        height: 600
+    });
+    
+    canvas.toBlob(function(blob) {
+        const originalFile = selectedFiles[currentCropIndex];
+        const croppedFile = new File([blob], originalFile.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+        
+        selectedFiles[currentCropIndex] = croppedFile;
+        
+        const modalEl = document.getElementById('cropperModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+        
+        renderPreview();
+    }, 'image/jpeg', 0.9);
+});
 
 function renderPreview() {
     const wrapper = document.getElementById('preview-wrapper');
@@ -298,8 +440,19 @@ function renderPreview() {
         removeBtn.innerHTML = '&times;';
         removeBtn.onclick = () => removeImage(index);
 
+        const cropBtn = document.createElement('button');
+        cropBtn.type = 'button';
+        cropBtn.classList.add('btn', 'btn-outline-primary', 'mt-1');
+        cropBtn.style.fontSize = '11px';
+        cropBtn.style.padding = '2px 8px';
+        cropBtn.style.borderRadius = '8px';
+        cropBtn.style.width = '120px';
+        cropBtn.innerHTML = '<i class="bi bi-crop"></i> Cắt ảnh';
+        cropBtn.onclick = () => openCropper(index);
+
         box.appendChild(img);
         box.appendChild(removeBtn);
+        box.appendChild(cropBtn);
 
         wrapper.appendChild(box);
     });
@@ -309,14 +462,22 @@ function renderPreview() {
 
 function updateFileInput() {
     const input = document.querySelector('input[name="anhsp[]"]');
-
     const dataTransfer = new DataTransfer();
     selectedFiles.forEach(file => dataTransfer.items.add(file));
-
     input.files = dataTransfer.files;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    const modalEl = document.getElementById('cropperModal');
+    if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+            setTimeout(processCropQueue, 300);
+        });
+    }
 
     const giaGoc = document.querySelector("input[name='giasp']");
     const giamPT = document.getElementById("giam_pt");
@@ -336,6 +497,91 @@ document.addEventListener("DOMContentLoaded", function () {
 
     giaGoc.addEventListener("input", tinhGia);
     giamPT.addEventListener("input", tinhGia);
+
+    // ==================== SIZE MANAGEMENT JS ====================
+    const coSizeCheckbox = document.getElementById('co_size');
+    const sizeSection = document.getElementById('size-section');
+    const mainSoluongInput = document.querySelector('input[name="soluong"]');
+    const sizeRowsContainer = document.getElementById('size-rows-container');
+    const addSizeBtn = document.getElementById('add-size-btn');
+    
+    let sizeIndex = 0;
+    const sizesList = JSON.parse(sizeSection.getAttribute('data-sizes') || '[]');
+
+    function toggleSizeSection() {
+        if (coSizeCheckbox.checked) {
+            sizeSection.style.display = 'block';
+            mainSoluongInput.setAttribute('readonly', 'readonly');
+            calculateTotalQuantity();
+        } else {
+            sizeSection.style.display = 'none';
+            mainSoluongInput.removeAttribute('readonly');
+        }
+    }
+
+    function calculateTotalQuantity() {
+        if (!coSizeCheckbox.checked) return;
+        let total = 0;
+        document.querySelectorAll('.size-soluong-input').forEach(input => {
+            total += parseInt(input.value) || 0;
+        });
+        mainSoluongInput.value = total;
+    }
+
+    coSizeCheckbox.addEventListener('change', toggleSizeSection);
+
+    addSizeBtn.addEventListener('click', function () {
+        const index = sizeIndex++;
+        
+        let optionsHtml = '<option value="">-- Chọn Size --</option>';
+        sizesList.forEach(size => {
+            optionsHtml += `<option value="${size.id_size}">${size.ten_size}</option>`;
+        });
+
+        const rowHtml = `
+            <div class="row mb-3 align-items-end size-row">
+                <div class="col-md-6">
+                    <label class="promo-label">Chọn Size</label>
+                    <select name="product_sizes[${index}][id_size]" class="form-select promo-select" required>
+                        ${optionsHtml}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <div class="row align-items-center">
+                        <div class="col-5">
+                            <label class="promo-label">Số lượng</label>
+                            <input type="number" name="product_sizes[${index}][soluong]" class="form-control promo-input size-soluong-input" value="0" min="0" required>
+                        </div>
+                        <div class="col-5">
+                            <label class="promo-label">Giá cộng thêm</label>
+                            <input type="number" name="product_sizes[${index}][gia_cong_them]" class="form-control promo-input" value="0" min="0" required>
+                        </div>
+                        <div class="col-2 text-end">
+                            <button type="button" class="btn btn-danger btn-sm remove-size-btn mt-3" style="border-radius: 8px;">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        sizeRowsContainer.insertAdjacentHTML('beforeend', rowHtml);
+        calculateTotalQuantity();
+    });
+
+    sizeRowsContainer.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-size-btn')) {
+            e.target.closest('.size-row').remove();
+            calculateTotalQuantity();
+        }
+    });
+
+    sizeRowsContainer.addEventListener('input', function (e) {
+        if (e.target.classList.contains('size-soluong-input')) {
+            calculateTotalQuantity();
+        }
+    });
+
+    // Khởi tạo trạng thái ban đầu
+    toggleSizeSection();
 
 });
 </script>

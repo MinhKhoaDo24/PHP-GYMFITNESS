@@ -13,6 +13,7 @@ class Dathang extends Model
     protected $fillable = [
         'ngaydathang',
         'ngaygiaohang',
+        'ngay_hoan_thanh',
         'tongtien',
         'tiengiam',           // thêm
         'tienphaitra',        // thêm
@@ -30,6 +31,7 @@ class Dathang extends Model
         'id_dathang' => 'int',
         'ngaydathang' => 'datetime',
         'ngaygiaohang' => 'datetime',
+        'ngay_hoan_thanh' => 'datetime',
         'tongtien' => 'int',
         'tiengiam' => 'int',       // thêm
         'tienphaitra' => 'int',    // thêm
@@ -46,6 +48,7 @@ class Dathang extends Model
     protected $dates = [
         'ngaydathang',
         'ngaygiaohang',
+        'ngay_hoan_thanh',
     ];
 
     public function khuyenmai()

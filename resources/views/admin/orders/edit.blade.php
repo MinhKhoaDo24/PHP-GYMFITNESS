@@ -177,6 +177,9 @@
 <form method="POST" action="{{ route('orders.update', $order->id_dathang) }}">
     @csrf
     @method('PUT')
+    @if(request('redirect'))
+        <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+    @endif
 
 
     {{-- THÔNG TIN KHÁCH HÀNG & LIÊN HỆ --}}
@@ -223,8 +226,24 @@
 
         <div>
             <label class="order-label">Phí vận chuyển</label>
+        @php
+            $phi_ship = 0;
+            if ($order->tienphaitra > 0) {
+                $phi_ship = $order->tienphaitra - $order->tongtien + ($order->tiengiam ?? 0);
+            } else {
+                $storeCity = env('STORE_CITY', 'Hà Nội');
+                $isInside = false;
+                if ($order->diachigiaohang) {
+                    if (mb_strpos(mb_strtolower($order->diachigiaohang), mb_strtolower($storeCity)) !== false) {
+                        $isInside = true;
+                    }
+                }
+                $phi_ship = $isInside ? (int)env('SHIPPING_FEE_INSIDE', 20000) : (int)env('SHIPPING_FEE_OUTSIDE', 35000);
+            }
+            if ($phi_ship < 0) $phi_ship = 0;
+        @endphp
             <input type="text" class="form-control order-input"
-                   value="25,000 đ" readonly>
+                   value="{{ number_format($phi_ship) }} đ" readonly>
         </div>
 
         <div>
@@ -236,7 +255,7 @@
         <div>
             <label class="order-label" style="color: #0ea5e9;">Tổng thanh toán (Tiền phải trả)</label>
             <input type="text" class="form-control order-input fw-bold" style="border-color: #0ea5e9; color: #0ea5e9;"
-                   value="{{ number_format($order->tienphaitra ?? $order->tongtien + 25000 - ($order->tiengiam ?? 0)) }} đ"
+                   value="{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : ($order->tongtien + $phi_ship - ($order->tiengiam ?? 0))) }} đ"
                    readonly>
         </div>
     </div>
@@ -313,7 +332,7 @@
 
     {{-- BUTTONS --}}
     <div class="d-flex justify-content-between mt-3">
-        <a href="{{ route('orders.pending') }}" class="btn-cancel">Quay lại</a>
+        <a href="{{ request('redirect') ?? route('orders.pending') }}" class="btn-cancel">Quay lại</a>
         <button type="submit" class="btn-submit">Cập nhật đơn hàng</button>
     </div>
 
