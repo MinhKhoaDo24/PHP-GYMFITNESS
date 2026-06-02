@@ -61,10 +61,14 @@ class ForgotPasswordController extends Controller
                     ->symbols(),    // cần ít nhất 1 ký tự đặc biệt
             ]
         ], [
-            'email.required' => 'Vui lòng nhập email',
-            'email.email' => 'Email không hợp lệ',
-            'password.required' => 'Vui lòng nhập mật khẩu',
-            'password.confirmed' => 'Mật khẩu xác nhận không khớp'
+            'email.required'     => 'Vui lòng nhập email',
+            'email.email'        => 'Email không hợp lệ',
+            'password.required'  => 'Vui lòng nhập mật khẩu',
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp',
+            'password.min'       => 'Mật khẩu phải có ít nhất 6 ký tự',
+            'password.mixed'     => 'Mật khẩu phải chứa cả chữ hoa (A-Z) và chữ thường (a-z)',
+            'password.numbers'   => 'Mật khẩu phải chứa ít nhất 1 chữ số (0-9)',
+            'password.symbols'   => 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)',
         ]);
 
         $reset = DB::table('password_resets')

@@ -95,24 +95,26 @@
     }
 
     .banner-content {
-        position: absolute;
-        top: 45%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        position: absolute !important;
+        top: 45% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
         text-align: center;
-        z-index: 2;
+        z-index: 10;
         color: white;
         opacity: 0;
+        width: max-content;
+        max-width: 90%;
         animation: slideUp 1s ease-out forwards;
     }
 
     @keyframes slideUp {
         0% {
-            transform: translate(-50%, 50%);
+            transform: translate(-50%, 50%) !important;
             opacity: 0;
         }
         100% {
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) !important;
             opacity: 1;
         }
     }
@@ -122,7 +124,7 @@
     }
 
     .banner-content.dynamic-overlay {
-        position: relative;
+        /* Không override position ở đây */
     }
 
     .banner-content.dynamic-overlay::before {

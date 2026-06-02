@@ -8,7 +8,7 @@
 <!-- HERO BANNER -->
 <section class="hero-banner">
 
-    <video autoplay muted loop playsinline" class="banner-video">
+    <video autoplay muted loop playsinline class="banner-video">
       <source src="https://res.cloudinary.com/dyk9mzb5t/video/upload/v1763131649/1114_xiw66b.mp4" type="video/mp4">
     </video>
      <!-- Lớp phủ tối -->
@@ -21,7 +21,6 @@
                 <a href="{{ route('services') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
             </div>
         </div>
-    </div>
     <div class="marquee-container">
             <div class="marquee">
                 <a href="{{ route('services.gym') }}">Gym</a>  <a href="{{ route('services.swimming') }}">Swimming</a>  <a href="{{ route('services.kickboxing') }}">Kick Boxing</a>  <a href="{{ route('services.dance') }}">Dance</a>  <a href="{{ route('services.yoga') }}">Yoga</a>
@@ -30,8 +29,6 @@
                 <a href="{{ route('services.gym') }}">Gym</a>  <a href="{{ route('services.swimming') }}">Swimming</a>  <a href="{{ route('services.kickboxing') }}">Kick Boxing</a>  <a href="{{ route('services.dance') }}">Dance</a>  <a href="{{ route('services.yoga') }}">Yoga</a>
             </div>
         </div>
-    </div>
-    </header>
 </section>
 <!-- About - về chúng tôi -->
 <section id="about">
