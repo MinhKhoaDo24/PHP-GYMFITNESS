@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Sanpham;
 use App\Models\Danhmuc;
+use App\Models\GoiTap;
 use App\Repositories\IProductRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -186,7 +187,32 @@ class HomeController extends Controller
 
     public function dichvu1()
     {
-        return view('pages.dichvu1');   // đúng folder bạn đang có
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu1', compact('goitaps'));
+    }
+
+    public function dichvu2()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu2', compact('goitaps'));
+    }
+
+    public function dichvu3()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu3', compact('goitaps'));
+    }
+
+    public function dichvu4()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu4', compact('goitaps'));
+    }
+
+    public function dichvu5()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu5', compact('goitaps'));
     }
 
 

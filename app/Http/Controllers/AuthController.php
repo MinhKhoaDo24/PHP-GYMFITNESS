@@ -38,7 +38,12 @@ class AuthController extends Controller
         // Lấy user theo email
         $user = NguoiDung::where('email', $request->email)->first();
 
-        // Nếu không có user hoặc trạng thái = 0 -> báo lỗi
+        // Nếu không tìm thấy user
+        if (!$user) {
+            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+        }
+
+        // Nếu trạng thái = 0 -> báo lỗi
         if ($user->trang_thai == 0) {
             return back()->with('error', 'Tài khoản đang bị khóa!');
         }
