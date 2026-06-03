@@ -2,6 +2,7 @@
 @section('content')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
+<link rel="stylesheet" href="{{ asset('frontend/css/health_station.css') }}">
 @endpush
 
 
@@ -497,39 +498,71 @@
         </div>
     </section>
 
-<section id="bmi">
-  <div class="bmi-container">
-    <div class="bmi-grid">
-      <div class="bmi-content">
-        <h2>Tính Chỉ Số BMI</h2>
-        <p>Kiểm tra chỉ số BMI của bạn để có cái nhìn tổng quan về tình trạng sức khỏe và nhận được lời khuyên từ chuyên gia.</p>
-        <form id="bmi-form">
-          <div class="form-group">
-            <label for="height">Chiều cao (cm)</label>
-            <input type="number" id="height" placeholder="Nhập chiều cao">
-          </div>
-          <div class="form-group">
-            <label for="weight">Cân nặng (kg)</label>
-            <input type="number" id="weight" placeholder="Nhập cân nặng">
-          </div>
-          <button type="submit">Tính BMI</button>
-        </form>
-        <div id="bmi-result" class="bmi-result hidden">
-          <div class="result-box">
-            <h3>Kết quả BMI của bạn</h3>
-            <div class="result-row">
-              <span>Chỉ số BMI:</span>
-              <span id="bmi-value">0</span>
+<section id="health-station">
+  <div class="hs-container">
+    <div class="hs-grid">
+      <div class="hs-content">
+        <h2>Trạm Đo Sức Khỏe Thông Minh</h2>
+        <p>Kiểm tra chỉ số BMI, BMR và TDEE của bạn để nhận lộ trình tập luyện và dinh dưỡng "đo ni đóng giày" từ chuyên gia.</p>
+        <form id="hs-form" action="{{ route('health.results') }}" method="GET">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="gender">Giới tính</label>
+              <select id="gender" name="gender" required>
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+              </select>
             </div>
-            <p id="bmi-message"></p>
+            <div class="form-group">
+              <label for="age">Tuổi</label>
+              <input type="number" id="age" name="age" placeholder="Ví dụ: 25" required min="10" max="100">
+            </div>
           </div>
-        </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="height">Chiều cao (cm)</label>
+              <input type="number" id="height" name="height" placeholder="Ví dụ: 170" required min="100" max="250">
+            </div>
+            <div class="form-group">
+              <label for="weight">Cân nặng (kg)</label>
+              <input type="number" id="weight" name="weight" placeholder="Ví dụ: 65" required min="30" max="200">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="activity">Tần suất vận động</label>
+            <select id="activity" name="activity" required>
+              <option value="sedentary">Ít vận động (Việc văn phòng, không tập)</option>
+              <option value="light">Vận động nhẹ (Tập 1-3 ngày/tuần)</option>
+              <option value="moderate">Vận động vừa (Tập 3-5 ngày/tuần)</option>
+              <option value="active">Vận động nhiều (Tập 6-7 ngày/tuần)</option>
+              <option value="very_active">Vận động rất nhiều (Tập nặng 2 lần/ngày)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="goal">Mục tiêu của bạn</label>
+            <select id="goal" name="goal" required>
+              <option value="lose_fat">Giảm mỡ, Giảm cân</option>
+              <option value="gain_muscle">Tăng cơ, Tăng cân</option>
+              <option value="maintain">Giữ dáng, Tăng độ dẻo dai</option>
+            </select>
+          </div>
+
+          <button type="submit" class="hs-submit-btn">Phân tích thể trạng ngay <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
       </div>
-      <div class="bmi-image">
-        <img src="https://hoangphucphoto.com/wp-content/uploads/2025/04/anh-fitness-2.jpg" alt="BMI Visualization">
-        <div class="image-overlay">
-          <h3>Tại sao cần tính BMI?</h3>
-          <p>BMI giúp bạn đánh giá mức độ cân đối của cơ thể, từ đó có kế hoạch tập luyện và dinh dưỡng phù hợp.</p>
+      <div class="hs-image">
+        <img src="https://hoangphucphoto.com/wp-content/uploads/2025/04/anh-fitness-2.jpg" alt="Health Station">
+        <div class="image-overlay-hs glassmorphism">
+          <h3>Phân tích 360&deg;</h3>
+          <ul>
+            <li><i class="fa-solid fa-check"></i> Chỉ số khối cơ thể (BMI)</li>
+            <li><i class="fa-solid fa-check"></i> Trao đổi chất cơ bản (BMR)</li>
+            <li><i class="fa-solid fa-check"></i> Tổng Calo tiêu thụ (TDEE)</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -646,41 +679,7 @@
         });
     }
 
-// === Tính BMI ===
-    const bmiForm = document.getElementById('bmi-form');
-    if (bmiForm) {
-        bmiForm.addEventListener('submit', (e) => {
-            e.preventDefault();
 
-            const height = parseFloat(document.getElementById('height').value) / 100;
-            const weight = parseFloat(document.getElementById('weight').value);
-            const bmiValue = document.getElementById('bmi-value');
-            const bmiMessage = document.getElementById('bmi-message');
-            const bmiResult = document.getElementById('bmi-result');
-
-            if (height > 0 && weight > 0) {
-                const bmi = weight / (height * height);
-                bmiValue.textContent = bmi.toFixed(1);
-
-                let message = '';
-                if (bmi < 18.5) {
-                    message = 'Bạn đang thiếu cân. Hãy đến với chúng tôi để có chế độ ăn uống và tập luyện hợp lý!';
-                } else if (bmi < 25) {
-                    message = 'Bạn đang có cân nặng bình thường. Tiếp tục duy trì lối sống lành mạnh!';
-                } else if (bmi < 30) {
-                    message = 'Bạn đang có dấu hiệu thừa cân. Hãy đến với chúng tôi để có kế hoạch tập luyện và dinh dưỡng phù hợp!';
-                } else {
-                    message = 'Bạn đang thừa cân. Hãy đến với chúng tôi để được tư vấn và hỗ trợ giảm cân hiệu quả!';
-                }
-
-                bmiMessage.textContent = message;
-                bmiResult.classList.remove('hidden');
-            } else {
-                alert('Vui lòng nhập chiều cao và cân nặng hợp lệ!');
-            }
-        });
-    }
-</script>
 <script>
     const row = document.querySelector('.testimonial-row');
     const left = document.querySelector('.left-arrow');

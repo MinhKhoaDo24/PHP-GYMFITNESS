@@ -56,6 +56,8 @@ Route::post('/dang-ky-tap-thu', [DangkidichvuController::class, 'store'])->name(
 
 Route::get('/ajax/filter-products', [HomeController::class, 'ajaxFilter'])->name('ajax.filter.products');
 
+// Health Station Results
+Route::get('/health-station/results', [HomeController::class, 'healthStationResults'])->name('health.results');
 
 //Dichvu
 Route::get('/dich-vu', [HomeController::class, 'dichvu1'])->name('services.main');
