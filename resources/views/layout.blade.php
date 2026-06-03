@@ -82,7 +82,7 @@
     </style>
 </head>
 
-<body style="margin: 0; min-height: 100vh; display: flex; flex-direction: column;">
+<body style="margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;">
 
     <header>
         <div class="header">
