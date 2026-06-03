@@ -11,10 +11,10 @@ use App\Http\Controllers\{
     CommentController,
     ForgotPasswordController,
     ProfileController,
-    GoiTapController
+    GoiTapController,
     EmailVerificationController
 };
-use App\Repositories\DangkidichvuRepository;;
+use App\Repositories\DangkidichvuRepository;
 use App\Http\Controllers\MailController;
 /*
 |--------------------------------------------------------------------------
