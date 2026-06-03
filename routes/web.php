@@ -212,4 +212,8 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/admin/goitap/dangky', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyList'])->name('admin.goitap.dangky');
     Route::post('/admin/goitap/dangky/kichhoat/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyKichHoat'])->name('admin.goitap.dangky.kichhoat');
 
+    // Quản lý đánh giá (Admin)
+    Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
+    Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
+
 });

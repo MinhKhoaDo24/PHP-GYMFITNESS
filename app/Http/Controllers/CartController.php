@@ -13,6 +13,7 @@ use App\Models\Sanpham;
 use App\Models\Dathang;
 use App\Models\Khuyenmai;
 use App\Models\ChitietDonhang;
+use App\Helpers\CartHelper;
 
 class CartController extends Controller
 {
@@ -179,7 +180,7 @@ class CartController extends Controller
             ];
         }
 
-        session()->put('cart', $cart);
+        CartHelper::saveCart($cart);
 
         if ($request->ajax()) {
             return response()->json([
@@ -291,7 +292,7 @@ class CartController extends Controller
 
             // Cập nhật số lượng
             $cart[$id]['quantity'] = $quantity;
-            session()->put('cart', $cart);
+            CartHelper::saveCart($cart);
 
             $itemSurcharge = $cart[$id]['gia_cong_them'] ?? 0;
             $productTotal = ($cart[$id]['giakhuyenmai'] + $itemSurcharge) * $quantity;
@@ -404,7 +405,7 @@ class CartController extends Controller
                 ];
             }
 
-            session()->put('cart', $cart);
+            CartHelper::saveCart($cart);
 
             $totalOriginal = 0;
             $totalSalePrice = 0;
@@ -448,7 +449,7 @@ class CartController extends Controller
 
         if (isset($cart[$id])) {
             unset($cart[$id]);
-            session()->put('cart', $cart);
+            CartHelper::saveCart($cart);
         }
 
         $total = 0;
@@ -709,7 +710,7 @@ if ($isFreeship) {
         if (session()->has('buy_now')) {
             session()->forget('buy_now');
         } else {
-            session()->forget('cart');
+            CartHelper::clearCart();
         }
 
         return view('pages.thongbaodathang', compact('order'));
@@ -882,7 +883,7 @@ if ($isFreeship) {
         if (session()->has('buy_now')) {
             session()->forget('buy_now');
         } else {
-            session()->forget('cart');
+            CartHelper::clearCart();
         }
 
         // -----------------------------
