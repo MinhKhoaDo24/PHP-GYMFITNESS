@@ -226,14 +226,14 @@
                         <!-- INFO -->
                         <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 4px 0 6px; text-align: left;">
                             @php
-                                $avgRating = $sp->comments_avg_rating ?? 5;
                                 $cntRating = $sp->comments_count ?? 0;
+                                $avgRating = $cntRating > 0 ? ($sp->comments_avg_rating ?? 5) : 0;
                             @endphp
                             @for($i = 1; $i <= 5; $i++)
                                 @if($i <= round($avgRating))
-                                    <i class="fa fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
                                 @else
-                                    <i class="fa fa-star-o"></i>
+                                    <i class="fa-regular fa-star" style="color: #ccc;"></i>
                                 @endif
                             @endfor
                             <span style="color: #aaa; font-size: 11px; margin-left: 4px;">({{ $cntRating }})</span>
@@ -319,14 +319,14 @@
                     <!-- INFO -->
                     <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 4px 0 6px; text-align: left;">
                         @php
-                            $avgRating = $sp->comments_avg_rating ?? 5;
                             $cntRating = $sp->comments_count ?? 0;
+                            $avgRating = $cntRating > 0 ? ($sp->comments_avg_rating ?? 5) : 0;
                         @endphp
                         @for($i = 1; $i <= 5; $i++)
                             @if($i <= round($avgRating))
-                                <i class="fa fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
                             @else
-                                <i class="fa fa-star-o"></i>
+                                <i class="fa-regular fa-star" style="color: #ccc;"></i>
                             @endif
                         @endfor
                         <span style="color: #aaa; font-size: 11px; margin-left: 4px;">({{ $cntRating }})</span>
@@ -403,6 +403,20 @@
                     </div>
 
                     <!-- INFO -->
+                    <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 4px 0 6px; text-align: left;">
+                        @php
+                            $cntRating = $sp->comments_count ?? 0;
+                            $avgRating = $cntRating > 0 ? ($sp->comments_avg_rating ?? 5) : 0;
+                        @endphp
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($i <= round($avgRating))
+                                <i class="fa-solid fa-star"></i>
+                            @else
+                                <i class="fa-regular fa-star" style="color: #ccc;"></i>
+                            @endif
+                        @endfor
+                        <span style="color: #aaa; font-size: 11px; margin-left: 4px;">({{ $cntRating }})</span>
+                    </div>
                     <div class="benefit">🔥 Giá tốt nhất thị trường</div>
                     <div class="gift">🎁 Quà tặng trị giá 100.000đ</div>
 
@@ -477,6 +491,20 @@
                         </div>
 
                         <!-- INFO -->
+                        <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 4px 0 6px; text-align: left;">
+                            @php
+                                $cntRating = $sp->comments_count ?? 0;
+                                $avgRating = $cntRating > 0 ? ($sp->comments_avg_rating ?? 5) : 0;
+                            @endphp
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= round($avgRating))
+                                    <i class="fa-solid fa-star"></i>
+                                @else
+                                    <i class="fa-regular fa-star" style="color: #ccc;"></i>
+                                @endif
+                            @endfor
+                            <span style="color: #aaa; font-size: 11px; margin-left: 4px;">({{ $cntRating }})</span>
+                        </div>
                         <div class="benefit">🔥 Giá tốt nhất thị trường</div>
                         <div class="gift">🎁 Quà tặng trị giá 100.000đ</div>
 
