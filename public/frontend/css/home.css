@@ -1,4 +1,4 @@
-﻿
+
     /* ===== RESET & GENERAL ===== */
     * {
         margin: 0;
@@ -123,9 +123,6 @@
         padding: 20px 30px;
     }
 
-    .banner-content.dynamic-overlay {
-        /* Không override position ở đây */
-    }
 
     .banner-content.dynamic-overlay::before {
         content: '';
