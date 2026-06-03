@@ -180,6 +180,12 @@ class HomeController extends Controller
         return view('pages.services', compact('danhmucs'));
     }
 
+    public function cacGoiDichVu()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.cac_goi_dich_vu', compact('goitaps'));
+    }
+
     public function dichvu1()
     {
         $goitaps = GoiTap::where('trang_thai', 1)->get();

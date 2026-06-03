@@ -117,9 +117,10 @@
                                 @endforeach
                             </ul>
                         </li>
-                        <li class="dropdown {{ request()->is('dich-vu/*') ? 'active' : '' }}">
+                        <li class="dropdown {{ request()->is('dich-vu/*') || request()->is('cac-goi-dich-vu') ? 'active' : '' }}">
                             <a href="javascript:void(0)" class="hover-a">Dịch vụ </a>
                             <ul class="dropdown-menu dropdown-services">
+                                <li><a href="{{ route('services.packages') }}">Các gói dịch vụ</a></li>
                                 <li><a href="{{ route('services.gym') }}">Gym</a></li>
                                 <li><a href="{{ route('services.yoga') }}">Yoga</a></li>
                                 <li><a href="{{ route('services.swimming') }}">Swimming</a></li>
