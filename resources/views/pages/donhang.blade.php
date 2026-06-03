@@ -5,6 +5,11 @@
 @section('content')
 
 <style>
+/* Fix z-index for SweetAlert2 when used inside Bootstrap Modals */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
 .orders-hero {
     width: 100%;
     height: 300px;
@@ -718,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const orderId = $(this).data('order-id');
         const products = $(this).data('products');
         
-        $('#reviewModalLabel').text('Đánh giá sản phẩm - Đơn hàng #' + orderId);
+        $('#reviewModalLabel').text('Đánh giá sản phẩm - Đơn hàng #RF-' + String(orderId).padStart(5, '0'));
         
         let container = $('#modalProductsContainer');
         container.html('');
@@ -805,7 +810,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                         
                         <div class="form-group">
-                            <textarea name="content" class="comment-textarea" rows="3" placeholder="Chia sẻ trải nghiệm thực tế về sản phẩm..." required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; background: #ffffff; color: #333; resize: vertical;"></textarea>
+                            <textarea name="content" class="comment-textarea" rows="3" placeholder="Chia sẻ trải nghiệm thực tế về sản phẩm... (Không bắt buộc)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; background: #ffffff; color: #333; resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
@@ -915,7 +920,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const productId = $(form).find('input[name="sanpham_id"]').val();
         const orderId = $(form).find('input[name="id_dathang"]').val();
         const content = $(form).find('.comment-textarea').val().trim();
-        if (content === '') return;
 
         let formData = new FormData();
         formData.append('_token', $('input[name="_token"]').val());

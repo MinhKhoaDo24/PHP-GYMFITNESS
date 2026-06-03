@@ -1,4 +1,4 @@
-
+﻿
     /* ===== RESET & GENERAL ===== */
     * {
         margin: 0;
@@ -2077,10 +2077,23 @@
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-.sale-img img {
+.sale-img {
+    position: relative;
     width: 100%;
-    height: 180px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f5f5f5;
+}
+
+.sale-img img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
     border-radius: 10px;
     transition: transform 0.3s ease;
 }
@@ -2232,3 +2245,43 @@
 
 
 
+
+/* ================= TR?NG TH�I H?T H?N CHO VOUCHER ? HOME PAGE ================= */
+.voucher-card.expired {
+    background: #e9ecef !important;
+    color: #6c757d;
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+}
+.voucher-card.expired:hover {
+    transform: none;
+    box-shadow: none;
+}
+.voucher-card.expired .voucher-content h3 {
+    color: #868e96;
+    text-decoration: line-through;
+}
+.voucher-card.expired .voucher-content p {
+    color: #adb5bd;
+}
+.voucher-card.expired .copy-btn {
+    background: #ced4da;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+.voucher-card.expired .expired-stamp-home {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 20px;
+    font-weight: 900;
+    color: rgba(250, 82, 82, 0.4);
+    border: 3px solid rgba(250, 82, 82, 0.4);
+    padding: 3px 10px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    pointer-events: none;
+    z-index: 10;
+}

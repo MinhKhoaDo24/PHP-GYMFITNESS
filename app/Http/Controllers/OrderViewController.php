@@ -11,6 +11,7 @@ use App\Models\Khuyenmai;
 use App\Models\ChitietDonhang;
 use App\Models\SanPham;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\CartHelper;
 
 class OrderViewController extends Controller
 {
@@ -103,7 +104,7 @@ class OrderViewController extends Controller
             return back()->with('error', 'Đơn hàng này không chứa sản phẩm nào.');
         }
 
-        $cart = [];
+        $cart = session()->get('cart', []);
         $warningMessages = [];
 
         foreach ($orderdetails as $detail) {
@@ -132,25 +133,31 @@ class OrderViewController extends Controller
                                 continue;
                             }
 
-                            $qty = $detail->soluong;
+                            $cartKey = $product->id_sanpham . '_' . $sizeObj->id_size;
+                            $currentQty = isset($cart[$cartKey]) ? $cart[$cartKey]['quantity'] : 0;
+                            $qty = $detail->soluong + $currentQty;
+                            
                             if ($qty > $sizeStock) {
                                 $qty = $sizeStock;
-                                $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" (Size: " . $sizeObj->ten_size . ") chỉ còn " . $sizeStock . " sản phẩm trong kho (yêu cầu cũ: " . $detail->soluong . ").";
+                                $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" (Size: " . $sizeObj->ten_size . ") chỉ còn " . $sizeStock . " sản phẩm trong kho (tổng yêu cầu: " . ($detail->soluong + $currentQty) . ").";
                             }
 
-                            $cartKey = $product->id_sanpham . '_' . $sizeObj->id_size;
-                            $cart[$cartKey] = [
-                                "id_sanpham"    => $product->id_sanpham,
-                                "tensp"         => $product->tensp,
-                                "anhsp"         => $imagePath,
-                                "giasp"         => $product->giasp,
-                                "giamgia"       => $product->giamgia,
-                                "giakhuyenmai"  => $product->giakhuyenmai,
-                                "quantity"      => $qty,
-                                "id_size"       => $sizeObj->id_size,
-                                "ten_size"      => $sizeObj->ten_size,
-                                "gia_cong_them" => (int) $sizeObj->pivot->gia_cong_them
-                            ];
+                            if (isset($cart[$cartKey])) {
+                                $cart[$cartKey]['quantity'] = $qty;
+                            } else {
+                                $cart[$cartKey] = [
+                                    "id_sanpham"    => $product->id_sanpham,
+                                    "tensp"         => $product->tensp,
+                                    "anhsp"         => $imagePath,
+                                    "giasp"         => $product->giasp,
+                                    "giamgia"       => $product->giamgia,
+                                    "giakhuyenmai"  => $product->giakhuyenmai,
+                                    "quantity"      => $qty,
+                                    "id_size"       => $sizeObj->id_size,
+                                    "ten_size"      => $sizeObj->ten_size,
+                                    "gia_cong_them" => (int) $sizeObj->pivot->gia_cong_them
+                                ];
+                            }
                         } else {
                             $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" (Size: " . $sizeName . ") không còn hỗ trợ kích cỡ này.";
                         }
@@ -164,22 +171,28 @@ class OrderViewController extends Controller
                         continue;
                     }
 
-                    $qty = $detail->soluong;
+                    $cartKey = $product->id_sanpham;
+                    $currentQty = isset($cart[$cartKey]) ? $cart[$cartKey]['quantity'] : 0;
+                    $qty = $detail->soluong + $currentQty;
+                    
                     if ($qty > $product->soluong) {
                         $qty = $product->soluong;
-                        $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" chỉ còn " . $product->soluong . " sản phẩm trong kho (yêu cầu cũ: " . $detail->soluong . ").";
+                        $warningMessages[] = "Sản phẩm \"" . $product->tensp . "\" chỉ còn " . $product->soluong . " sản phẩm trong kho (tổng yêu cầu: " . ($detail->soluong + $currentQty) . ").";
                     }
 
-                    $cartKey = $product->id_sanpham;
-                    $cart[$cartKey] = [
-                        "id_sanpham"   => $product->id_sanpham,
-                        "tensp"        => $product->tensp,
-                        "anhsp"        => $imagePath,
-                        "giasp"        => $product->giasp,
-                        "giamgia"      => $product->giamgia,
-                        "giakhuyenmai" => $product->giakhuyenmai,
-                        "quantity"     => $qty
-                    ];
+                    if (isset($cart[$cartKey])) {
+                        $cart[$cartKey]['quantity'] = $qty;
+                    } else {
+                        $cart[$cartKey] = [
+                            "id_sanpham"   => $product->id_sanpham,
+                            "tensp"        => $product->tensp,
+                            "anhsp"        => $imagePath,
+                            "giasp"        => $product->giasp,
+                            "giamgia"      => $product->giamgia,
+                            "giakhuyenmai" => $product->giakhuyenmai,
+                            "quantity"     => $qty
+                        ];
+                    }
                 }
             } else {
                 $warningMessages[] = "Sản phẩm \"" . $detail->tensp . "\" không còn tồn tại trên hệ thống.";
@@ -194,13 +207,13 @@ class OrderViewController extends Controller
         session()->forget('promo');
 
         // Set the session cart to the new cart list
-        session()->put('cart', $cart);
+        CartHelper::saveCart($cart);
 
         if (!empty($warningMessages)) {
             $warningText = implode(' ', $warningMessages);
             return redirect()->route('cart')->with('warning', $warningText);
         }
 
-        return redirect()->route('cart')->with('success', 'Đã tạo lại từ đơn hàng cũ vào giỏ hàng thành công.');
+        return redirect()->route('cart')->with('success', 'Đã thêm các sản phẩm từ đơn hàng cũ vào giỏ hàng thành công.');
     }
 }

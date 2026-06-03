@@ -13,6 +13,7 @@ use App\Models\Sanpham;
 use App\Models\Dathang;
 use App\Models\Khuyenmai;
 use App\Models\ChitietDonhang;
+use App\Helpers\CartHelper;
 
 class CartController extends Controller
 {
@@ -179,7 +180,7 @@ class CartController extends Controller
             ];
         }
 
-        session()->put('cart', $cart);
+        CartHelper::saveCart($cart);
 
         if ($request->ajax()) {
             return response()->json([
@@ -291,7 +292,7 @@ class CartController extends Controller
 
             // Cập nhật số lượng
             $cart[$id]['quantity'] = $quantity;
-            session()->put('cart', $cart);
+            CartHelper::saveCart($cart);
 
             $itemSurcharge = $cart[$id]['gia_cong_them'] ?? 0;
             $productTotal = ($cart[$id]['giakhuyenmai'] + $itemSurcharge) * $quantity;
@@ -404,7 +405,7 @@ class CartController extends Controller
                 ];
             }
 
-            session()->put('cart', $cart);
+            CartHelper::saveCart($cart);
 
             $totalOriginal = 0;
             $totalSalePrice = 0;
@@ -448,7 +449,7 @@ class CartController extends Controller
 
         if (isset($cart[$id])) {
             unset($cart[$id]);
-            session()->put('cart', $cart);
+            CartHelper::saveCart($cart);
         }
 
         $total = 0;
@@ -466,20 +467,19 @@ class CartController extends Controller
     public function checkout()
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->guest('/login')->with('needLogin', true);
-        }
-
+        
         $buyNow = session()->get('buy_now');
         $cart = !empty($buyNow) ? $buyNow : session()->get('cart', []);
         if (empty($cart)) {
             return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
 
-        $showusers = DB::table('nguoidung')
-            ->select('nguoidung.*')
-            ->where('nguoidung.id_nd', $user->id_nd)
-            ->get();
+        $showusers = $user 
+            ? DB::table('nguoidung')
+                ->select('nguoidung.*')
+                ->where('nguoidung.id_nd', $user->id_nd)
+                ->get()
+            : collect();
 
         $total = 0;
         $totalSurcharge = 0;
@@ -555,7 +555,7 @@ class CartController extends Controller
             // Kiểm tra điều kiện mã Freeship
             if ($km->kieu_giam === 'freeship') {
                 if ($km->don_toi_thieu != null && $tongtien < $km->don_toi_thieu) {
-                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!");
+                    return back()->with('error', "Đơn hàng phải từ " . number_format($km->don_toi_thieu, 0, ',', '.') . "đ trở lên mới được miễn phí vận chuyển!");
                 }
             }
 
@@ -651,7 +651,7 @@ if ($isFreeship) {
             'sdt'          => $request->display_sdt,
             'ngaydathang'  => now(),
             'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::user()->id_nd,
+            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
         ]);
 
         // -----------------------------
@@ -671,7 +671,7 @@ if ($isFreeship) {
                 'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::user()->id_nd,
+                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
             // Trừ tồn kho
@@ -710,10 +710,10 @@ if ($isFreeship) {
         if (session()->has('buy_now')) {
             session()->forget('buy_now');
         } else {
-            session()->forget('cart');
+            CartHelper::clearCart();
         }
 
-        return view('pages.thongbaodathang');
+        return view('pages.thongbaodathang', compact('order'));
     }
 
     public function thongbaodathang(Request $request)
@@ -730,7 +730,7 @@ if ($isFreeship) {
                     $order->trangthai = 'Đã thanh toán';
                     $order->save();
 
-                    return view('pages.thongbaodathang');
+                    return view('pages.thongbaodathang', compact('order'));
                 } else {
                     // Cập nhật trạng thái thành Thất bại khi giao dịch thất bại
                     $order->trangthai = 'Thất bại';
@@ -836,7 +836,7 @@ if ($isFreeship) {
             'email'        => $request->display_email,
             'sdt'          => $request->display_sdt,
             'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::user()->id_nd,
+            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
             'trangthai'    => 'Chờ xác nhận',
         ]);
 
@@ -857,7 +857,7 @@ if ($isFreeship) {
                 'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                 'id_sanpham'    => $item['id_sanpham'],
                 'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::user()->id_nd,
+                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
             // Trừ tồn kho
@@ -883,7 +883,7 @@ if ($isFreeship) {
         if (session()->has('buy_now')) {
             session()->forget('buy_now');
         } else {
-            session()->forget('cart');
+            CartHelper::clearCart();
         }
 
         // -----------------------------
@@ -961,6 +961,14 @@ if ($isFreeship) {
             ]);
         }
 
+        // Kiểm tra yêu cầu đăng nhập
+        if ($promo->yeu_cau_dang_nhap == 1 && !Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng đăng nhập để sử dụng mã ưu đãi này!',
+            ]);
+        }
+
         // Kiểm tra ngày áp dụng
         $today = now();
         if (($promo->ngay_bat_dau && $today < $promo->ngay_bat_dau) ||
@@ -984,7 +992,7 @@ if ($isFreeship) {
         if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
             return response()->json([
                 'success' => false,
-                'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã khuyến mãi!',
+                'message' => 'Giá trị đơn hàng chưa đủ để áp dụng mã khuyến mãi (tối thiểu ' . number_format($promo->don_toi_thieu, 0, ',', '.') . 'đ)!',
             ]);
         }
 
@@ -1001,7 +1009,7 @@ if ($isFreeship) {
             if ($promo->don_toi_thieu != null && $total < $promo->don_toi_thieu) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu) . "đ trở lên mới được miễn phí vận chuyển!",
+                    'message' => "Đơn hàng phải từ " . number_format($promo->don_toi_thieu, 0, ',', '.') . "đ trở lên mới được miễn phí vận chuyển!",
                 ]);
             }
         }

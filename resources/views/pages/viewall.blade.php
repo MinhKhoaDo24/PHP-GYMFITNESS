@@ -126,6 +126,7 @@ $ten = request('category')
                                data-id="{{ $p->id_sanpham }}"
                                data-name="{{ $p->tensp }}"
                                data-co-size="{{ $p->co_size }}"
+                               data-is-supplement="{{ in_array($p->id_danhmuc, [5, 6, 7]) ? 1 : 0 }}"
                                data-sizes="{{ $p->co_size == 1 ? json_encode($p->sizes->map(function($s){ return ['id'=>$s->id_size,'name'=>$s->ten_size,'qty'=>$s->pivot->soluong,'surcharge'=>(int)$s->pivot->gia_cong_them]; })) : '' }}">
                                 <i class="fa fa-shopping-cart"></i>
                             </a>
@@ -136,8 +137,8 @@ $ten = request('category')
                         <h3 class="sale-name">{{ $p->tensp }}</h3>
 
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($p->giakhuyenmai) }}đ</span>
-                            <span class="old-price">{{ number_format($p->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($p->giakhuyenmai, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($p->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $p->giamgia }}%</span>
                         </div>
                         
@@ -157,7 +158,7 @@ $ten = request('category')
                         </div>
 
                         <div class="benefit">🔥 Giá tốt nhất thị trường</div>
-                        <div class="gift">🎁 Quà tặng trị giá {{ rand(100000,200000) }}đ</div>
+                        <div class="gift">🎁 Quà tặng trị giá {{ number_format(rand(100, 200) * 1000, 0, ',', '.') }}đ</div>
 
                         <div class="progress-bar">
                             <div class="progress" style="width: {{ rand(40,80) }}%"></div>

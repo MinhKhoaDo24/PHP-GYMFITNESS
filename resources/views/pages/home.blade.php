@@ -2,6 +2,7 @@
 @section('content')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('frontend/css/home.css') }}">
+<link rel="stylesheet" href="{{ asset('frontend/css/health_station.css') }}">
 @endpush
 
 
@@ -18,7 +19,7 @@
             <p class="slogan">Chinh phục vóc dáng, bứt phá giới hạn!</p>
             <div class="banner-buttons">
                 <a href="{{ route('dang-ky-tap-thu') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Đăng ký tập thử</a>
-                <a href="{{ route('services') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
+                <a href="{{ route('services.gym') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
             </div>
         </div>
     <div class="marquee-container">
@@ -93,7 +94,10 @@
     <div class="voucher-container">
 
         @foreach ($vouchers as $km)
-        <div class="voucher-card">
+        @php 
+            $isExpired = \Carbon\Carbon::parse($km->ngay_ket_thuc)->isPast() || $km->trang_thai == 0;
+        @endphp
+        <div class="voucher-card {{ $isExpired ? 'expired' : '' }}">
             <div class="voucher-content">
 
                 <h3>Nhập mã: {{ $km->ma_code }}</h3>
@@ -102,12 +106,22 @@
                     {{ $km->mo_ta ?? 'Ưu đãi hấp dẫn dành cho bạn!' }}
                 </p>
 
-                <button class="copy-btn" data-code="{{ $km->ma_code }}">
+                @if($isExpired)
+                <button class="copy-btn" onclick="showExpiredAlertHome()">
+                    Đã hết hạn
+                </button>
+                @else
+                <button class="copy-btn active-btn" data-code="{{ $km->ma_code }}">
                     Sao chép mã
                 </button>
+                @endif
 
             </div>
             <div class="voucher-barcode"></div>
+            
+            @if($isExpired)
+                <div class="expired-stamp-home">HẾT HẠN</div>
+            @endif
         </div>
         @endforeach
 
@@ -201,8 +215,8 @@
 
                         <!-- PRICE -->
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                            <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $sp->giamgia }}%</span>
                         </div>
 
@@ -254,7 +268,7 @@
 
 <section class="top-sell-section">
     <div class="container">
-        <h2 class="top-sell-title">Top sản phẩm bán chạy!</h2>
+        <h2 class="top-sell-title">Sản phẩm nổi bật!</h2>
 
         <div class="top-sell-grid">
             @foreach($sanphams as $sp)
@@ -294,8 +308,8 @@
 
                     <!-- PRICE -->
                     <div class="sale-price">
-                        <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                        <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                        <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                        <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                         <span class="discount">-{{ $sp->giamgia }}%</span>
                     </div>
 
@@ -380,8 +394,8 @@
 
                     <!-- PRICE -->
                     <div class="sale-price">
-                        <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                        <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                        <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                        <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                         <span class="discount">-{{ $sp->giamgia }}%</span>
                     </div>
 
@@ -454,8 +468,8 @@
 
                         <!-- PRICE -->
                         <div class="sale-price">
-                            <span class="new-price">{{ number_format($sp->gia_duoc_giam) }}đ</span>
-                            <span class="old-price">{{ number_format($sp->giasp) }}đ</span>
+                            <span class="new-price">{{ number_format($sp->gia_duoc_giam, 0, ',', '.') }}đ</span>
+                            <span class="old-price">{{ number_format($sp->giasp, 0, ',', '.') }}đ</span>
                             <span class="discount">-{{ $sp->giamgia }}%</span>
                         </div>
 
@@ -480,39 +494,71 @@
         </div>
     </section>
 
-<section id="bmi">
-  <div class="bmi-container">
-    <div class="bmi-grid">
-      <div class="bmi-content">
-        <h2>Tính Chỉ Số BMI</h2>
-        <p>Kiểm tra chỉ số BMI của bạn để có cái nhìn tổng quan về tình trạng sức khỏe và nhận được lời khuyên từ chuyên gia.</p>
-        <form id="bmi-form">
-          <div class="form-group">
-            <label for="height">Chiều cao (cm)</label>
-            <input type="number" id="height" placeholder="Nhập chiều cao">
-          </div>
-          <div class="form-group">
-            <label for="weight">Cân nặng (kg)</label>
-            <input type="number" id="weight" placeholder="Nhập cân nặng">
-          </div>
-          <button type="submit">Tính BMI</button>
-        </form>
-        <div id="bmi-result" class="bmi-result hidden">
-          <div class="result-box">
-            <h3>Kết quả BMI của bạn</h3>
-            <div class="result-row">
-              <span>Chỉ số BMI:</span>
-              <span id="bmi-value">0</span>
+<section id="health-station">
+  <div class="hs-container">
+    <div class="hs-grid">
+      <div class="hs-content">
+        <h2>Trạm Đo Sức Khỏe Thông Minh</h2>
+        <p>Kiểm tra chỉ số BMI, BMR và TDEE của bạn để nhận lộ trình tập luyện và dinh dưỡng "đo ni đóng giày" từ chuyên gia.</p>
+        <form id="hs-form" action="{{ route('health.results') }}" method="GET">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="gender">Giới tính</label>
+              <select id="gender" name="gender" required>
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+              </select>
             </div>
-            <p id="bmi-message"></p>
+            <div class="form-group">
+              <label for="age">Tuổi</label>
+              <input type="number" id="age" name="age" placeholder="Ví dụ: 25" required min="10" max="100">
+            </div>
           </div>
-        </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="height">Chiều cao (cm)</label>
+              <input type="number" id="height" name="height" placeholder="Ví dụ: 170" required min="100" max="250">
+            </div>
+            <div class="form-group">
+              <label for="weight">Cân nặng (kg)</label>
+              <input type="number" id="weight" name="weight" placeholder="Ví dụ: 65" required min="30" max="200">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="activity">Tần suất vận động</label>
+            <select id="activity" name="activity" required>
+              <option value="sedentary">Ít vận động (Việc văn phòng, không tập)</option>
+              <option value="light">Vận động nhẹ (Tập 1-3 ngày/tuần)</option>
+              <option value="moderate">Vận động vừa (Tập 3-5 ngày/tuần)</option>
+              <option value="active">Vận động nhiều (Tập 6-7 ngày/tuần)</option>
+              <option value="very_active">Vận động rất nhiều (Tập nặng 2 lần/ngày)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="goal">Mục tiêu của bạn</label>
+            <select id="goal" name="goal" required>
+              <option value="lose_fat">Giảm mỡ, Giảm cân</option>
+              <option value="gain_muscle">Tăng cơ, Tăng cân</option>
+              <option value="maintain">Giữ dáng, Tăng độ dẻo dai</option>
+            </select>
+          </div>
+
+          <button type="submit" class="hs-submit-btn">Phân tích thể trạng ngay <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
       </div>
-      <div class="bmi-image">
-        <img src="https://hoangphucphoto.com/wp-content/uploads/2025/04/anh-fitness-2.jpg" alt="BMI Visualization">
-        <div class="image-overlay">
-          <h3>Tại sao cần tính BMI?</h3>
-          <p>BMI giúp bạn đánh giá mức độ cân đối của cơ thể, từ đó có kế hoạch tập luyện và dinh dưỡng phù hợp.</p>
+      <div class="hs-image">
+        <img src="https://hoangphucphoto.com/wp-content/uploads/2025/04/anh-fitness-2.jpg" alt="Health Station">
+        <div class="image-overlay-hs glassmorphism">
+          <h3>Phân tích 360&deg;</h3>
+          <ul>
+            <li><i class="fa-solid fa-check"></i> Chỉ số khối cơ thể (BMI)</li>
+            <li><i class="fa-solid fa-check"></i> Trao đổi chất cơ bản (BMR)</li>
+            <li><i class="fa-solid fa-check"></i> Tổng Calo tiêu thụ (TDEE)</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -615,104 +661,21 @@
 
 
 
-<div id="cart-toast" class="cart-toast">
-    <span class="cart-toast__text"></span>
-</div>
 @push('scripts')
 <script src="{{ asset('frontend/script/about.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const buttons = document.querySelectorAll('.js-add-to-cart');
-    const toast = document.getElementById('cart-toast');
-    const toastText = toast.querySelector('.cart-toast__text');
-    let toastTimeout;
-
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const url = this.dataset.url;
-            if (!url) return;
-
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            })
-            .then(async res => {
-                // Tránh lỗi JSON.parse khi Laravel trả HTML
-                let data = {};
-                try {
-                    data = await res.json();
-                } catch (e) {
-                    data = { message: "Đã thêm sản phẩm vào giỏ hàng!" };
-                }
-                showCartToast(data.message);
-
-                // Cập nhật số lượng giỏ hàng ở header
-                if (data.cart_count !== undefined) {
-                    const badge = document.querySelector('.navbar__shoppingCart span');
-                    if (badge) {
-                        badge.textContent = data.cart_count;
-                    }
-                }
-            })
-            .catch(() => {
-                showCartToast('Có lỗi xảy ra, vui lòng thử lại!');
-            });
-        });
-    });
-
-    function showCartToast(message) {
-        toastText.textContent = message;
-        toast.classList.add('show');
-
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-});
-
-
-
-// === Tính BMI ===
-    const bmiForm = document.getElementById('bmi-form');
-    if (bmiForm) {
-        bmiForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const height = parseFloat(document.getElementById('height').value) / 100;
-            const weight = parseFloat(document.getElementById('weight').value);
-            const bmiValue = document.getElementById('bmi-value');
-            const bmiMessage = document.getElementById('bmi-message');
-            const bmiResult = document.getElementById('bmi-result');
-
-            if (height > 0 && weight > 0) {
-                const bmi = weight / (height * height);
-                bmiValue.textContent = bmi.toFixed(1);
-
-                let message = '';
-                if (bmi < 18.5) {
-                    message = 'Bạn đang thiếu cân. Hãy đến với chúng tôi để có chế độ ăn uống và tập luyện hợp lý!';
-                } else if (bmi < 25) {
-                    message = 'Bạn đang có cân nặng bình thường. Tiếp tục duy trì lối sống lành mạnh!';
-                } else if (bmi < 30) {
-                    message = 'Bạn đang có dấu hiệu thừa cân. Hãy đến với chúng tôi để có kế hoạch tập luyện và dinh dưỡng phù hợp!';
-                } else {
-                    message = 'Bạn đang thừa cân. Hãy đến với chúng tôi để được tư vấn và hỗ trợ giảm cân hiệu quả!';
-                }
-
-                bmiMessage.textContent = message;
-                bmiResult.classList.remove('hidden');
-            } else {
-                alert('Vui lòng nhập chiều cao và cân nặng hợp lệ!');
-            }
+    function showExpiredAlertHome() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Rất tiếc!',
+            text: 'Mã khuyến mãi này đã hết hạn và không thể sử dụng!',
+            confirmButtonText: 'Đã hiểu'
         });
     }
-</script>
+
+
 <script>
     const row = document.querySelector('.testimonial-row');
     const left = document.querySelector('.left-arrow');
@@ -727,7 +690,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 </script>
 <script>
-document.querySelectorAll(".copy-btn").forEach(btn => {
+document.querySelectorAll(".copy-btn.active-btn").forEach(btn => {
     btn.addEventListener("click", () => {
         let code = btn.getAttribute("data-code");
         navigator.clipboard.writeText(code);
@@ -751,8 +714,18 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
 </script>
 
 <script>
-    // Set ngày kết thúc
-    const endDate = new Date("2025-12-31 23:59:59").getTime();
+    // Tự động thiết lập ngày kết thúc là Chủ Nhật tuần này lúc 23:59:59
+    function getNextSundayEnd() {
+        const now = new Date();
+        const resultDate = new Date(now);
+        const day = now.getDay();
+        const diff = (day === 0 ? 0 : 7 - day); // Số ngày đến Chủ Nhật
+        resultDate.setDate(now.getDate() + diff);
+        resultDate.setHours(23, 59, 59, 999);
+        return resultDate.getTime();
+    }
+
+    const endDate = getNextSundayEnd();
 
     const timer = setInterval(function () {
         const now = new Date().getTime();
@@ -773,11 +746,13 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        // Hiển thị
-        document.getElementById("days").innerHTML = days;
-        document.getElementById("hours").innerHTML = hours;
-        document.getElementById("minutes").innerHTML = minutes;
-        document.getElementById("seconds").innerHTML = seconds;
+        // Hiển thị dạng 2 chữ số
+        const formatNumber = num => String(num).padStart(2, '0');
+
+        document.getElementById("days").innerHTML = formatNumber(days);
+        document.getElementById("hours").innerHTML = formatNumber(hours);
+        document.getElementById("minutes").innerHTML = formatNumber(minutes);
+        document.getElementById("seconds").innerHTML = formatNumber(seconds);
 
     }, 1000);
 

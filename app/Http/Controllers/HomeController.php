@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Sanpham;
 use App\Models\Danhmuc;
+use App\Models\GoiTap;
 use App\Repositories\IProductRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -31,8 +32,8 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        $vouchers = DB::table('khuyenmai')
-            ->where('trang_thai', 1)
+        $vouchers = \App\Models\Khuyenmai::orderBy('trang_thai', 'desc')
+            ->orderBy('ngay_ket_thuc', 'desc')
             ->get();
 
         return view('pages.home', compact(
@@ -179,9 +180,40 @@ class HomeController extends Controller
         return view('pages.services', compact('danhmucs'));
     }
 
+    public function cacGoiDichVu()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.cac_goi_dich_vu', compact('goitaps'));
+    }
+
     public function dichvu1()
     {
-        return view('pages.dichvu1');   // đúng folder bạn đang có
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu1', compact('goitaps'));
+    }
+
+    public function dichvu2()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu2', compact('goitaps'));
+    }
+
+    public function dichvu3()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu3', compact('goitaps'));
+    }
+
+    public function dichvu4()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu4', compact('goitaps'));
+    }
+
+    public function dichvu5()
+    {
+        $goitaps = GoiTap::where('trang_thai', 1)->get();
+        return view('pages.dichvu5', compact('goitaps'));
     }
 
 
@@ -281,5 +313,94 @@ class HomeController extends Controller
             'pagination' => view('pages.components.pagination', compact('products'))->render(),
             'count' => $products->total()
         ]);
+    }
+
+    /** ===================== HEALTH STATION ===================== */
+    public function healthStationResults(Request $request)
+    {
+        $gender = $request->input('gender', 'male');
+        $age = (int)$request->input('age');
+        $height = (float)$request->input('height'); // cm
+        $weight = (float)$request->input('weight'); // kg
+        $activity = $request->input('activity', 'sedentary');
+        $goal = $request->input('goal', 'maintain');
+
+        if(!$height || !$weight || !$age) {
+            return redirect('/')->with('error', 'Vui lòng nhập đầy đủ thông tin chiều cao, cân nặng, độ tuổi.');
+        }
+
+        // 1. Tính BMI
+        $height_m = $height / 100;
+        $bmi = $weight / ($height_m * $height_m);
+        $bmi = round($bmi, 1);
+
+        // 2. Tính BMR (Mifflin-St Jeor)
+        if ($gender == 'male') {
+            $bmr = (10 * $weight) + (6.25 * $height) - (5 * $age) + 5;
+        } else {
+            $bmr = (10 * $weight) + (6.25 * $height) - (5 * $age) - 161;
+        }
+        $bmr = round($bmr);
+
+        // 3. Tính TDEE
+        $activity_multiplier = [
+            'sedentary' => 1.2,
+            'light' => 1.375,
+            'moderate' => 1.55,
+            'active' => 1.725,
+            'very_active' => 1.9,
+        ];
+        $multiplier = $activity_multiplier[$activity] ?? 1.2;
+        $tdee = round($bmr * $multiplier);
+
+        // 4. Phân tích mục tiêu & Đưa ra gợi ý
+        $categoryIds = [];
+        $recommendedServices = [];
+        $caloAdvice = $tdee;
+        $goalText = '';
+
+        if ($goal == 'lose_fat') {
+            $goalText = 'Giảm mỡ, Giảm cân';
+            $categoryIds = [5]; // Giảm cân - Đốt mỡ
+            $recommendedServices = [
+                ['name' => 'Kick Boxing', 'url' => route('services.kickboxing'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-3.webp'],
+                ['name' => 'Dance', 'url' => route('services.dance'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-5.webp']
+            ];
+            $caloAdvice = $tdee - 500;
+        } elseif ($goal == 'gain_muscle') {
+            $goalText = 'Tăng cơ, Tăng cân';
+            $categoryIds = [6, 7]; // Tăng cân, Tăng cơ
+            $recommendedServices = [
+                ['name' => 'Gym Thể hình', 'url' => route('services.gym'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-1.webp']
+            ];
+            $caloAdvice = $tdee + 500;
+        } else {
+            $goalText = 'Giữ dáng, Tăng dẻo dai';
+            $categoryIds = [7]; // Tăng cơ / Phục hồi
+            $recommendedServices = [
+                ['name' => 'Yoga', 'url' => route('services.yoga'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-2.webp'],
+                ['name' => 'Swimming', 'url' => route('services.swimming'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-6.webp']
+            ];
+            $caloAdvice = $tdee;
+        }
+
+        // Lấy sản phẩm gợi ý
+        $recommendedProducts = collect();
+        if (!empty($categoryIds)) {
+            $recommendedProducts = Sanpham::whereIn('id_danhmuc', $categoryIds)
+                ->where('trang_thai', 1)
+                ->with(['images', 'sizes'])
+                ->withAvg('comments', 'rating')
+                ->withCount('comments')
+                ->inRandomOrder()
+                ->take(4)
+                ->get();
+        }
+
+        return view('pages.health_results', compact(
+            'bmi', 'bmr', 'tdee', 'goal', 'goalText', 'caloAdvice',
+            'recommendedProducts', 'recommendedServices',
+            'gender', 'age', 'height', 'weight', 'activity'
+        ));
     }
 }

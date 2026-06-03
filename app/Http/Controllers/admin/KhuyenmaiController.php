@@ -58,12 +58,25 @@ class KhuyenmaiController extends Controller
         $request->validate([
             'ten_khuyenmai'   => 'required|max:150',
             'ma_code'         => 'required|unique:khuyenmai,ma_code',
-           'gia_tri_giam'    => 'required|numeric|min:0',
-'kieu_giam'       => 'required|in:percent,money,freeship',
+            'gia_tri_giam'    => 'required|numeric|min:0',
+            'kieu_giam'       => 'required|in:percent,money,freeship',
+            'yeu_cau_dang_nhap' => 'nullable|in:0,1',
             'don_toi_thieu'   => 'nullable|numeric|min:0',
             'giam_toi_da'     => 'nullable|numeric|min:0',
             'ngay_bat_dau'    => 'required|date',
-            'ngay_ket_thuc'   => 'required|date|after_or_equal:ngay_bat_dau',
+            'ngay_ket_thuc'   => 'required|date|after:ngay_bat_dau',
+        ], [
+            'ten_khuyenmai.required'  => 'Vui lòng nhập tên chương trình khuyến mãi.',
+            'ma_code.required'        => 'Vui lòng nhập mã code.',
+            'ma_code.unique'          => 'Mã code này đã tồn tại, vui lòng chọn mã khác.',
+            'gia_tri_giam.required'   => 'Vui lòng nhập giá trị giảm.',
+            'gia_tri_giam.numeric'    => 'Giá trị giảm phải là số.',
+            'gia_tri_giam.min'        => 'Giá trị giảm không được âm.',
+            'ngay_bat_dau.required'   => 'Vui lòng chọn ngày bắt đầu.',
+            'ngay_bat_dau.date'       => 'Ngày bắt đầu không hợp lệ.',
+            'ngay_ket_thuc.required'  => 'Vui lòng chọn ngày kết thúc.',
+            'ngay_ket_thuc.date'      => 'Ngày kết thúc không hợp lệ.',
+            'ngay_ket_thuc.after'     => 'Ngày kết thúc phải sau ngày bắt đầu.',
         ]);
 
         $this->repo->store($request->all());
@@ -92,11 +105,22 @@ class KhuyenmaiController extends Controller
         $request->validate([
             'ten_khuyenmai'   => 'required|max:150',
             'gia_tri_giam'    => 'required|numeric|min:0',
-'kieu_giam'       => 'required|in:percent,money,freeship',
+            'kieu_giam'       => 'required|in:percent,money,freeship',
+            'yeu_cau_dang_nhap' => 'nullable|in:0,1',
             'don_toi_thieu'   => 'nullable|numeric|min:0',
             'giam_toi_da'     => 'nullable|numeric|min:0',
             'ngay_bat_dau'    => 'required|date',
-            'ngay_ket_thuc'   => 'required|date|after_or_equal:ngay_bat_dau',
+            'ngay_ket_thuc'   => 'required|date|after:ngay_bat_dau',
+        ], [
+            'ten_khuyenmai.required'  => 'Vui lòng nhập tên chương trình khuyến mãi.',
+            'gia_tri_giam.required'   => 'Vui lòng nhập giá trị giảm.',
+            'gia_tri_giam.numeric'    => 'Giá trị giảm phải là số.',
+            'gia_tri_giam.min'        => 'Giá trị giảm không được âm.',
+            'ngay_bat_dau.required'   => 'Vui lòng chọn ngày bắt đầu.',
+            'ngay_bat_dau.date'       => 'Ngày bắt đầu không hợp lệ.',
+            'ngay_ket_thuc.required'  => 'Vui lòng chọn ngày kết thúc.',
+            'ngay_ket_thuc.date'      => 'Ngày kết thúc không hợp lệ.',
+            'ngay_ket_thuc.after'     => 'Ngày kết thúc phải sau ngày bắt đầu.',
         ]);
         $data = $request->except(['_token', '_method']);
 

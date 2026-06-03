@@ -118,9 +118,10 @@
                                 @endforeach
                             </ul>
                         </li>
-                        <li class="dropdown {{ request()->is('dich-vu/*') ? 'active' : '' }}">
+                        <li class="dropdown {{ request()->is('dich-vu/*') || request()->is('cac-goi-dich-vu') ? 'active' : '' }}">
                             <a href="javascript:void(0)" class="hover-a">Dịch vụ </a>
                             <ul class="dropdown-menu dropdown-services">
+                                <li><a href="{{ route('services.packages') }}">Các gói dịch vụ</a></li>
                                 <li><a href="{{ route('services.gym') }}">Gym</a></li>
                                 <li><a href="{{ route('services.yoga') }}">Yoga</a></li>
                                 <li><a href="{{ route('services.swimming') }}">Swimming</a></li>
@@ -132,9 +133,18 @@
                             <a href="{{ route('dang-ky-tap-thu') }}" class="hover-a">Đăng ký tập thử</a>
                         </li>
 
+                        @if(Auth::check())
                         <li class="{{ request()->is('donhang') ? 'active' : '' }}">
                             <a href="{{ URL::to('/donhang') }}" class="hover-a">Đơn hàng</a>
                         </li>
+                        <li class="{{ request()->is('goi-tap/lich-su') ? 'active' : '' }}">
+                            <a href="{{ route('goitap.history') }}" class="hover-a">Gói tập của tôi</a>
+                        </li>
+                        @else
+                        <li class="{{ request()->is('tra-cuu-don-hang') ? 'active' : '' }}">
+                            <a href="{{ URL::to('/tra-cuu-don-hang') }}" class="hover-a">Tra cứu đơn hàng</a>
+                        </li>
+                        @endif
                     </ul>
                 </div>
 
@@ -234,7 +244,11 @@
                         <ul>
                             <li><a href="{{ URL::to('/services') }}">Giới thiệu</a></li>
                             <li><a href="{{ URL::to('/test') }}">Dịch vụ</a></li>
+                            @if(Auth::check())
                             <li><a href="{{ URL::to('/donhang') }}">Đơn hàng</a></li>
+                            @else
+                            <li><a href="{{ URL::to('/tra-cuu-don-hang') }}">Tra cứu đơn hàng</a></li>
+                            @endif
                             <li><a href="{{ URL::to('/viewAll') }}">Sản phẩm</a></li>
                         </ul>
                         <ul>
@@ -282,7 +296,7 @@
             </div>
 
             <div class="site-footer__bottom">
-                <span>Rise Fitness © All Rights Reserved – 2025</span>
+                <span>Rise Fitness © All Rights Reserved – 2026</span>
             </div>
         </div>
     </footer>
@@ -298,6 +312,7 @@
             e.stopPropagation();
 
             const coSize = btn.getAttribute('data-co-size');
+            const isSupplement = btn.getAttribute('data-is-supplement') === '1';
             const productId = btn.getAttribute('data-id') || btn.getAttribute('data-url').split('/').pop();
             const productName = btn.getAttribute('data-name') || 'Sản phẩm';
 
@@ -313,13 +328,16 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Thông báo',
-                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình kích thước!'
+                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình!'
                     });
                     return;
                 }
 
+                const labelText = isSupplement ? 'Vui lòng chọn hương vị / quy cách của sản phẩm:' : 'Vui lòng chọn kích thước (Size) của sản phẩm:';
+                const validationText = isSupplement ? 'Vui lòng chọn hương vị / quy cách trước khi thêm vào giỏ hàng!' : 'Vui lòng chọn một size trước khi thêm vào giỏ hàng!';
+
                 let sizesHtml = `
-                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">Vui lòng chọn kích thước (Size) của sản phẩm:</p>
+                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">${labelText}</p>
                     <div class="swal-size-options" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 15px; margin-bottom: 15px;">
                 `;
 
@@ -371,7 +389,7 @@
                     preConfirm: () => {
                         const active = Swal.getHtmlContainer().querySelector('.swal-size-btn.active');
                         if (!active) {
-                            Swal.showValidationMessage('Vui lòng chọn một size trước khi thêm vào giỏ hàng!');
+                            Swal.showValidationMessage(validationText);
                             return false;
                         }
                         return active.getAttribute('data-id');

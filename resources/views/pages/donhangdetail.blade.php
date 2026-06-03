@@ -302,10 +302,10 @@
                                 </a>
                             </td>
                             <td>{{ $od->soluong }}</td>
-                            <td>{{ number_format($od->giatien) }}đ</td>
+                            <td>{{ number_format($od->giatien, 0, ',', '.') }}đ</td>
                             <td>{{ $od->giamgia }}%</td>
-                            <td>{{ number_format($od->giakhuyenmai) }}đ</td>
-                            <td>{{ number_format($line) }}đ</td>
+                            <td>{{ number_format($od->giakhuyenmai, 0, ',', '.') }}đ</td>
+                            <td>{{ number_format($line, 0, ',', '.') }}đ</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -318,25 +318,29 @@
             {{-- Tổng tiền hàng --}}
             <div class="total-card">
                 <div class="total-title">Tổng tiền hàng</div>
-                <div class="total-value">{{ number_format($order->tongtien) }} VND</div>
+                <div class="total-value">{{ number_format($order->tongtien, 0, ',', '.') }}đ</div>
             </div>
 
             {{-- Giảm giá --}}
             <div class="total-card discount-card">
                 <div class="total-title">Giảm giá</div>
-                <div class="total-value text-danger">- {{ number_format($order->tiengiam) }} VND</div>
+                <div class="total-value text-danger">- {{ number_format($order->tiengiam, 0, ',', '.') }}đ</div>
             </div>
 
             {{-- Tổng phải trả --}}
             <div class="total-card final-card">
                 <div class="total-title">Tổng thanh toán</div>
-                <div class="total-value big-price">{{ number_format($order->tienphaitra) }} VND</div>
+                <div class="total-value big-price">{{ number_format($order->tienphaitra, 0, ',', '.') }}đ</div>
             </div>
 
         </div>
 
 
-        <a href="{{ URL::to('/donhang') }}" class="btn btn-outline-main mt-4">← Quay lại</a>
+        @if(Auth::check())
+            <a href="{{ URL::to('/donhang') }}" class="btn btn-outline-main mt-4">← Quay lại</a>
+        @else
+            <a href="{{ URL::to('/tra-cuu-don-hang') }}" class="btn btn-outline-main mt-4">← Quay lại</a>
+        @endif
 
     </div>
 </div>

@@ -25,7 +25,7 @@ class OrderController extends Controller
         $query = Dathang::query();
 
         // Chỉ lấy 2 trạng thái chính cho màn pending
-        $query->whereIn('trangthai', ['Chờ xác nhận', 'Hủy']);
+        $query->whereIn('trangthai', ['Chờ xác nhận', 'Bị hủy']);
 
         // ===================== SEARCH =====================
         if ($request->search) {
@@ -52,8 +52,8 @@ class OrderController extends Controller
         // ===================== THỐNG KÊ =====================
         $stats = [
             'pending'  => Dathang::where('trangthai', 'Chờ xác nhận')->count(),
-            'canceled' => Dathang::where('trangthai', 'Hủy')->count(),
-            'total'    => Dathang::whereIn('trangthai', ['Chờ xác nhận', 'Hủy'])->count(),
+            'canceled' => Dathang::where('trangthai', 'Bị hủy')->count(),
+            'total'    => Dathang::whereIn('trangthai', ['Chờ xác nhận', 'Bị hủy'])->count(),
         ];
 
         return view('admin.orders.pending', compact('orders', 'stats'));
@@ -160,9 +160,9 @@ public function update(Request $request, $id)
     $allowedStatuses = [$currentStatus];
     
     if ($currentStatus === 'Chờ xác nhận') {
-        $allowedStatuses = ['Chờ xác nhận', 'Chờ giao hàng', 'Hủy'];
+        $allowedStatuses = ['Chờ xác nhận', 'Chờ giao hàng', 'Bị hủy'];
     } elseif ($currentStatus === 'Chờ giao hàng') {
-        $allowedStatuses = ['Chờ giao hàng', 'Đang giao hàng', 'Hủy'];
+        $allowedStatuses = ['Chờ giao hàng', 'Đang giao hàng', 'Bị hủy'];
     } elseif ($currentStatus === 'Đang giao hàng') {
         $allowedStatuses = ['Đang giao hàng', 'Hoàn thành', 'Thất bại'];
     }

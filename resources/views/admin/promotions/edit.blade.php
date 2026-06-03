@@ -96,9 +96,19 @@
         Chỉnh sửa khuyến mãi
     </div>
 
-    <form method="POST" action="{{ route('khuyenmai.update', $km->id_khuyenmai) }}">
+    <form method="POST" action="{{ route('khuyenmai.update', $km->id_khuyenmai) }}" id="form-edit-promo">
     @csrf
     @method('PUT')
+
+        @if($errors->any())
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         <div class="grid-2">
 
@@ -125,26 +135,34 @@
                 </select>
             </div>
 
+            <div>
+                <label class="promo-label">Yêu cầu đăng nhập <span style='color: red;'>*</span></label>
+                <select name="yeu_cau_dang_nhap" class="form-select promo-select">
+                    <option value="0" {{ $km->yeu_cau_dang_nhap == 0 ? 'selected' : '' }}>Không (Mã công khai)</option>
+                    <option value="1" {{ $km->yeu_cau_dang_nhap == 1 ? 'selected' : '' }}>Có (Mã độc quyền)</option>
+                </select>
+            </div>
+
             <div id="gia_tri_wrap">
                 <label class="promo-label">Giá trị giảm <span style='color: red;'>*</span></label>
                 <input type="number" name="gia_tri_giam"
                        class="form-control promo-input"
                        id="gia_tri_giam_edit"
-                       value="{{ $km->gia_tri_giam }}">
+                       value="{{ (int)$km->gia_tri_giam }}">
             </div>
 
             <div>
-                <label class="promo-label">Giảm tối đa (VNĐ)</label>
+                <label class="promo-label">Giảm tối đa (đ)</label>
                 <input type="number" name="giam_toi_da"
                        class="form-control promo-input"
-                       value="{{ $km->giam_toi_da }}">
+                       value="{{ $km->giam_toi_da !== null ? (int)$km->giam_toi_da : '' }}">
             </div>
 
             <div>
-                <label class="promo-label">Đơn hàng tối thiểu</label>
+                <label class="promo-label">Đơn hàng tối thiểu (đ) *</label>
                 <input type="number" name="don_toi_thieu"
                        class="form-control promo-input"
-                       value="{{ $km->don_toi_thieu }}">
+                       value="{{ $km->don_toi_thieu !== null ? (int)$km->don_toi_thieu : '' }}">
             </div>
 
             <div>
@@ -166,6 +184,9 @@
                 <input type="date" name="ngay_ket_thuc"
                        class="form-control promo-input"
                        value="{{ date('Y-m-d', strtotime($km->ngay_ket_thuc)) }}" required>
+                <div id="date-error-edit" style="display:none; color:#dc3545; font-size:13px; margin-top:4px;">
+                    <i class="bi bi-exclamation-circle"></i> Ngày kết thúc phải sau ngày bắt đầu.
+                </div>
             </div>
 
             <div>
@@ -196,10 +217,10 @@ function toggleGiaTri(val) {
     const input = document.getElementById('gia_tri_giam_edit');
     if (val === 'freeship') {
         input.value = 0;
-        input.readOnly = true;        // ← đổi disabled thành readOnly
+        input.readOnly = true;
         input.style.background = '#f3f4f6';
     } else {
-        input.readOnly = false;       // ← đổi disabled thành readOnly
+        input.readOnly = false;
         input.style.background = '#fff';
     }
 }
@@ -211,6 +232,40 @@ document.getElementById('kieu_giam_edit').addEventListener('change', function() 
 window.onload = function() {
     toggleGiaTri(document.getElementById('kieu_giam_edit').value);
 };
+
+// --- Validation ngày ---
+const batDauInputE  = document.querySelector('#form-edit-promo input[name="ngay_bat_dau"]');
+const ketThucInputE = document.querySelector('#form-edit-promo input[name="ngay_ket_thuc"]');
+const dateErrorE    = document.getElementById('date-error-edit');
+
+function validateDatesEdit() {
+    if (batDauInputE.value && ketThucInputE.value) {
+        if (ketThucInputE.value <= batDauInputE.value) {
+            dateErrorE.style.display = 'block';
+            ketThucInputE.setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu.');
+            return false;
+        } else {
+            dateErrorE.style.display = 'none';
+            ketThucInputE.setCustomValidity('');
+        }
+    }
+    return true;
+}
+
+batDauInputE.addEventListener('change', function() {
+    if (this.value) {
+        ketThucInputE.min = this.value;
+    }
+    validateDatesEdit();
+});
+
+ketThucInputE.addEventListener('change', validateDatesEdit);
+
+document.getElementById('form-edit-promo').addEventListener('submit', function(e) {
+    if (!validateDatesEdit()) {
+        e.preventDefault();
+    }
+});
 </script>
 
 @endsection

@@ -16,7 +16,7 @@ class NguoiDung extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'hoten', 'email', 'password', 'diachi', 'sdt', 'id_phanquyen', 'trang_thai'
+        'hoten', 'email', 'password', 'diachi', 'sdt', 'id_phanquyen', 'trang_thai', 'cart_data'
     ];
 
     /**
@@ -37,6 +37,7 @@ class NguoiDung extends Authenticatable
         'id_nd' => 'int',
         'sdt' => 'int',
         'id_phanquyen' => 'int',
+        'cart_data' => 'array',  // Tự động encode/decode JSON
     ];
 
     /**

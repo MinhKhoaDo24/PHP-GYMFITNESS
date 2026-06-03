@@ -93,8 +93,8 @@ class AdminController extends Controller
             $labels[] = $d->format('d/m');
 
             $values[] = DB::table('dathang')
-                ->whereDate('ngaydathang', $d->format('Y-m-d'))
-                ->where('trangthai', '!=', 'Đã hủy') // Không đếm đơn hủy
+                ->whereDate('ngay_hoan_thanh', $d->format('Y-m-d'))
+                ->where('trangthai', 'Hoàn thành') // Chỉ đếm đơn đã hoàn thành
                 ->count();
         }
 

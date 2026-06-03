@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules\Password;
+use App\Helpers\CartHelper;
 
 class AuthController extends Controller
 {
@@ -112,6 +113,7 @@ class AuthController extends Controller
         // ── 2. Kiểm tra tài khoản ─────────────────────────────────────────
         $user = NguoiDung::where('email', $request->email)->first();
 
+        // Nếu không tìm thấy user
         if (!$user) {
             // Tăng counter
             session(["login_attempts.{$email}" => $loginAttempts + 1]);
@@ -128,6 +130,7 @@ class AuthController extends Controller
             }
         }
 
+        // Nếu trạng thái = 0 -> báo lỗi
         if ($user->trang_thai == 0) {
             return back()->with('error', 'Tài khoản đang bị khóa. Vui lòng liên hệ quản trị viên!');
         }
@@ -143,6 +146,11 @@ class AuthController extends Controller
             session()->forget("login_attempts.{$email}");
             
             $request->session()->regenerate();
+
+            // ── Khôi phục giỏ hàng từ CSDL (Không gộp giỏ hàng khách) ───────
+            $loggedInUser = Auth::user();
+            $dbCart = $loggedInUser->cart_data ?? [];
+            session()->put('cart', $dbCart);
 
             // ── Remember Me bằng Sanctum token ghi vào cookie ──────────────
             if ($request->boolean('remember')) {

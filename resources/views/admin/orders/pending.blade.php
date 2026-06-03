@@ -141,8 +141,8 @@
                     Chờ xác nhận
                 </option>
 
-                <option value="Hủy"
-                    {{ request('status') == 'Hủy' ? 'selected' : '' }}>
+                <option value="Bị hủy"
+                    {{ request('status') == 'Bị hủy' ? 'selected' : '' }}>
                     Đã hủy
                 </option>
             </select>
@@ -171,10 +171,10 @@
 
         @forelse($orders as $order)
             <tr>
-                <td>#{{ $order->id_dathang }}</td>
+                <td>#RF-{{ str_pad($order->id_dathang, 5, '0', STR_PAD_LEFT) }}</td>
                 <td>{{ \Carbon\Carbon::parse($order->ngaydathang)->format('d/m/Y H:i') }}</td>
                 <td>{{ $order->hoten }}</td>
-                <td>{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : $order->tongtien) }} đ</td>
+                <td>{{ number_format($order->tienphaitra > 0 ? $order->tienphaitra : $order->tongtien, 0, ',', '.') }} đ</td>
 
                 {{-- PAYMENT --}}
                 <td>
@@ -189,7 +189,7 @@
                 <td>
                     @if($order->trangthai === 'Chờ xác nhận')
                         <span class="status-badge status-waiting">Chờ xác nhận</span>
-                    @elseif($order->trangthai === 'Hủy')
+                    @elseif($order->trangthai === 'Bị hủy')
                         <span class="status-badge status-cancel" style="background:#fecaca; color:#b91c1c;">
                             Đã hủy
                         </span>

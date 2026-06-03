@@ -25,7 +25,7 @@ class DangKyTapThuSeeder extends Seeder
                 'ngay_mong_muon' => fake()->dateTimeBetween('-3 days', '+7 days')->format('Y-m-d'),
                 'gio_mong_muon'  => $gioList[array_rand($gioList)],
                 'ghi_chu'        => fake()->boolean(30) ? fake()->sentence(8) : null,
-                'trangthai'      => rand(0, 4),  // 0 → 4
+                'trangthai'      => rand(0, 3),  // 0 → 3
                 'id_nguoidung'   => null,
                 'created_at'     => Carbon::now(),
                 'updated_at'     => Carbon::now(),

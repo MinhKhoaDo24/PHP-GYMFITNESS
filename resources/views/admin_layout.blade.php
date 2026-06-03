@@ -96,6 +96,32 @@
                     </a>
                 </li>
 
+                {{-- GÓI TẬP GYM --}}
+                <li class="sidebar-item {{ request()->is('admin/goitap*') ? 'active' : '' }}">
+                    <a class="sidebar-link d-flex align-items-center"
+                    data-bs-toggle="collapse"
+                    href="#goitapMenu"
+                    role="button">
+                        <i class="bi bi-award me-2"></i> Gói tập Gym
+                    </a>
+
+                    <ul id="goitapMenu"
+                        class="collapse list-unstyled ms-4 {{ request()->is('admin/goitap*') ? 'show' : '' }}">
+                        <li>
+                            <a class="sidebar-link submenu-link {{ request()->routeIs('admin.goitap.index') ? 'active-sub' : '' }}"
+                            href="{{ route('admin.goitap.index') }}">
+                                Quản lý Gói tập
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sidebar-link submenu-link {{ request()->routeIs('admin.goitap.dangky') ? 'active-sub' : '' }}"
+                            href="{{ route('admin.goitap.dangky') }}">
+                                Duyệt Gói tập
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 {{-- KHUYẾN MÃI --}}
                 <li class="sidebar-item {{ request()->is('admin/khuyenmai*') ? 'active' : '' }}">
                     <a class="sidebar-link" href="{{ url('/admin/khuyenmai') }}">

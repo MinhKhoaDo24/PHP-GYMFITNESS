@@ -96,8 +96,18 @@
         Tạo khuyến mãi mới
     </div>
 
-    <form action="{{ route('khuyenmai.store') }}" method="POST">
+    <form action="{{ route('khuyenmai.store') }}" method="POST" id="form-create-promo">
         @csrf
+
+        @if($errors->any())
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         <div class="grid-2">
 
@@ -121,17 +131,25 @@
             </div>
 
             <div>
+                <label class="promo-label">Yêu cầu đăng nhập <span style='color: red;'>*</span></label>
+                <select name="yeu_cau_dang_nhap" class="form-select promo-select">
+                    <option value="0">Không (Mã công khai)</option>
+                    <option value="1">Có (Mã độc quyền)</option>
+                </select>
+            </div>
+
+            <div>
                 <label class="promo-label">Giá trị giảm <span style='color: red;'>*</span></label>
                 <input type="number" name="gia_tri_giam" class="form-control promo-input" id="gia_tri_giam_create" value="0" min="-1" required>
             </div>
 
             <div>
-                <label class="promo-label">Giảm tối đa (VNĐ)</label>
+                <label class="promo-label">Giảm tối đa (đ)</label>
                 <input type="number" name="giam_toi_da" class="form-control promo-input">
             </div>
 
             <div>
-                <label class="promo-label">Đơn hàng tối thiểu (VNĐ) *</label>
+                <label class="promo-label">Đơn hàng tối thiểu (đ) *</label>
                 <input type="number" name="don_toi_thieu" class="form-control promo-input" value="0" required>
             </div>
 
@@ -148,6 +166,9 @@
             <div>
                 <label class="promo-label">Ngày kết thúc <span style='color: red;'>*</span></label>
                 <input type="date" name="ngay_ket_thuc" class="form-control promo-input" required>
+                <div id="date-error-create" style="display:none; color:#dc3545; font-size:13px; margin-top:4px;">
+                    <i class="bi bi-exclamation-circle"></i> Ngày kết thúc phải sau ngày bắt đầu.
+                </div>
             </div>
 
         </div>
@@ -164,16 +185,6 @@
 
     </form>
 
-    @if($errors->any())
-    <div class="alert alert-danger mt-2">
-        <ul>
-            @foreach($errors->all() as $err)
-                <li>{{ $err }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
-
 </div>
 
 <script>
@@ -189,6 +200,41 @@ function toggleGiaTriCreate(val) {
 
 document.getElementById('kieu_giam_create').addEventListener('change', function() {
     toggleGiaTriCreate(this.value);
+});
+
+// --- Validation ngày ---
+const batDauInput  = document.querySelector('input[name="ngay_bat_dau"]');
+const ketThucInput = document.querySelector('input[name="ngay_ket_thuc"]');
+const dateError    = document.getElementById('date-error-create');
+
+function validateDates() {
+    if (batDauInput.value && ketThucInput.value) {
+        if (ketThucInput.value <= batDauInput.value) {
+            dateError.style.display = 'block';
+            ketThucInput.setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu.');
+            return false;
+        } else {
+            dateError.style.display = 'none';
+            ketThucInput.setCustomValidity('');
+        }
+    }
+    return true;
+}
+
+batDauInput.addEventListener('change', function() {
+    // Cập nhật min cho ngày kết thúc
+    if (this.value) {
+        ketThucInput.min = this.value;
+    }
+    validateDates();
+});
+
+ketThucInput.addEventListener('change', validateDates);
+
+document.getElementById('form-create-promo').addEventListener('submit', function(e) {
+    if (!validateDates()) {
+        e.preventDefault();
+    }
 });
 </script>
 

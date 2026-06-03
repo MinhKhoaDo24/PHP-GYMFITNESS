@@ -175,9 +175,9 @@
 
         <!-- Giá gốc -->
         <div>
-            <label class="promo-label">Giá gốc (VNĐ) *</label>
+            <label class="promo-label">Giá gốc (đ) *</label>
             <input type="number" name="giasp" class="form-control promo-input"
-                value="{{ old('giasp', $sp->giasp) }}" required>
+                value="{{ old('giasp', (int)$sp->giasp) }}" required>
         </div>
 
         <div class="grid-2">
@@ -192,20 +192,20 @@
             </div>
 
             <div>
-                <label class="promo-label">Giá khuyến mãi (VNĐ)</label>
+                <label class="promo-label">Giá khuyến mãi (đ)</label>
                 <input type="number" id="tien_giam"
                     class="form-control promo-input"
-                    value="{{ old('gia_duoc_giam', $sp->gia_duoc_giam ?? 0) }}"
+                    value="{{ old('gia_duoc_giam', (int)($sp->gia_duoc_giam ?? 0)) }}"
                     readonly>
             </div>
 
         </div>
 
         <div>
-            <label class="promo-label">Giá bán (VNĐ) *</label>
+            <label class="promo-label">Giá bán (đ) *</label>
             <input type="number" name="giakhuyenmai"
                 class="form-control promo-input"
-                value="{{ old('giakhuyenmai', $sp->giakhuyenmai) }}"
+                value="{{ old('giakhuyenmai', (int)$sp->giakhuyenmai) }}"
                 readonly />
         </div>
 
@@ -343,7 +343,7 @@
                         </div>
                         <div class="col-5">
                             <label class="promo-label">Giá cộng thêm</label>
-                            <input type="number" name="product_sizes[{{ $index }}][gia_cong_them]" class="form-control promo-input" value="{{ $currentSize->pivot->gia_cong_them }}" min="0" required>
+                            <input type="number" name="product_sizes[{{ $index }}][gia_cong_them]" class="form-control promo-input" value="{{ (int)$currentSize->pivot->gia_cong_them }}" min="0" required>
                         </div>
                         <div class="col-2 text-end">
                             <button type="button" class="btn btn-danger btn-sm remove-size-btn mt-3" style="border-radius: 8px;">Xóa</button>

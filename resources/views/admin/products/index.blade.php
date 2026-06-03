@@ -199,7 +199,7 @@
 
             <td class="fw-bold">{{ $sp->tensp }}</td>
 
-            <td>{{ number_format($sp->giakhuyenmai) }} VNĐ</td>
+            <td>{{ number_format($sp->giakhuyenmai, 0, ',', '.') }}đ</td>
 
             <td>{{ $sp->giamgia }}%</td>
 

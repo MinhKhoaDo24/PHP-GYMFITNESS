@@ -114,22 +114,50 @@
 
             <div class="price-box">
                 <span class="current-price">
-                    {{ number_format($sanpham->giakhuyenmai ?: $sanpham->giasp) }}đ
+                    {{ number_format($sanpham->giakhuyenmai ?: $sanpham->giasp, 0, ',', '.') }}đ
                 </span>
 
                 @if($sanpham->giakhuyenmai > 0 && $sanpham->giakhuyenmai < $sanpham->giasp)
-                    <span class="old-price">{{ number_format($sanpham->giasp) }}đ</span>
-                    <span class="save-price">Tiết kiệm: {{ number_format($sanpham->giasp - $sanpham->giakhuyenmai) }}đ</span>
+                    <span class="old-price">{{ number_format($sanpham->giasp, 0, ',', '.') }}đ</span>
+                    <span class="save-price">Tiết kiệm: {{ number_format($sanpham->giasp - $sanpham->giakhuyenmai, 0, ',', '.') }}đ</span>
                 @endif
             </div>
 
             @php
-                $sentences = preg_split('/(?<=[.!?])\s+/', $sanpham->mota_ngan);
+                $motaNgan = trim($sanpham->mota_ngan);
+                
+                // Khôi phục xuống dòng bị mất do copy-paste
+                $motaNgan = preg_replace('/([\p{Ll}])([\p{Lu}])/u', '$1' . "\n" . '$2', $motaNgan); // chữ thường liền HOA
+                $motaNgan = preg_replace('/(\d)([\p{Lu}])/u', '$1' . "\n" . '$2', $motaNgan); // Số liền HOA (vd: 1Bổ)
+                $motaNgan = preg_replace('/([\p{Ll}])(\d)/u', '$1' . "\n" . '$2', $motaNgan); // chữ thường liền số (vd: calo1)
+                $motaNgan = preg_replace('/([.!?])\s*([\p{Lu}])/u', '$1' . "\n" . '$2', $motaNgan); // Dấu câu liền HOA (vd: cơ.Không, mỡ ?Bạn)
+                $motaNgan = preg_replace('/#{2,}/', "\n", $motaNgan);
+
+                // Nếu có xuống dòng thì cắt theo xuống dòng, nếu không thì cắt theo dấu câu
+                if (strpos($motaNgan, "\n") !== false) {
+                    $rawSentences = explode("\n", $motaNgan);
+                } else {
+                    $rawSentences = preg_split('/(?<=[.!?])\s+/', $motaNgan);
+                }
+                
+                $sentences = [];
+                foreach ($rawSentences as $item) {
+                    $item = trim($item);
+                    if (mb_strlen($item) < 10) continue; // Bỏ các dòng quá ngắn vô nghĩa (vd: "1...")
+                    
+                    // BỎ: Các câu hỏi marketing nhảm (chứa dấu ?)
+                    if (strpos($item, '?') !== false) continue;
+                    
+                    // BỎ: Thông tin rác về giá/VAT không liên quan đến lợi ích sản phẩm
+                    if (stripos($item, 'VAT') !== false || stripos($item, 'Giá chưa bao gồm') !== false) continue;
+                    
+                    $sentences[] = $item;
+                }
             @endphp
 
             <ul class="benefits">
-                @foreach(array_slice($sentences, 0, 6) as $item)
-                    <li>{{ $item }}</li>
+                @foreach(array_slice($sentences, 0, 3) as $item)
+                    <li>{{ \Illuminate\Support\Str::limit($item, 120) }}</li>
                 @endforeach
             </ul>
 
@@ -208,7 +236,13 @@
 
             @if($sanpham->co_size == 1)
                 <div class="size-selection-box">
-                    <span class="d-block mb-2 font-weight-bold">Chọn Kích Thước (Size):</span>
+                    <span class="d-block mb-2 font-weight-bold">
+                        @if(in_array($sanpham->id_danhmuc, [5, 6, 7]))
+                            Chọn Hương Vị / Quy Cách:
+                        @else
+                            Chọn Kích Thước (Size):
+                        @endif
+                    </span>
                     <div class="size-options">
                         @foreach($sanpham->sizes as $sz)
                             @php
@@ -229,7 +263,13 @@
                             </div>
                         @endforeach
                     </div>
-                    <div id="size-selection-error" class="size-warning-red" style="display: none;">Vui lòng chọn kích thước (size) trước khi mua!</div>
+                    <div id="size-selection-error" class="size-warning-red" style="display: none;">
+                        @if(in_array($sanpham->id_danhmuc, [5, 6, 7]))
+                            Vui lòng chọn hương vị / quy cách trước khi mua!
+                        @else
+                            Vui lòng chọn kích thước (size) trước khi mua!
+                        @endif
+                    </div>
                 </div>
             @endif
 
@@ -312,8 +352,49 @@
         <!-- TAB 1 – THÔNG TIN CHI TIẾT -->
         <div id="tab1" class="tab-pane active">
             @php
-            $formatted = preg_replace('/\s*✓\s*/', '</li><li>', $sanpham->mota);
-            $formatted = "<ul><li>" . trim($formatted, "</li>") . "</li></ul>";
+            $mota = trim($sanpham->mota);
+
+            // Khôi phục xuống dòng bị mất do copy-paste
+            $mota = preg_replace('/([\p{Ll}])([\p{Lu}])/u', '$1' . "\n" . '$2', $mota); // chữ thường liền HOA
+            $mota = preg_replace('/(\d)([\p{Lu}])/u', '$1' . "\n" . '$2', $mota); // Số liền HOA
+            $mota = preg_replace('/([\p{Ll}])(\d)/u', '$1' . "\n" . '$2', $mota); // chữ thường liền số
+            $mota = preg_replace('/([.!?])\s*([\p{Lu}])/u', '$1' . "\n" . '$2', $mota); // Dấu câu liền HOA
+            $mota = preg_replace('/#{2,}/', "\n", $mota);
+
+            // Tách thành mảng để lọc rác
+            if (strpos($mota, "\n") !== false) {
+                $rawMota = explode("\n", $mota);
+            } else {
+                $rawMota = preg_split('/(?<=[.!?])\s+/', $mota);
+            }
+            
+            $filteredMota = [];
+            foreach ($rawMota as $item) {
+                $item = trim($item);
+                if ($item === '') continue;
+                
+                // Lọc câu hỏi marketing
+                if (strpos($item, '?') !== false) continue;
+                
+                // Lọc giá / VAT
+                if (stripos($item, 'VAT') !== false || stripos($item, 'Giá chưa bao gồm') !== false) continue;
+                
+                // Lọc câu bị cắt cụt (thường do varchar limit)
+                if (substr($item, -3) === '...') continue;
+                
+                $filteredMota[] = $item;
+            }
+            
+            $mota = implode("\n\n", $filteredMota);
+            $formatted = e($mota);
+
+            // Nếu có ký tự ✓ thì định dạng thành list (như cũ)
+            if (strpos($formatted, '✓') !== false) {
+                $formatted = preg_replace('/\s*✓\s*/', '</li><li>', $formatted);
+                $formatted = "<ul><li>" . trim($formatted, "</li>") . "</li></ul>";
+            } else {
+                $formatted = nl2br($formatted);
+            }
             @endphp
 
             {!! $formatted !!}
