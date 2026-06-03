@@ -34,14 +34,14 @@
 
     <div class="product-rating" style="color: #ffb800; font-size: 12px; margin: 5px 0 8px; text-align: left;">
         @php
-            $avg = $p->comments_avg_rating ?? 5;
             $count = $p->comments_count ?? 0;
+            $avg = $count > 0 ? ($p->comments_avg_rating ?? 5) : 0;
         @endphp
         @for($i = 1; $i <= 5; $i++)
             @if($i <= round($avg))
-                <i class="fa fa-star"></i>
+                <i class="fa-solid fa-star"></i>
             @else
-                <i class="fa fa-star-o"></i>
+                <i class="fa-regular fa-star" style="color: #ccc;"></i>
             @endif
         @endfor
         <span style="color: #777; font-size: 11px; margin-left: 4px;">({{ $count }})</span>

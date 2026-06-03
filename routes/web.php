@@ -15,9 +15,8 @@ use App\Http\Controllers\{
     ChatController,
     GuestCheckoutController,
     GoiTapController
-
 };
-use App\Repositories\DangkidichvuRepository;;
+use App\Repositories\DangkidichvuRepository;
 use App\Http\Controllers\MailController;
 /*
 |--------------------------------------------------------------------------
