@@ -97,7 +97,10 @@
     <div class="voucher-container">
 
         @foreach ($vouchers as $km)
-        <div class="voucher-card">
+        @php 
+            $isExpired = \Carbon\Carbon::parse($km->ngay_ket_thuc)->isPast() || $km->trang_thai == 0;
+        @endphp
+        <div class="voucher-card {{ $isExpired ? 'expired' : '' }}">
             <div class="voucher-content">
 
                 <h3>Nhập mã: {{ $km->ma_code }}</h3>
@@ -106,12 +109,22 @@
                     {{ $km->mo_ta ?? 'Ưu đãi hấp dẫn dành cho bạn!' }}
                 </p>
 
-                <button class="copy-btn" data-code="{{ $km->ma_code }}">
+                @if($isExpired)
+                <button class="copy-btn" onclick="showExpiredAlertHome()">
+                    Đã hết hạn
+                </button>
+                @else
+                <button class="copy-btn active-btn" data-code="{{ $km->ma_code }}">
                     Sao chép mã
                 </button>
+                @endif
 
             </div>
             <div class="voucher-barcode"></div>
+            
+            @if($isExpired)
+                <div class="expired-stamp-home">HẾT HẠN</div>
+            @endif
         </div>
         @endforeach
 
@@ -621,10 +634,17 @@
 
 @push('scripts')
 <script src="{{ asset('frontend/script/about.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 <script>
-
-
+    function showExpiredAlertHome() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Rất tiếc!',
+            text: 'Mã khuyến mãi này đã hết hạn và không thể sử dụng!',
+            confirmButtonText: 'Đã hiểu'
+        });
+    }
 
 // === Tính BMI ===
     const bmiForm = document.getElementById('bmi-form');
@@ -675,7 +695,7 @@
     });
 </script>
 <script>
-document.querySelectorAll(".copy-btn").forEach(btn => {
+document.querySelectorAll(".copy-btn.active-btn").forEach(btn => {
     btn.addEventListener("click", () => {
         let code = btn.getAttribute("data-code");
         navigator.clipboard.writeText(code);

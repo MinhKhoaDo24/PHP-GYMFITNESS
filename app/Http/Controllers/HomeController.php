@@ -32,8 +32,8 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        $vouchers = DB::table('khuyenmai')
-            ->where('trang_thai', 1)
+        $vouchers = \App\Models\Khuyenmai::orderBy('trang_thai', 'desc')
+            ->orderBy('ngay_ket_thuc', 'desc')
             ->get();
 
         return view('pages.home', compact(
