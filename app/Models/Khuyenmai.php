@@ -15,6 +15,7 @@ class Khuyenmai extends Model
         'ma_code',
         'gia_tri_giam',
         'kieu_giam',              // percent | money
+        'yeu_cau_dang_nhap',
         'mo_ta',
         'don_toi_thieu',
         'giam_toi_da',

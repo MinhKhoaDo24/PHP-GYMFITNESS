@@ -131,6 +131,14 @@
             </div>
 
             <div>
+                <label class="promo-label">Yêu cầu đăng nhập <span style='color: red;'>*</span></label>
+                <select name="yeu_cau_dang_nhap" class="form-select promo-select">
+                    <option value="0">Không (Mã công khai)</option>
+                    <option value="1">Có (Mã độc quyền)</option>
+                </select>
+            </div>
+
+            <div>
                 <label class="promo-label">Giá trị giảm <span style='color: red;'>*</span></label>
                 <input type="number" name="gia_tri_giam" class="form-control promo-input" id="gia_tri_giam_create" value="0" min="-1" required>
             </div>
@@ -176,8 +184,6 @@
         </div>
 
     </form>
-
-    @endif
 
 </div>
 

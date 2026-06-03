@@ -135,6 +135,14 @@
                 </select>
             </div>
 
+            <div>
+                <label class="promo-label">Yêu cầu đăng nhập <span style='color: red;'>*</span></label>
+                <select name="yeu_cau_dang_nhap" class="form-select promo-select">
+                    <option value="0" {{ $km->yeu_cau_dang_nhap == 0 ? 'selected' : '' }}>Không (Mã công khai)</option>
+                    <option value="1" {{ $km->yeu_cau_dang_nhap == 1 ? 'selected' : '' }}>Có (Mã độc quyền)</option>
+                </select>
+            </div>
+
             <div id="gia_tri_wrap">
                 <label class="promo-label">Giá trị giảm <span style='color: red;'>*</span></label>
                 <input type="number" name="gia_tri_giam"
