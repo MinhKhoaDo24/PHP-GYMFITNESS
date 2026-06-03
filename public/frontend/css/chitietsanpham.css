@@ -59,8 +59,13 @@
     color: #666;
 }
 
-.stock-yes { color: green; }
-.stock-no { color: red; }
+.stock-yes {
+    color: green;
+}
+
+.stock-no {
+    color: red;
+}
 
 .price-box {
     margin: 15px 0;
@@ -140,6 +145,7 @@
     background: #34A4E0;
     color: white;
 }
+
 .add-cart:hover {
     color: #34A4E0;
     background-color: #fff;
@@ -151,6 +157,7 @@
     border: 2px solid #34A4E0;
     color: #34A4E0;
 }
+
 .buy-now:hover {
     color: #fff;
     background-color: #34A4E0;
@@ -262,7 +269,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.75);
+    background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
     display: none;
     justify-content: center;
@@ -279,7 +286,7 @@
     object-fit: contain;
 
     border-radius: 8px;
-    box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
     animation: zoomFade 0.3s ease;
 }
 
@@ -301,8 +308,15 @@
 
 /* Animation khi mở */
 @keyframes zoomFade {
-    from { transform: scale(0.7); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
+    from {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 
@@ -310,12 +324,15 @@
 .product-info-area {
     display: flex;
     flex-direction: column;
-    min-height: 100px; /* chỉnh tùy UI bạn muốn */
+    min-height: 100px;
+    /* chỉnh tùy UI bạn muốn */
 }
 
 .action-wrapper {
-    margin-top: auto;  /* ĐẨY XUỐNG DƯỚI */
-    padding-top: 50px; /* tạo khoảng cách đẹp */
+    margin-top: auto;
+    /* ĐẨY XUỐNG DƯỚI */
+    padding-top: 50px;
+    /* tạo khoảng cách đẹp */
 }
 
 
@@ -327,7 +344,8 @@
 }
 
 .tabs-header {
-    position: relative; /* quan trọng */
+    position: relative;
+    /* quan trọng */
     display: flex;
     gap: 40px;
     align-items: center;
@@ -595,8 +613,8 @@
 }
 
 .star-rating-selector label:hover,
-.star-rating-selector label:hover ~ label,
-.star-rating-selector input:checked ~ label {
+.star-rating-selector label:hover~label,
+.star-rating-selector input:checked~label {
     color: #ffb800 !important;
 }
 
@@ -666,4 +684,3 @@ video.overlay-img {
     border-radius: 8px;
     background-color: #000;
 }
-

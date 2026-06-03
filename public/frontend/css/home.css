@@ -1,4 +1,4 @@
-
+﻿
     /* ===== RESET & GENERAL ===== */
     * {
         margin: 0;
@@ -2243,3 +2243,43 @@
 
 
 
+
+/* ================= TR?NG TH�I H?T H?N CHO VOUCHER ? HOME PAGE ================= */
+.voucher-card.expired {
+    background: #e9ecef !important;
+    color: #6c757d;
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+}
+.voucher-card.expired:hover {
+    transform: none;
+    box-shadow: none;
+}
+.voucher-card.expired .voucher-content h3 {
+    color: #868e96;
+    text-decoration: line-through;
+}
+.voucher-card.expired .voucher-content p {
+    color: #adb5bd;
+}
+.voucher-card.expired .copy-btn {
+    background: #ced4da;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+.voucher-card.expired .expired-stamp-home {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 20px;
+    font-weight: 900;
+    color: rgba(250, 82, 82, 0.4);
+    border: 3px solid rgba(250, 82, 82, 0.4);
+    padding: 3px 10px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    pointer-events: none;
+    z-index: 10;
+}

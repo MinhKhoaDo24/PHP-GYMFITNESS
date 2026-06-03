@@ -177,16 +177,23 @@
             <div class="checkout-card">
                 <div class="section-title"><i class="bi bi-person-circle"></i> Thông tin khách hàng nhận hàng</div>
 
+                @if(!$u)
+                <div class="alert alert-info d-flex align-items-center mb-3" style="border-radius: 10px;">
+                    <i class="bi bi-info-circle-fill me-2" style="font-size: 20px;"></i>
+                    <span>Bạn chưa đăng nhập. Vui lòng nhấn <strong>"Cập nhật thông tin nhận hàng"</strong> bên dưới để nhập thông tin giao hàng.</span>
+                </div>
+                @endif
+
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3 mb-md-0">
                         <div class="p-3" style="background: #fafafa; border-radius: 12px; border: 1px solid #f1f5f9; height: 100%;">
                             <div class="mb-3">
                                 <span class="info-label text-muted" style="font-size: 13px;">Họ tên khách hàng:</span> <br>
-                                <strong class="info-value" id="display_hoten" style="font-size: 16px; color: #1f2937;">{{ $u->hoten }}</strong>
+                                <strong class="info-value" id="display_hoten" style="font-size: 16px; color: #1f2937;">{{ optional($u)->hoten ?? 'Chưa cập nhật' }}</strong>
                             </div>
                             <div>
                                 <span class="info-label text-muted" style="font-size: 13px;">Địa chỉ Email:</span> <br>
-                                <strong class="info-value" id="display_email" style="font-size: 16px; color: #1f2937;">{{ $u->email }}</strong>
+                                <strong class="info-value" id="display_email" style="font-size: 16px; color: #1f2937;">{{ optional($u)->email ?? 'Chưa cập nhật' }}</strong>
                             </div>
                         </div>
                     </div>
@@ -194,11 +201,11 @@
                         <div class="p-3" style="background: #fafafa; border-radius: 12px; border: 1px solid #f1f5f9; height: 100%;">
                             <div class="mb-3">
                                 <span class="info-label text-muted" style="font-size: 13px;">Số điện thoại liên hệ:</span> <br>
-                                <strong class="info-value" id="display_sdt" style="font-size: 16px; color: #1f2937;">0{{ $u->sdt }}</strong>
+                                <strong class="info-value" id="display_sdt" style="font-size: 16px; color: #1f2937;">{{ $u ? '0'.$u->sdt : 'Chưa cập nhật' }}</strong>
                             </div>
                             <div>
                                 <span class="info-label text-muted" style="font-size: 13px;">Địa chỉ nhận hàng chi tiết:</span> <br>
-                                <strong class="info-value" id="display_diachigiaohang" style="font-size: 16px; color: #1f2937;">{{ $u->diachi }}</strong>
+                                <strong class="info-value" id="display_diachigiaohang" style="font-size: 16px; color: #1f2937;">{{ optional($u)->diachi ?? 'Chưa cập nhật' }}</strong>
                             </div>
                         </div>
                     </div>
@@ -242,11 +249,11 @@
                 </div>
 
                 {{-- Hidden --}}
-                <input type="hidden" name="id_nd" value="{{ $u->id_nd }}">
-                <input type="hidden" id="input_hoten" name="display_hoten" value="{{ $u->hoten }}">
-                <input type="hidden" id="input_email" name="display_email" value="{{ $u->email }}">
-                <input type="hidden" id="input_sdt" name="display_sdt" value="{{ $u->sdt }}">
-                <input type="hidden" id="input_diachigiaohang" name="display_diachigiaohang" value="{{ $u->diachi }}">
+                <input type="hidden" name="id_nd" value="{{ optional($u)->id_nd }}">
+                <input type="hidden" id="input_hoten" name="display_hoten" value="{{ optional($u)->hoten }}">
+                <input type="hidden" id="input_email" name="display_email" value="{{ optional($u)->email }}">
+                <input type="hidden" id="input_sdt" name="display_sdt" value="{{ optional($u)->sdt }}">
+                <input type="hidden" id="input_diachigiaohang" name="display_diachigiaohang" value="{{ optional($u)->diachi }}">
             </div>
 
             {{-- ==================== GIỎ HÀNG ==================== --}}
@@ -410,13 +417,13 @@
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label class="fw-semibold">Họ tên</label>
-                            <input type="text" class="form-control" id="modal_hoten" value="{{ $u->hoten }}" required>
+                            <input type="text" class="form-control" id="modal_hoten" value="{{ optional($u)->hoten }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label class="fw-semibold">Email</label>
-                            <input type="email" class="form-control" id="modal_email" value="{{ $u->email }}" required>
+                            <input type="email" class="form-control" id="modal_email" value="{{ optional($u)->email }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -425,13 +432,13 @@
                             <input type="text" class="form-control" id="modal_sdt"
                                 pattern="^0\d{9}$" minlength="10" maxlength="10"
                                 title="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số"
-                                value="0{{ $u->sdt }}" required>
+                                value="{{ $u ? '0'.$u->sdt : '' }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label class="fw-semibold">Địa chỉ (số nhà, đường)</label>
-                            <input type="text" class="form-control" id="modal_diachi" value="{{ $u->diachi }}" required>
+                            <input type="text" class="form-control" id="modal_diachi" value="{{ optional($u)->diachi }}" required>
                         </div>
                     </div>
                     <div class="col-12">
