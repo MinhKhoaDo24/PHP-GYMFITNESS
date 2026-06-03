@@ -535,7 +535,7 @@ function getShippingFee(city) {
 
 // Cập nhật tổng tiền hiển thị (không có promo)
 function refreshTotal() {
-    const city    = $('#thanh_pho_select').val();
+    const city = $('#guest_thanh_pho').length ? $('#guest_thanh_pho').val() : $('#thanh_pho_select').val();
     const fee     = getShippingFee(city);
     const newTotal = originalTotal + fee;
 
@@ -604,7 +604,7 @@ $('#saveInfoBtn').on('click', function() {
 
 // Áp mã KM
 $('#apply_promo').click(function() {
-    const city = $('#thanh_pho_select').val();
+    const city = $('#guest_thanh_pho').length ? $('#guest_thanh_pho').val() : $('#thanh_pho_select').val();
     $.post("{{ route('promo.apply') }}", {
         promo_code: $('#promo_code').val().trim(),
         thanh_pho : city,
@@ -645,12 +645,28 @@ $('#apply_promo').click(function() {
     });
 });
 
+// Thay đổi tỉnh/thành của khách guest
+$(document).on('change', '#guest_thanh_pho', function() {
+    const city = $(this).val();
+    $('#thanh_pho_hidden').val(city);
+    refreshTotal();
+    const fee = getShippingFee(city);
+    $('#display_phi_ship').text(fee.toLocaleString('vi-VN') + 'đ');
+    $('#display_thanh_pho').text(city);
+});
+
 // Khởi tạo khi load trang
 $(document).ready(function () {
     // Tự động chọn tỉnh/thành phố trong select khớp với giá trị ẩn ban đầu (STORE_CITY)
     const initialCity = $('#thanh_pho_hidden').val() ? $('#thanh_pho_hidden').val().trim().toLowerCase() : '';
     if (initialCity) {
         $('#thanh_pho_select option').each(function() {
+            if ($(this).val().trim().toLowerCase() === initialCity) {
+                $(this).prop('selected', true);
+                return false; // break loop
+            }
+        });
+        $('#guest_thanh_pho option').each(function() {
             if ($(this).val().trim().toLowerCase() === initialCity) {
                 $(this).prop('selected', true);
                 return false; // break loop
@@ -666,16 +682,16 @@ $('#vnpay').click(() => $('#checkout').attr('action', "{{ route('vnpay') }}"));
 
 // Ràng buộc kiểm tra trước khi đặt hàng (Không cho đặt hàng khi sđt/địa chỉ trống hoặc sđt = 0)
 $('#checkout').submit(function(e) {
-    const sdt = $('#input_sdt').val().trim();
-    const diachi = $('#input_diachigiaohang').val().trim();
-    const hoten = $('#input_hoten').val().trim();
+    const sdt = $('#guest_sdt').length ? $('#guest_sdt').val().trim() : $('#input_sdt').val().trim();
+    const diachi = $('#guest_diachi').length ? $('#guest_diachi').val().trim() : $('#input_diachigiaohang').val().trim();
+    const hoten = $('#guest_hoten').length ? $('#guest_hoten').val().trim() : $('#input_hoten').val().trim();
 
     if (!diachi || !sdt || sdt === '0' || sdt === '') {
         e.preventDefault();
         Swal.fire({
             icon: 'warning',
             title: 'Thiếu thông tin giao hàng!',
-            text: 'Vui lòng bấm nút "Cập nhật thông tin" để cập nhật Số điện thoại và Địa chỉ giao hàng trước khi đặt hàng.',
+            text: 'Vui lòng điền đầy đủ thông tin nhận hàng trước khi đặt hàng.',
             confirmButtonText: 'Đồng ý'
         });
         return false;

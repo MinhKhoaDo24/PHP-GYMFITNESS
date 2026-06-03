@@ -257,7 +257,7 @@
 
 <section class="top-sell-section">
     <div class="container">
-        <h2 class="top-sell-title">Top sản phẩm bán chạy!</h2>
+        <h2 class="top-sell-title">Sản phẩm nổi bật!</h2>
 
         <div class="top-sell-grid">
             @foreach($sanphams as $sp)
@@ -618,66 +618,10 @@
 
 
 
-<div id="cart-toast" class="cart-toast">
-    <span class="cart-toast__text"></span>
-</div>
 @push('scripts')
 <script src="{{ asset('frontend/script/about.js') }}"></script>
 @endpush
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const buttons = document.querySelectorAll('.js-add-to-cart');
-    const toast = document.getElementById('cart-toast');
-    const toastText = toast.querySelector('.cart-toast__text');
-    let toastTimeout;
-
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            const url = this.dataset.url;
-            if (!url) return;
-
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                }
-            })
-            .then(async res => {
-                // Tránh lỗi JSON.parse khi Laravel trả HTML
-                let data = {};
-                try {
-                    data = await res.json();
-                } catch (e) {
-                    data = { message: "Đã thêm sản phẩm vào giỏ hàng!" };
-                }
-                showCartToast(data.message);
-
-                // Cập nhật số lượng giỏ hàng ở header
-                if (data.cart_count !== undefined) {
-                    const badge = document.querySelector('.navbar__shoppingCart span');
-                    if (badge) {
-                        badge.textContent = data.cart_count;
-                    }
-                }
-            })
-            .catch(() => {
-                showCartToast('Có lỗi xảy ra, vui lòng thử lại!');
-            });
-        });
-    });
-
-    function showCartToast(message) {
-        toastText.textContent = message;
-        toast.classList.add('show');
-
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-});
 
 
 
@@ -754,8 +698,18 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
 </script>
 
 <script>
-    // Set ngày kết thúc
-    const endDate = new Date("2025-12-31 23:59:59").getTime();
+    // Tự động thiết lập ngày kết thúc là Chủ Nhật tuần này lúc 23:59:59
+    function getNextSundayEnd() {
+        const now = new Date();
+        const resultDate = new Date(now);
+        const day = now.getDay();
+        const diff = (day === 0 ? 0 : 7 - day); // Số ngày đến Chủ Nhật
+        resultDate.setDate(now.getDate() + diff);
+        resultDate.setHours(23, 59, 59, 999);
+        return resultDate.getTime();
+    }
+
+    const endDate = getNextSundayEnd();
 
     const timer = setInterval(function () {
         const now = new Date().getTime();
@@ -776,11 +730,13 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        // Hiển thị
-        document.getElementById("days").innerHTML = days;
-        document.getElementById("hours").innerHTML = hours;
-        document.getElementById("minutes").innerHTML = minutes;
-        document.getElementById("seconds").innerHTML = seconds;
+        // Hiển thị dạng 2 chữ số
+        const formatNumber = num => String(num).padStart(2, '0');
+
+        document.getElementById("days").innerHTML = formatNumber(days);
+        document.getElementById("hours").innerHTML = formatNumber(hours);
+        document.getElementById("minutes").innerHTML = formatNumber(minutes);
+        document.getElementById("seconds").innerHTML = formatNumber(seconds);
 
     }, 1000);
 
