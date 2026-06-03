@@ -11,7 +11,7 @@ use App\Http\Controllers\{
     CommentController,
     ForgotPasswordController,
     ProfileController,
-    GoiTapController
+    GoiTapController,
     EmailVerificationController
 };
 use App\Repositories\DangkidichvuRepository;;
@@ -56,6 +56,7 @@ Route::get('/ajax/filter-products', [HomeController::class, 'ajaxFilter'])->name
 
 
 //Dichvu
+Route::get('/cac-goi-dich-vu', [HomeController::class, 'cacGoiDichVu'])->name('services.packages');
 Route::get('/dich-vu', [HomeController::class, 'dichvu1'])->name('services.main');
 Route::get('/dich-vu/gym', [HomeController::class, 'dichvu1'])->name('services.gym');
 Route::get('/dich-vu/yoga', [HomeController::class, 'dichvu2'])->name('services.yoga');
@@ -92,10 +93,10 @@ Route::prefix('/')->middleware('orderview')->group(function () {
 Route::post('/donhang/cancel/{id}', [OrderViewController::class, 'cancel'])->name('donhang.cancel');
 
 
-Route::get('/login', [AuthController::class, 'index']);
-Route::post('/login', [AuthController::class, 'loginPost'])->name('login');
-Route::get('/register', [AuthController::class, 'register']);
-Route::post('/register', [AuthController::class, 'registerPost'])->name('register');
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
 Route::post('/kiem-tra-email', [AuthController::class, 'kiemTraEmail'])->name('kiemtra.email');
 
 Route::delete('/logout', [AuthController::class, 'logout'])->name('logout');
