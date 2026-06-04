@@ -78,13 +78,15 @@ class PtController extends Controller
                               ->firstOrFail();
 
         $request->validate([
-            'ngay_ghi_nhan' => 'required|date',
+            'ngay_ghi_nhan' => 'required|date|before_or_equal:today',
             'chieu_cao' => 'required|numeric|min:50|max:300',
             'can_nang' => 'required|numeric|min:20|max:300',
             'luong_mo' => 'nullable|numeric|min:0|max:100',
             'luong_nuoc' => 'nullable|numeric|min:0|max:100',
             'thoi_quen_song' => 'nullable|string',
             'nhac_nho' => 'nullable|string'
+        ], [
+            'ngay_ghi_nhan.before_or_equal' => 'Ngày ghi nhận không được vượt quá ngày hiện tại.'
         ]);
 
         // Tính BMI = Cân nặng (kg) / (Chiều cao (m) * Chiều cao (m))

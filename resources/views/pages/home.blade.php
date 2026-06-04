@@ -18,7 +18,7 @@
             <p class="slogan">Chinh phục vóc dáng, bứt phá giới hạn!</p>
             <div class="banner-buttons">
                 <a href="{{ route('dang-ky-tap-thu') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Đăng ký tập thử</a>
-                <a href="{{ route('services.gym') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
+                <a href="{{ route('services.packages') }}" class="cta-button highlighted rect-button animated" style="color: #fff;">Xem Dịch Vụ</a>
             </div>
         </div>  
     </div>
@@ -404,7 +404,7 @@
         </div>
 
         <div class="view-more-container">
-            <a href="#" class="view-more-btn">Xem tất cả →</a>
+            <a href="{{ route('viewAll', ['category' => 1]) }}" class="view-more-btn">Xem tất cả →</a>
         </div>
     </div>
 </section>
@@ -418,7 +418,7 @@
             <h2 class="section-badge">ÁO TẬP</h2>
 
             <div class="top-sell-grid">
-                @foreach($alls->where('id_danhmuc', 1)->take(8) as $sp)
+                @foreach($alls->where('id_danhmuc', 2)->take(8) as $sp)
                     <div class="sale-item" data-href="{{ route('detail', ['id' => $sp->id_sanpham]) }}">
 
                         <!-- IMAGE -->
@@ -478,7 +478,7 @@
             </div>
 
             <div class="view-more-container">
-                <a href="#" class="view-more-btn">Xem tất cả →</a>
+                <a href="{{ route('viewAll', ['category' => 2]) }}" class="view-more-btn">Xem tất cả →</a>
             </div>
         </div>
     </section>

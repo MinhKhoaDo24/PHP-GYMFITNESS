@@ -17,7 +17,7 @@
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Ngày ghi nhận <span class="text-danger">*</span></label>
-                        <input type="date" name="ngay_ghi_nhan" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" name="ngay_ghi_nhan" class="form-control" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
                     </div>
                 </div>
 
