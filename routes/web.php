@@ -11,8 +11,10 @@ use App\Http\Controllers\{
     CommentController,
     ForgotPasswordController,
     ProfileController,
-    GoiTapController,
-    EmailVerificationController
+    EmailVerificationController,
+    ChatController,
+    GuestCheckoutController,
+    GoiTapController
 };
 use App\Repositories\DangkidichvuRepository;
 use App\Http\Controllers\MailController;
@@ -36,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/goi-tap/register/{slug}', [\App\Http\Controllers\GoiTapController::class, 'registerShow'])->name('goitap.register.show');
     Route::post('/goi-tap/register/{slug}', [\App\Http\Controllers\GoiTapController::class, 'registerStore'])->name('goitap.register.store');
     Route::get('/goi-tap/lich-su', [\App\Http\Controllers\GoiTapController::class, 'history'])->name('goitap.history');
+    
+    // Khách hàng xem chỉ số sức khỏe
+    Route::get('/chi-so-suc-khoe', [\App\Http\Controllers\GoiTapController::class, 'chiSoSucKhoe'])->name('chiso.index');
 });
 
 //Frontend
@@ -54,8 +59,11 @@ Route::post('/dang-ky-tap-thu', [DangkidichvuController::class, 'store'])->name(
 
 Route::get('/ajax/filter-products', [HomeController::class, 'ajaxFilter'])->name('ajax.filter.products');
 
+// Health Station Results
+Route::get('/health-station/results', [HomeController::class, 'healthStationResults'])->name('health.results');
 
 //Dichvu
+Route::get('/cac-goi-dich-vu', [HomeController::class, 'cacGoiDichVu'])->name('services.packages');
 Route::get('/dich-vu', [HomeController::class, 'dichvu1'])->name('services.main');
 Route::get('/dich-vu/gym', [HomeController::class, 'dichvu1'])->name('services.gym');
 Route::get('/dich-vu/yoga', [HomeController::class, 'dichvu2'])->name('services.yoga');
@@ -91,11 +99,16 @@ Route::prefix('/')->middleware('orderview')->group(function () {
 });
 Route::post('/donhang/cancel/{id}', [OrderViewController::class, 'cancel'])->name('donhang.cancel');
 
+// Guest Checkout - Tra cứu đơn hàng cho khách vãng lai
+Route::get('/tra-cuu-don-hang', [GuestCheckoutController::class, 'showSearchForm'])->name('guest.search-form');
+Route::post('/tra-cuu-don-hang', [GuestCheckoutController::class, 'search'])->name('guest.search');
+Route::get('/tra-cuu-don-hang/{id}', [GuestCheckoutController::class, 'showDetail'])->name('donhang.guest-detail');
 
-Route::get('/login', [AuthController::class, 'index']);
-Route::post('/login', [AuthController::class, 'loginPost'])->name('login');
-Route::get('/register', [AuthController::class, 'register']);
-Route::post('/register', [AuthController::class, 'registerPost'])->name('register');
+
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post');
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
 Route::post('/kiem-tra-email', [AuthController::class, 'kiemTraEmail'])->name('kiemtra.email');
 
 Route::delete('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -203,4 +216,41 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/admin/goitap/dangky', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyList'])->name('admin.goitap.dangky');
     Route::post('/admin/goitap/dangky/kichhoat/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyKichHoat'])->name('admin.goitap.dangky.kichhoat');
 
+    // Quản lý đánh giá (Admin)
+    Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
+    Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
+
 });
+
+// PT Routes
+Route::prefix('/pt')->middleware('pt.login')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\pt\PtController::class, 'dashboard'])->name('pt.dashboard');
+    Route::get('/khach-hang', [\App\Http\Controllers\pt\PtController::class, 'khachHang'])->name('pt.khachhang');
+    Route::get('/chi-so/{dangky_id}', [\App\Http\Controllers\pt\PtController::class, 'chiSoIndex'])->name('pt.chiso.index');
+    Route::get('/chi-so/{dangky_id}/them', [\App\Http\Controllers\pt\PtController::class, 'chiSoCreate'])->name('pt.chiso.create');
+    Route::post('/chi-so/{dangky_id}', [\App\Http\Controllers\pt\PtController::class, 'chiSoStore'])->name('pt.chiso.store');
+    Route::get('/thong-bao', [\App\Http\Controllers\pt\PtController::class, 'thongBao'])->name('pt.thongbao');
+    Route::post('/thong-bao/{id}/doc', [\App\Http\Controllers\pt\PtController::class, 'docThongBao'])->name('pt.thongbao.doc');
+});
+
+// ─── CHAT SYSTEM ────────────────────────────────────────────────────────────
+Route::middleware('auth')->prefix('/chat')->group(function () {
+    Route::get('/', [ChatController::class, 'getConversations'])->name('chat.conversations');
+    Route::post('/start', [ChatController::class, 'startConversation'])->name('chat.start');
+    Route::get('/{id}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::post('/{id}/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::post('/{id}/accept', [ChatController::class, 'acceptConversation'])->name('chat.accept');
+    Route::post('/{id}/close', [ChatController::class, 'closeConversation'])->name('chat.close');
+});
+// ────────────────────────────────────────────────────────────────────────────
+
+// ─── TELEGRAM WEBHOOK ────────────────────────────────────────────────────────
+// Nhận lệnh /reply từ admin trong Telegram
+Route::post('/telegram/webhook', function (\Illuminate\Http\Request $request) {
+    $update = $request->all();
+    if (!empty($update)) {
+        app(\App\Services\TelegramService::class)->handleWebhook($update);
+    }
+    return response()->json(['ok' => true]);
+})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('telegram.webhook');
+// ─────────────────────────────────────────────────────────────────────────────

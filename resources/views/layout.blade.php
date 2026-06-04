@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Chào mừng đến với Rise Fitness & Yoga</title>
     <link rel="shortcut icon" type="image/png" href="/frontend/img/LOGO.png" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -81,7 +82,7 @@
     </style>
 </head>
 
-<body style="margin: 0; min-height: 100vh; display: flex; flex-direction: column;">
+<body style="margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;">
 
     <header>
         <div class="header">
@@ -117,9 +118,10 @@
                                 @endforeach
                             </ul>
                         </li>
-                        <li class="dropdown {{ request()->is('dich-vu/*') ? 'active' : '' }}">
+                        <li class="dropdown {{ request()->is('dich-vu/*') || request()->is('cac-goi-dich-vu') ? 'active' : '' }}">
                             <a href="javascript:void(0)" class="hover-a">Dịch vụ </a>
                             <ul class="dropdown-menu dropdown-services">
+                                <li><a href="{{ route('services.packages') }}">Các gói dịch vụ</a></li>
                                 <li><a href="{{ route('services.gym') }}">Gym</a></li>
                                 <li><a href="{{ route('services.yoga') }}">Yoga</a></li>
                                 <li><a href="{{ route('services.swimming') }}">Swimming</a></li>
@@ -131,13 +133,16 @@
                             <a href="{{ route('dang-ky-tap-thu') }}" class="hover-a">Đăng ký tập thử</a>
                         </li>
 
+                        @if(Auth::check())
                         <li class="{{ request()->is('donhang') ? 'active' : '' }}">
                             <a href="{{ URL::to('/donhang') }}" class="hover-a">Đơn hàng</a>
                         </li>
-
-                        @if (Auth::check())
                         <li class="{{ request()->is('goi-tap/lich-su') ? 'active' : '' }}">
                             <a href="{{ route('goitap.history') }}" class="hover-a">Gói tập của tôi</a>
+                        </li>
+                        @else
+                        <li class="{{ request()->is('tra-cuu-don-hang') ? 'active' : '' }}">
+                            <a href="{{ URL::to('/tra-cuu-don-hang') }}" class="hover-a">Tra cứu đơn hàng</a>
                         </li>
                         @endif
                     </ul>
@@ -150,9 +155,20 @@
                     </form>
                 </div>
 
-                <div class="navbar__right">
+                <div class="navbar__right" style="display: flex; align-items: center;">
                     @if (Auth::check())
-                    <div class="user-info">
+                    <div class="notifications" style="margin-right: 15px; position: relative;">
+                        @php
+                            $unreadCount = \App\Models\Thongbao::where('id_nguoidung', Auth::user()->id_nd)->where('da_doc', 0)->count();
+                        @endphp
+                        <a href="{{ route('goitap.history') }}" class="hover-effect text-white" style="text-decoration: none;">
+                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+                            @if($unreadCount > 0)
+                                <span class="badge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; position: absolute; top: -8px; right: -8px;">{{ $unreadCount }}</span>
+                            @endif
+                        </a>
+                    </div>
+                    <div class="user-info" style="margin-right: 15px;">
                         <a href="{{ route('profile.show') }}" class="hover-effect user-name-link">
                             {{ Auth::user()->hoten }} <i class="fas fa-user-circle"></i>
                         </a>
@@ -239,7 +255,11 @@
                         <ul>
                             <li><a href="{{ URL::to('/services') }}">Giới thiệu</a></li>
                             <li><a href="{{ URL::to('/test') }}">Dịch vụ</a></li>
+                            @if(Auth::check())
                             <li><a href="{{ URL::to('/donhang') }}">Đơn hàng</a></li>
+                            @else
+                            <li><a href="{{ URL::to('/tra-cuu-don-hang') }}">Tra cứu đơn hàng</a></li>
+                            @endif
                             <li><a href="{{ URL::to('/viewAll') }}">Sản phẩm</a></li>
                         </ul>
                         <ul>
@@ -303,6 +323,7 @@
             e.stopPropagation();
 
             const coSize = btn.getAttribute('data-co-size');
+            const isSupplement = btn.getAttribute('data-is-supplement') === '1';
             const productId = btn.getAttribute('data-id') || btn.getAttribute('data-url').split('/').pop();
             const productName = btn.getAttribute('data-name') || 'Sản phẩm';
 
@@ -318,13 +339,16 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Thông báo',
-                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình kích thước!'
+                        text: 'Sản phẩm này tạm thời hết hàng hoặc chưa cấu hình!'
                     });
                     return;
                 }
 
+                const labelText = isSupplement ? 'Vui lòng chọn hương vị / quy cách của sản phẩm:' : 'Vui lòng chọn kích thước (Size) của sản phẩm:';
+                const validationText = isSupplement ? 'Vui lòng chọn hương vị / quy cách trước khi thêm vào giỏ hàng!' : 'Vui lòng chọn một size trước khi thêm vào giỏ hàng!';
+
                 let sizesHtml = `
-                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">Vui lòng chọn kích thước (Size) của sản phẩm:</p>
+                    <p style="font-size: 15px; color: #555; margin-bottom: 20px;">${labelText}</p>
                     <div class="swal-size-options" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 15px; margin-bottom: 15px;">
                 `;
 
@@ -376,7 +400,7 @@
                     preConfirm: () => {
                         const active = Swal.getHtmlContainer().querySelector('.swal-size-btn.active');
                         if (!active) {
-                            Swal.showValidationMessage('Vui lòng chọn một size trước khi thêm vào giỏ hàng!');
+                            Swal.showValidationMessage(validationText);
                             return false;
                         }
                         return active.getAttribute('data-id');
@@ -562,6 +586,9 @@
         }
     </script>
     <script src="/frontend/script/script.js"></script>
+
+    <!-- Chat Bubble Component -->
+    @include('components.chat-bubble')
 </body>
 
 </html>

@@ -206,11 +206,11 @@
     align-items: center;
     gap: 7px;
     font-size: 12px;
-    color: rgba(255,255,255,0.4);
+    color: #9ca3af;
     transition: color 0.25s;
 }
 .rule.pass { color: #4ade80; }
-.rule.fail { color: rgba(255,255,255,0.35); }
+.rule.fail { color: #9ca3af; }
 .rule-icon { font-size: 13px; }
 .rule.pass .rule-icon { color: #4ade80; }
 .rule.pass .rule-icon::before { content: '\f058'; } /* fa-circle-check */

@@ -11,6 +11,7 @@ use App\Models\Khuyenmai;
 use App\Models\ChitietDonhang;
 use App\Models\SanPham;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\CartHelper;
 
 class OrderViewController extends Controller
 {
@@ -206,7 +207,7 @@ class OrderViewController extends Controller
         session()->forget('promo');
 
         // Set the session cart to the new cart list
-        session()->put('cart', $cart);
+        CartHelper::saveCart($cart);
 
         if (!empty($warningMessages)) {
             $warningText = implode(' ', $warningMessages);

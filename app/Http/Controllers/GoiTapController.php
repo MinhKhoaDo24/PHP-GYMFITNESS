@@ -93,4 +93,18 @@ class GoiTapController extends Controller
 
         return view('pages.goitap_history', compact('registrations', 'danhmucs'));
     }
+
+    public function chiSoSucKhoe()
+    {
+        $danhmucs = Danhmuc::all();
+        $user = Auth::user();
+
+        // Lấy tất cả chỉ số sức khỏe của khách hàng này
+        $chiSos = \App\Models\ChiSoSucKhoe::with(['pt', 'dangKyGoiTap.packagePrice.goitap'])
+            ->where('id_khach_hang', $user->id_nd)
+            ->orderBy('ngay_ghi_nhan', 'desc')
+            ->get();
+
+        return view('pages.chiso_suc_khoe', compact('chiSos', 'danhmucs'));
+    }
 }

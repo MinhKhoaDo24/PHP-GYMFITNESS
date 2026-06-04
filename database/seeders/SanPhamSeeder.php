@@ -27,7 +27,7 @@ class SanphamSeeder extends Seeder
                 'soluong' => 100,
                 'noi_bat' => 1,
                 'trang_thai' => 1,
-                'id_danhmuc' => 1,
+                'id_danhmuc' => 2,
                 'created_at' => $now, 'updated_at' => $now
             ],
             [
@@ -42,7 +42,7 @@ class SanphamSeeder extends Seeder
                 'soluong' => 80,
                 'noi_bat' => 0,
                 'trang_thai' => 1,
-                'id_danhmuc' => 1,
+                'id_danhmuc' => 2,
                 'created_at' => $now, 'updated_at' => $now
             ],
             [
@@ -104,7 +104,7 @@ class SanphamSeeder extends Seeder
                 'soluong' => 100,
                 'noi_bat' => 1,
                 'trang_thai' => 1,
-                'id_danhmuc' => 2,
+                'id_danhmuc' => 1,
                 'created_at' => $now, 'updated_at' => $now
             ],
             [
@@ -134,7 +134,7 @@ class SanphamSeeder extends Seeder
                 'soluong' => 85,
                 'noi_bat' => 0,
                 'trang_thai' => 1,
-                'id_danhmuc' => 2,
+                'id_danhmuc' => 1,
                 'created_at' => $now, 'updated_at' => $now
             ],
 

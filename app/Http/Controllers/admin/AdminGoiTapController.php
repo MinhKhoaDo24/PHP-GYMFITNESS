@@ -187,6 +187,28 @@ class AdminGoiTapController extends Controller
             'ngay_ket_thuc' => $now->copy()->addMonths($soThang)
         ]);
 
+        if ($dangKy->co_pt && $request->id_pt) {
+            $pt = NguoiDung::find($request->id_pt);
+            
+            // Thông báo cho PT
+            \App\Models\Thongbao::create([
+                'id_nguoidung' => $pt->id_nd,
+                'tieu_de' => 'Có khách hàng mới',
+                'noi_dung' => 'Bạn được phân công huấn luyện cho khách hàng ' . $dangKy->user->hoten . ' (' . $dangKy->user->sdt . ') - ' . $dangKy->packagePrice->goitap->ten_goi,
+                'loai' => 'phan_pt',
+                'link' => '/pt/khach-hang'
+            ]);
+
+            // Thông báo cho khách hàng
+            \App\Models\Thongbao::create([
+                'id_nguoidung' => $dangKy->id_nguoidung,
+                'tieu_de' => 'Đã phân công Huấn luyện viên',
+                'noi_dung' => 'Gói tập đã kích hoạt. PT phụ trách của bạn là ' . $pt->hoten . ' (SĐT: 0' . $pt->sdt . ').',
+                'loai' => 'kich_hoat',
+                'link' => '/goi-tap/lich-su'
+            ]);
+        }
+
         // Gửi mail kích hoạt thành công
         try {
             Mail::to($dangKy->user->email)->send(new KichHoatGoiTapMail($dangKy));

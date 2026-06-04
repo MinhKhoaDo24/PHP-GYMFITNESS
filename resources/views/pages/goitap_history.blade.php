@@ -159,6 +159,13 @@
                                 <span class="rf-badge-status badge-{{ $reg->trang_thai }}">
                                     {{ $statusLabels[$reg->trang_thai] ?? $reg->trang_thai }}
                                 </span>
+                                @if($reg->trang_thai == 'dang_tap' && $reg->co_pt)
+                                    <div class="mt-2">
+                                        <a href="{{ route('chiso.index') }}" class="btn btn-sm btn-outline-info" style="font-size: 11px; padding: 2px 8px; border-radius: 6px;">
+                                            <i class="bi bi-heart-pulse"></i> Xem chỉ số
+                                        </a>
+                                    </div>
+                                @endif
                             </td>
                             <td>
                                 @if($reg->co_pt)

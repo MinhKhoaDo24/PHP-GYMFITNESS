@@ -24,6 +24,9 @@ class AdminRepository implements IAdminRepository
 
             if ($user) {
                 Auth::login($user);
+                if ($user->id_phanquyen == 4) {
+                    return redirect('/pt/dashboard');
+                }
                 return redirect('/dashboard');
             }
             return back()->with('thongbao', 'Không tìm thấy tài khoản');
@@ -35,6 +38,10 @@ class AdminRepository implements IAdminRepository
         ];
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            if ($user->id_phanquyen == 4) {
+                return redirect('/pt/dashboard');
+            }
             return redirect('/dashboard');
         }
 
