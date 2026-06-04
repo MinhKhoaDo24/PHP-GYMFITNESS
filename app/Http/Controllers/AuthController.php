@@ -81,6 +81,16 @@ class AuthController extends Controller
      */
     public function loginPost(Request $request)
     {
+        // ── Track số lần đăng nhập sai ─────────────────────────────────────
+        $email = $request->email;
+        $loginAttempts = session("login_attempts.{$email}", 0);
+
+        // Nếu đã sai 5 lần, chặn đăng nhập
+        if ($loginAttempts >= 5) {
+            return redirect()->route('password.forgot')
+                ->with('error', 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để tiếp tục!');
+        }
+
         // ── 1. Validate reCAPTCHA ──────────────────────────────────────────
         $recaptchaToken = $request->input('g-recaptcha-response');
 
@@ -105,7 +115,19 @@ class AuthController extends Controller
 
         // Nếu không tìm thấy user
         if (!$user) {
-            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+            // Tăng counter
+            session(["login_attempts.{$email}" => $loginAttempts + 1]);
+
+            $newAttempts = $loginAttempts + 1;
+            if ($newAttempts >= 5) {
+                session(["login_attempts.{$email}" => $newAttempts]);
+                return redirect()->route('password.forgot')
+                    ->with('error', 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để tiếp tục!');
+            } elseif ($newAttempts >= 3) {
+                return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu! (Lần nhập sai: ' . $newAttempts . '/5 - Lần thứ 5 sẽ bị khóa)');
+            } else {
+                return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+            }
         }
 
         // Nếu trạng thái = 0 -> báo lỗi
@@ -120,6 +142,9 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($credentials, false)) {
+            // Reset counter khi đăng nhập thành công
+            session()->forget("login_attempts.{$email}");
+            
             $request->session()->regenerate();
 
             // ── Khôi phục giỏ hàng từ CSDL (Không gộp giỏ hàng khách) ───────
@@ -154,7 +179,18 @@ class AuthController extends Controller
                 ->withCookie(Cookie::queued('remember_token') ?? cookie()->forget('remember_token'));
         }
 
-        return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+        // Tăng counter khi đăng nhập thất bại
+        $newAttempts = $loginAttempts + 1;
+        session(["login_attempts.{$email}" => $newAttempts]);
+
+        if ($newAttempts >= 5) {
+            return redirect()->route('password.forgot')
+                ->with('error', 'Bạn đã nhập sai mật khẩu 5 lần. Vui lòng đặt lại mật khẩu để tiếp tục!');
+        } elseif ($newAttempts >= 3) {
+            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu! (Lần nhập sai: ' . $newAttempts . '/5 - Lần thứ 5 sẽ bị khóa)');
+        } else {
+            return back()->with('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+        }
     }
 
     public function logout(Request $request)

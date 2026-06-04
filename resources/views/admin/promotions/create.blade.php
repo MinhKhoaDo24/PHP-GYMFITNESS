@@ -96,8 +96,18 @@
         Tạo khuyến mãi mới
     </div>
 
-    <form action="{{ route('khuyenmai.store') }}" method="POST">
+    <form action="{{ route('khuyenmai.store') }}" method="POST" id="form-create-promo">
         @csrf
+
+        @if($errors->any())
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         <div class="grid-2">
 
@@ -117,6 +127,14 @@
                     <option value="percent">% Phần trăm</option>
                     <option value="money">Giảm tiền</option>
                     <option value="freeship">Miễn phí vận chuyển</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="promo-label">Yêu cầu đăng nhập <span style='color: red;'>*</span></label>
+                <select name="yeu_cau_dang_nhap" class="form-select promo-select">
+                    <option value="0">Không (Mã công khai)</option>
+                    <option value="1">Có (Mã độc quyền)</option>
                 </select>
             </div>
 
@@ -148,6 +166,9 @@
             <div>
                 <label class="promo-label">Ngày kết thúc <span style='color: red;'>*</span></label>
                 <input type="date" name="ngay_ket_thuc" class="form-control promo-input" required>
+                <div id="date-error-create" style="display:none; color:#dc3545; font-size:13px; margin-top:4px;">
+                    <i class="bi bi-exclamation-circle"></i> Ngày kết thúc phải sau ngày bắt đầu.
+                </div>
             </div>
 
         </div>
@@ -164,16 +185,6 @@
 
     </form>
 
-    @if($errors->any())
-    <div class="alert alert-danger mt-2">
-        <ul>
-            @foreach($errors->all() as $err)
-                <li>{{ $err }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
-
 </div>
 
 <script>
@@ -189,6 +200,41 @@ function toggleGiaTriCreate(val) {
 
 document.getElementById('kieu_giam_create').addEventListener('change', function() {
     toggleGiaTriCreate(this.value);
+});
+
+// --- Validation ngày ---
+const batDauInput  = document.querySelector('input[name="ngay_bat_dau"]');
+const ketThucInput = document.querySelector('input[name="ngay_ket_thuc"]');
+const dateError    = document.getElementById('date-error-create');
+
+function validateDates() {
+    if (batDauInput.value && ketThucInput.value) {
+        if (ketThucInput.value <= batDauInput.value) {
+            dateError.style.display = 'block';
+            ketThucInput.setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu.');
+            return false;
+        } else {
+            dateError.style.display = 'none';
+            ketThucInput.setCustomValidity('');
+        }
+    }
+    return true;
+}
+
+batDauInput.addEventListener('change', function() {
+    // Cập nhật min cho ngày kết thúc
+    if (this.value) {
+        ketThucInput.min = this.value;
+    }
+    validateDates();
+});
+
+ketThucInput.addEventListener('change', validateDates);
+
+document.getElementById('form-create-promo').addEventListener('submit', function(e) {
+    if (!validateDates()) {
+        e.preventDefault();
+    }
 });
 </script>
 

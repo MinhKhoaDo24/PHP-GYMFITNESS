@@ -218,7 +218,7 @@
                 <option value="">Tất cả trạng thái</option>
                 <option value="1" {{ request('status')==1 ? 'selected' : '' }}>Hoạt động</option>
                 <option value="0" {{ request('status')==='0' ? 'selected' : '' }}>Tạm ngưng</option>
-                <option value="0" {{ request('status')==='2' ? 'selected' : '' }}>Hết hạn</option>
+                <option value="2" {{ request('status')==='2' ? 'selected' : '' }}>Hết hạn</option>
             </select>
         </form>
 
@@ -254,7 +254,14 @@
             <td class="fw-bold">{{ $km->ten_khuyenmai }}</td>
 
             {{-- CODE --}}
-            <td><span class="promo-code">{{ $km->ma_code }}</span></td>
+            <td>
+                <span class="promo-code">{{ $km->ma_code }}</span>
+                @if($km->yeu_cau_dang_nhap == 1)
+                    <div class="mt-1"><span class="badge bg-dark"><i class="bi bi-lock-fill"></i> Cần đăng nhập</span></div>
+                @else
+                    <div class="mt-1"><span class="badge bg-success"><i class="bi bi-globe"></i> Công khai</span></div>
+                @endif
+            </td>
 
             {{-- GIẢM GIÁ --}}
             <td>
@@ -284,12 +291,12 @@
 
             {{-- TRẠNG THÁI --}}
             <td>
-                @if($km->trang_thai == 2)
-                    <span class="status-badge expired">Hết hạn</span>
-                @elseif($km->trang_thai == 1)
-                    <span class="status-badge active">Hoạt động</span>
-                @else
+                @if($km->trang_thai == 0)
                     <span class="status-badge paused">Tạm dừng</span>
+                @elseif($km->ngay_ket_thuc && $km->ngay_ket_thuc < now())
+                    <span class="status-badge expired">Hết hạn</span>
+                @else
+                    <span class="status-badge active">Hoạt động</span>
                 @endif
             </td>
 
@@ -301,15 +308,15 @@
                 <a href="{{ route('khuyenmai.edit', $km->id_khuyenmai) }}" 
                     class="btn-action edit">Sửa</a>
 
-                {{-- KIỂM TRA HẾT HẠN --}}
-                @if($km->trang_thai == 2 || $km->trang_thai == 0)
+                {{-- KIỂM TRA HẾT HẠN HOẶC TẠM DỪNG --}}
+                @if($km->trang_thai == 0 || ($km->ngay_ket_thuc && $km->ngay_ket_thuc < now()))
 
-                    {{-- Hết hạn → nút vô hiệu bị khóa --}}
+                    {{-- Khóa nút Vô hiệu --}}
                     <button class="btn-action delete" disabled style="opacity:0.6; cursor:not-allowed;">
                         Vô hiệu
                     </button>
 
-                @elseif($km->trang_thai == 1)
+                @else
                     {{-- Đang hoạt động → cho phép vô hiệu --}}
                     <form class="d-inline delete-form"
                         action="{{ route('khuyenmai.destroy', $km->id_khuyenmai) }}"
@@ -322,10 +329,6 @@
                             Vô hiệu
                         </button>
                     </form>
-
-
-
-                @else
                 @endif
 
             </td>

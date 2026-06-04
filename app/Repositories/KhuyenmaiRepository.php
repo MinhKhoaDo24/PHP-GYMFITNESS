@@ -13,7 +13,13 @@ class KhuyenmaiRepository implements IKhuyenmaiRepository
     public function filter($status = null, $search = null, $type = null)
     {
         return Khuyenmai::when($status !== null, function ($q) use ($status) {
-                return $q->where('trang_thai', $status);
+                if ($status == '2') {
+                    return $q->where('trang_thai', 1)->where('ngay_ket_thuc', '<', Carbon::now());
+                } elseif ($status == '1') {
+                    return $q->where('trang_thai', 1)->where('ngay_ket_thuc', '>=', Carbon::now());
+                } else {
+                    return $q->where('trang_thai', $status);
+                }
             })
             ->when($search, function ($q) use ($search) {
                 return $q->where(function ($x) use ($search) {
@@ -35,7 +41,13 @@ class KhuyenmaiRepository implements IKhuyenmaiRepository
     public function all($status = null)
     {
         return Khuyenmai::when($status !== null, function ($query) use ($status) {
-                return $query->where('trang_thai', $status);
+                if ($status == '2') {
+                    return $query->where('trang_thai', 1)->where('ngay_ket_thuc', '<', Carbon::now());
+                } elseif ($status == '1') {
+                    return $query->where('trang_thai', 1)->where('ngay_ket_thuc', '>=', Carbon::now());
+                } else {
+                    return $query->where('trang_thai', $status);
+                }
             })
             ->orderBy('id_khuyenmai', 'DESC')
             ->get();

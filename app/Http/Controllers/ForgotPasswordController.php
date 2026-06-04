@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\NguoiDung;
+use Illuminate\Validation\Rules\Password;
 
 class ForgotPasswordController extends Controller
 {
@@ -51,7 +52,23 @@ class ForgotPasswordController extends Controller
     public function resetPassword(Request $request) {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:6|confirmed'
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(6)
+                    ->mixedCase()   // cần cả chữ hoa và chữ thường
+                    ->numbers()     // cần ít nhất 1 chữ số
+                    ->symbols(),    // cần ít nhất 1 ký tự đặc biệt
+            ]
+        ], [
+            'email.required'     => 'Vui lòng nhập email',
+            'email.email'        => 'Email không hợp lệ',
+            'password.required'  => 'Vui lòng nhập mật khẩu',
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp',
+            'password.min'       => 'Mật khẩu phải có ít nhất 6 ký tự',
+            'password.mixed'     => 'Mật khẩu phải chứa cả chữ hoa (A-Z) và chữ thường (a-z)',
+            'password.numbers'   => 'Mật khẩu phải chứa ít nhất 1 chữ số (0-9)',
+            'password.symbols'   => 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*)',
         ]);
 
         $reset = DB::table('password_resets')

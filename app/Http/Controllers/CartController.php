@@ -961,6 +961,14 @@ if ($isFreeship) {
             ]);
         }
 
+        // Kiểm tra yêu cầu đăng nhập
+        if ($promo->yeu_cau_dang_nhap == 1 && !Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng đăng nhập để sử dụng mã ưu đãi này!',
+            ]);
+        }
+
         // Kiểm tra ngày áp dụng
         $today = now();
         if (($promo->ngay_bat_dau && $today < $promo->ngay_bat_dau) ||

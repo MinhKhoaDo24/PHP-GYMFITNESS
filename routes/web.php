@@ -14,9 +14,9 @@ use App\Http\Controllers\{
     EmailVerificationController,
     ChatController,
     GuestCheckoutController,
-    GoiTapController,
+    GoiTapController
 };
-use App\Repositories\DangkidichvuRepository;;
+use App\Repositories\DangkidichvuRepository;
 use App\Http\Controllers\MailController;
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +59,8 @@ Route::post('/dang-ky-tap-thu', [DangkidichvuController::class, 'store'])->name(
 
 Route::get('/ajax/filter-products', [HomeController::class, 'ajaxFilter'])->name('ajax.filter.products');
 
+// Health Station Results
+Route::get('/health-station/results', [HomeController::class, 'healthStationResults'])->name('health.results');
 
 //Dichvu
 Route::get('/cac-goi-dich-vu', [HomeController::class, 'cacGoiDichVu'])->name('services.packages');
@@ -230,3 +232,25 @@ Route::prefix('/pt')->middleware('pt.login')->group(function () {
     Route::get('/thong-bao', [\App\Http\Controllers\pt\PtController::class, 'thongBao'])->name('pt.thongbao');
     Route::post('/thong-bao/{id}/doc', [\App\Http\Controllers\pt\PtController::class, 'docThongBao'])->name('pt.thongbao.doc');
 });
+
+// ─── CHAT SYSTEM ────────────────────────────────────────────────────────────
+Route::middleware('auth')->prefix('/chat')->group(function () {
+    Route::get('/', [ChatController::class, 'getConversations'])->name('chat.conversations');
+    Route::post('/start', [ChatController::class, 'startConversation'])->name('chat.start');
+    Route::get('/{id}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::post('/{id}/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::post('/{id}/accept', [ChatController::class, 'acceptConversation'])->name('chat.accept');
+    Route::post('/{id}/close', [ChatController::class, 'closeConversation'])->name('chat.close');
+});
+// ────────────────────────────────────────────────────────────────────────────
+
+// ─── TELEGRAM WEBHOOK ────────────────────────────────────────────────────────
+// Nhận lệnh /reply từ admin trong Telegram
+Route::post('/telegram/webhook', function (\Illuminate\Http\Request $request) {
+    $update = $request->all();
+    if (!empty($update)) {
+        app(\App\Services\TelegramService::class)->handleWebhook($update);
+    }
+    return response()->json(['ok' => true]);
+})->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('telegram.webhook');
+// ─────────────────────────────────────────────────────────────────────────────
