@@ -154,9 +154,20 @@
                     </form>
                 </div>
 
-                <div class="navbar__right">
+                <div class="navbar__right" style="display: flex; align-items: center;">
                     @if (Auth::check())
-                    <div class="user-info">
+                    <div class="notifications" style="margin-right: 15px; position: relative;">
+                        @php
+                            $unreadCount = \App\Models\Thongbao::where('id_nguoidung', Auth::user()->id_nd)->where('da_doc', 0)->count();
+                        @endphp
+                        <a href="{{ route('goitap.history') }}" class="hover-effect text-white" style="text-decoration: none;">
+                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+                            @if($unreadCount > 0)
+                                <span class="badge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; position: absolute; top: -8px; right: -8px;">{{ $unreadCount }}</span>
+                            @endif
+                        </a>
+                    </div>
+                    <div class="user-info" style="margin-right: 15px;">
                         <a href="{{ route('profile.show') }}" class="hover-effect user-name-link">
                             {{ Auth::user()->hoten }} <i class="fas fa-user-circle"></i>
                         </a>

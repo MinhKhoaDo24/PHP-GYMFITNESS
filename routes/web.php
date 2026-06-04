@@ -38,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/goi-tap/register/{slug}', [\App\Http\Controllers\GoiTapController::class, 'registerShow'])->name('goitap.register.show');
     Route::post('/goi-tap/register/{slug}', [\App\Http\Controllers\GoiTapController::class, 'registerStore'])->name('goitap.register.store');
     Route::get('/goi-tap/lich-su', [\App\Http\Controllers\GoiTapController::class, 'history'])->name('goitap.history');
+    
+    // Khách hàng xem chỉ số sức khỏe
+    Route::get('/chi-so-suc-khoe', [\App\Http\Controllers\GoiTapController::class, 'chiSoSucKhoe'])->name('chiso.index');
 });
 
 //Frontend
@@ -215,4 +218,15 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
     Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
 
+});
+
+// PT Routes
+Route::prefix('/pt')->middleware('pt.login')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\pt\PtController::class, 'dashboard'])->name('pt.dashboard');
+    Route::get('/khach-hang', [\App\Http\Controllers\pt\PtController::class, 'khachHang'])->name('pt.khachhang');
+    Route::get('/chi-so/{dangky_id}', [\App\Http\Controllers\pt\PtController::class, 'chiSoIndex'])->name('pt.chiso.index');
+    Route::get('/chi-so/{dangky_id}/them', [\App\Http\Controllers\pt\PtController::class, 'chiSoCreate'])->name('pt.chiso.create');
+    Route::post('/chi-so/{dangky_id}', [\App\Http\Controllers\pt\PtController::class, 'chiSoStore'])->name('pt.chiso.store');
+    Route::get('/thong-bao', [\App\Http\Controllers\pt\PtController::class, 'thongBao'])->name('pt.thongbao');
+    Route::post('/thong-bao/{id}/doc', [\App\Http\Controllers\pt\PtController::class, 'docThongBao'])->name('pt.thongbao.doc');
 });
