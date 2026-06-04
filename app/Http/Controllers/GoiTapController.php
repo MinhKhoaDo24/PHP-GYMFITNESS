@@ -88,6 +88,12 @@ class GoiTapController extends Controller
         $user = Auth::user();
         $today = today();
 
+        // 0. Tự động quét gói hết hạn
+        DangKyGoiTap::where('id_nguoidung', $user->id_nd)
+            ->where('trang_thai', 'dang_tap')
+            ->where('ngay_ket_thuc', '<', $today)
+            ->update(['trang_thai' => 'het_han']);
+
         // 1. Tự động chuyển các gói tập sang 'bao_luu' nếu đã đến ngày bắt đầu bảo lưu
         $pendingStarts = \App\Models\YeuCauBaoLuu::where('id_khachhang', $user->id_nd)
             ->where('trang_thai', 'da_duyet')

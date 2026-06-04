@@ -9,6 +9,7 @@
         <div class="d-flex gap-2">
             <a href="{{ route('admin.goitap.dangky') }}" class="btn btn-sm btn-outline-secondary {{ !request('trang_thai') ? 'active' : '' }}">Tất cả</a>
             <a href="{{ route('admin.goitap.dangky', ['trang_thai' => 'cho_thanh_toan']) }}" class="btn btn-sm btn-outline-warning {{ request('trang_thai') == 'cho_thanh_toan' ? 'active' : '' }}">Chờ thanh toán</a>
+            <a href="{{ route('admin.goitap.dangky', ['trang_thai' => 'cho_pt_xac_nhan']) }}" class="btn btn-sm btn-outline-primary {{ request('trang_thai') == 'cho_pt_xac_nhan' ? 'active' : '' }}">Chờ xác nhận</a>
             <a href="{{ route('admin.goitap.dangky', ['trang_thai' => 'dang_tap']) }}" class="btn btn-sm btn-outline-success {{ request('trang_thai') == 'dang_tap' ? 'active' : '' }}">Đang hoạt động</a>
         </div>
     </div>
@@ -59,6 +60,16 @@
                                         <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
                                             Chờ phân PT
                                         </span>
+                                        @if($dangKy->rejected_pts && count($dangKy->rejected_pts) > 0)
+                                            @php
+                                                $rejectedNames = $pts->whereIn('id_nd', $dangKy->rejected_pts)->pluck('hoten')->toArray();
+                                            @endphp
+                                            @if(count($rejectedNames) > 0)
+                                                <div class="text-danger small mt-1" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-x-circle-fill"></i> Từ chối: {{ implode(', ', $rejectedNames) }}
+                                                </div>
+                                            @endif
+                                        @endif
                                     @endif
                                 @else
                                     <span class="text-muted small">Không kèm PT</span>
@@ -69,6 +80,7 @@
                                     $statusBadges = [
                                         'cho_thanh_toan' => 'bg-warning text-dark',
                                         'da_thanh_toan' => 'bg-info text-white',
+                                        'cho_pt_xac_nhan' => 'bg-primary text-white',
                                         'dang_tap' => 'bg-success text-white',
                                         'het_han' => 'bg-danger text-white',
                                         'da_huy' => 'bg-secondary text-white'
@@ -76,6 +88,7 @@
                                     $statusLabels = [
                                         'cho_thanh_toan' => 'Chờ thanh toán',
                                         'da_thanh_toan' => 'Đã thanh toán',
+                                        'cho_pt_xac_nhan' => 'Chờ xác nhận',
                                         'dang_tap' => 'Đang hoạt động',
                                         'het_han' => 'Đã hết hạn',
                                         'da_huy' => 'Đã hủy'
@@ -91,6 +104,11 @@
                                         <div><span class="text-muted">Từ:</span> {{ $dangKy->ngay_bat_dau->format('d/m/Y') }}</div>
                                         <div><span class="text-muted">Đến:</span> {{ $dangKy->ngay_ket_thuc->format('d/m/Y') }}</div>
                                     </div>
+                                @elseif($dangKy->trang_thai == 'cho_pt_xac_nhan')
+                                    <div class="small text-primary">
+                                        <div><span class="text-muted">Giao PT:</span> {{ $dangKy->updated_at->format('d/m/Y H:i') }}</div>
+                                        <div class="fw-bold">({{ $dangKy->updated_at->diffForHumans() }})</div>
+                                    </div>
                                 @else
                                     <span class="text-muted small">Chờ kích hoạt</span>
                                 @endif
@@ -102,12 +120,28 @@
                                         data-id="{{ $dangKy->id }}"
                                         data-code="{{ $dangKy->ma_dang_ky }}"
                                         data-copt="{{ $dangKy->co_pt }}"
+                                        data-rejected-pts="{{ json_encode($dangKy->rejected_pts ?? []) }}"
                                         data-bs-toggle="modal" 
                                         data-bs-target="#approveModal">
                                     <i class="bi bi-shield-check"></i> Duyệt & Kích Hoạt
                                 </button>
+                                @elseif($dangKy->trang_thai == 'da_thanh_toan')
+                                <button type="button" 
+                                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 btn-approve"
+                                        data-id="{{ $dangKy->id }}"
+                                        data-code="{{ $dangKy->ma_dang_ky }}"
+                                        data-copt="{{ $dangKy->co_pt }}"
+                                        data-rejected-pts="{{ json_encode($dangKy->rejected_pts ?? []) }}"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#approveModal">
+                                    <i class="bi bi-person-fill-gear"></i> Phân công PT
+                                </button>
+                                @elseif($dangKy->trang_thai == 'cho_pt_xac_nhan')
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2 fw-semibold">
+                                    <i class="bi bi-hourglass-split"></i> Chờ xác nhận
+                                </span>
                                 @else
-                                <span class="text-muted small">Đã duyệt</span>
+                                <span class="text-muted small">Đã kích hoạt</span>
                                 @endif
                             </td>
                         </tr>
@@ -145,7 +179,7 @@
                         <select name="id_pt" class="form-select" id="ptSelect" required>
                             <option value="">-- Chọn Huấn luyện viên (PT) --</option>
                             @foreach($pts as $pt)
-                            <option value="{{ $pt->id_nd }}">{{ $pt->hoten }} (SĐT: 0{{ $pt->sdt }})</option>
+                            <option value="{{ $pt->id_nd }}">{{ $pt->hoten }} (Đang dạy: {{ $pt->pt_registrations_count }} | SĐT: 0{{ $pt->sdt }})</option>
                             @endforeach
                         </select>
                         <div class="form-text text-warning mt-1"><i class="bi bi-info-circle"></i> Khách hàng đăng ký gói tập có kèm PT. Vui lòng phân công PT trước khi kích hoạt.</div>
@@ -178,6 +212,13 @@
                 const id = this.dataset.id;
                 const code = this.dataset.code;
                 const coPT = parseInt(this.dataset.copt);
+                const rejectedPts = JSON.parse(this.dataset.rejectedPts || '[]');
+
+                // Reset all options in ptSelect
+                Array.from(ptSelect.options).forEach(opt => {
+                    opt.disabled = false;
+                    opt.classList.remove('d-none');
+                });
 
                 // Cập nhật Action của Form
                 approveForm.action = `/admin/goitap/dangky/kichhoat/${id}`;
@@ -187,6 +228,14 @@
                     ptAssignSection.classList.remove('d-none');
                     noPtSection.classList.add('d-none');
                     ptSelect.setAttribute('required', 'required');
+
+                    // Filter out rejected PTs
+                    Array.from(ptSelect.options).forEach(opt => {
+                        if (opt.value && rejectedPts.includes(parseInt(opt.value))) {
+                            opt.disabled = true;
+                            opt.classList.add('d-none');
+                        }
+                    });
                 } else {
                     ptAssignSection.classList.add('d-none');
                     noPtSection.classList.remove('d-none');

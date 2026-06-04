@@ -9,6 +9,7 @@
         <div class="d-flex gap-2">
             <a href="{{ route('admin.yeucau-doipt.index') }}" class="btn btn-sm btn-outline-secondary {{ !request('trang_thai') ? 'active' : '' }}">Tất cả</a>
             <a href="{{ route('admin.yeucau-doipt.index', ['trang_thai' => 'cho_xu_ly']) }}" class="btn btn-sm btn-outline-warning {{ request('trang_thai') == 'cho_xu_ly' ? 'active' : '' }}">Chờ xử lý</a>
+            <a href="{{ route('admin.yeucau-doipt.index', ['trang_thai' => 'cho_pt_moi_xac_nhan']) }}" class="btn btn-sm btn-outline-info {{ request('trang_thai') == 'cho_pt_moi_xac_nhan' ? 'active' : '' }}">Chờ xác nhận</a>
             <a href="{{ route('admin.yeucau-doipt.index', ['trang_thai' => 'da_duyet']) }}" class="btn btn-sm btn-outline-success {{ request('trang_thai') == 'da_duyet' ? 'active' : '' }}">Đã duyệt</a>
             <a href="{{ route('admin.yeucau-doipt.index', ['trang_thai' => 'tu_choi']) }}" class="btn btn-sm btn-outline-danger {{ request('trang_thai') == 'tu_choi' ? 'active' : '' }}">Từ chối</a>
         </div>
@@ -68,11 +69,13 @@
                                 @php
                                     $statusBadges = [
                                         'cho_xu_ly' => 'bg-warning text-dark',
+                                        'cho_pt_moi_xac_nhan' => 'bg-info text-white',
                                         'da_duyet' => 'bg-success text-white',
                                         'tu_choi' => 'bg-danger text-white'
                                     ];
                                     $statusLabels = [
                                         'cho_xu_ly' => 'Chờ xử lý',
+                                        'cho_pt_moi_xac_nhan' => 'Chờ xác nhận',
                                         'da_duyet' => 'Đã đổi PT',
                                         'tu_choi' => 'Từ chối'
                                     ];
@@ -82,7 +85,7 @@
                                 </span>
                             </td>
                             <td>
-                                @if($req->trang_thai == 'da_duyet' && $req->ptMoi)
+                                @if(($req->trang_thai == 'da_duyet' || $req->trang_thai == 'cho_pt_moi_xac_nhan') && $req->ptMoi)
                                     <div class="small">
                                         <span class="text-muted">PT Mới:</span> <strong>{{ $req->ptMoi->hoten }}</strong>
                                     </div>
@@ -103,6 +106,8 @@
                                             data-code="{{ $req->dangKyGoiTap->ma_dang_ky }}"
                                             data-client="{{ $req->khachHang->hoten }}"
                                             data-ptcu="{{ $req->ptCu->hoten }}"
+                                            data-ptcu-id="{{ $req->id_pt_cu }}"
+                                            data-rejected-pts="{{ json_encode($req->dangKyGoiTap->rejected_pts ?? []) }}"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#acceptPTModal">
                                         <i class="bi bi-check-circle"></i> Duyệt đổi
@@ -116,6 +121,8 @@
                                         <i class="bi bi-x-circle"></i> Từ chối
                                     </button>
                                 </div>
+                                @elseif($req->trang_thai == 'cho_pt_moi_xac_nhan')
+                                <span class="text-info small">Chờ xác nhận</span>
                                 @else
                                 <span class="text-muted small">Đã xử lý</span>
                                 @endif
@@ -161,10 +168,10 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">Chọn Huấn luyện viên mới <span class="text-danger">*</span></label>
-                        <select name="id_pt_moi" class="form-select" required>
+                        <select name="id_pt_moi" class="form-select" id="ptMoiSelect" required>
                             <option value="">-- Chọn Huấn luyện viên mới --</option>
                             @foreach($pts as $pt)
-                            <option value="{{ $pt->id_nd }}">{{ $pt->hoten }} (SĐT: 0{{ $pt->sdt }})</option>
+                            <option value="{{ $pt->id_nd }}">{{ $pt->hoten }} (Đang dạy: {{ $pt->pt_registrations_count }} | SĐT: 0{{ $pt->sdt }})</option>
                             @endforeach
                         </select>
                         <div class="form-text text-muted mt-1">Hệ thống sẽ cập nhật PT phụ trách mới cho học viên này và gửi thông báo cho các bên.</div>
@@ -213,6 +220,7 @@
         const modalPTRegCode = document.getElementById('modalPTRegCode');
         const modalPTClient = document.getElementById('modalPTClient');
         const modalPTPtCu = document.getElementById('modalPTPtCu');
+        const ptMoiSelect = document.getElementById('ptMoiSelect');
 
         btnAccepts.forEach(btn => {
             btn.addEventListener('click', function () {
@@ -220,11 +228,30 @@
                 const code = this.dataset.code;
                 const client = this.dataset.client;
                 const ptcu = this.dataset.ptcu;
+                const ptcuId = this.dataset.ptcuId;
+                const rejectedPts = JSON.parse(this.dataset.rejectedPts || '[]');
 
                 acceptPTForm.action = `/admin/yeucau-doipt/${id}/accept`;
                 modalPTRegCode.innerText = code;
                 modalPTClient.innerText = client;
                 modalPTPtCu.innerText = ptcu;
+
+                // Reset all options
+                Array.from(ptMoiSelect.options).forEach(opt => {
+                    opt.disabled = false;
+                    opt.classList.remove('d-none');
+                });
+
+                // Filter options: exclude old PT and rejected PTs
+                Array.from(ptMoiSelect.options).forEach(opt => {
+                    if (opt.value) {
+                        const optVal = parseInt(opt.value);
+                        if (optVal === parseInt(ptcuId) || rejectedPts.includes(optVal)) {
+                            opt.disabled = true;
+                            opt.classList.add('d-none');
+                        }
+                    }
+                });
             });
         });
 

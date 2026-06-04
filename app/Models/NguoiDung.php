@@ -64,4 +64,9 @@ class NguoiDung extends Authenticatable
     {
         return $this->belongsTo(Phanquyen::class, 'id_phanquyen', 'id_phanquyen');
     }
+
+    public function ptRegistrations()
+    {
+        return $this->hasMany(DangKyGoiTap::class, 'id_pt', 'id_nd');
+    }
 }

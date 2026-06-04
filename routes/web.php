@@ -232,6 +232,11 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::post('/admin/yeucau-doipt/{id}/accept', [\App\Http\Controllers\admin\AdminRequestController::class, 'acceptPTRequest'])->name('admin.yeucau-doipt.accept');
     Route::post('/admin/yeucau-doipt/{id}/reject', [\App\Http\Controllers\admin\AdminRequestController::class, 'rejectPTRequest'])->name('admin.yeucau-doipt.reject');
 
+    // Thông báo Admin
+    Route::get('/admin/thong-bao', [\App\Http\Controllers\admin\AdminController::class, 'thongBao'])->name('admin.thongbao');
+    Route::post('/admin/thong-bao/{id}/doc', [\App\Http\Controllers\admin\AdminController::class, 'docThongBao'])->name('admin.thongbao.doc');
+    Route::post('/admin/thong-bao/doc-het', [\App\Http\Controllers\admin\AdminController::class, 'docHetThongBao'])->name('admin.thongbao.doc-het');
+
     // Quản lý bảo lưu gói tập (Admin)
     Route::get('/admin/yeucau-baoluu', [\App\Http\Controllers\admin\AdminRequestController::class, 'listBaoLuuRequests'])->name('admin.yeucau-baoluu.index');
     Route::post('/admin/yeucau-baoluu/{id}/approve', [\App\Http\Controllers\admin\AdminRequestController::class, 'approveBaoLuu'])->name('admin.yeucau-baoluu.approve');
@@ -249,6 +254,10 @@ Route::prefix('/pt')->middleware('pt.login')->group(function () {
     Route::post('/chi-so/{dangky_id}', [\App\Http\Controllers\pt\PtController::class, 'chiSoStore'])->name('pt.chiso.store');
     Route::get('/thong-bao', [\App\Http\Controllers\pt\PtController::class, 'thongBao'])->name('pt.thongbao');
     Route::post('/thong-bao/{id}/doc', [\App\Http\Controllers\pt\PtController::class, 'docThongBao'])->name('pt.thongbao.doc');
+    Route::post('/goitap/{id}/accept', [\App\Http\Controllers\pt\PtController::class, 'acceptAssignment'])->name('pt.goitap.accept');
+    Route::post('/goitap/{id}/reject', [\App\Http\Controllers\pt\PtController::class, 'rejectAssignment'])->name('pt.goitap.reject');
+    Route::post('/goitap/{id}/accept-doi-pt', [\App\Http\Controllers\pt\PtController::class, 'acceptDoiPtAssignment'])->name('pt.goitap.accept-doi-pt');
+    Route::post('/goitap/{id}/reject-doi-pt', [\App\Http\Controllers\pt\PtController::class, 'rejectDoiPtAssignment'])->name('pt.goitap.reject-doi-pt');
 });
 
 // ─── CHAT SYSTEM ────────────────────────────────────────────────────────────

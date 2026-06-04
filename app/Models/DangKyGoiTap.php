@@ -14,16 +14,19 @@ class DangKyGoiTap extends Model
         'id_goitap_gia',
         'co_pt',
         'id_pt',
+        'id_pt_moi_tam',
         'tong_tien',
         'trang_thai',
         'ngay_bat_dau',
         'ngay_ket_thuc',
-        'ghi_chu'
+        'ghi_chu',
+        'rejected_pts'
     ];
 
     protected $casts = [
         'ngay_bat_dau' => 'date',
         'ngay_ket_thuc' => 'date',
+        'rejected_pts' => 'array',
     ];
 
     public function user()
@@ -34,6 +37,11 @@ class DangKyGoiTap extends Model
     public function pt()
     {
         return $this->belongsTo(NguoiDung::class, 'id_pt', 'id_nd');
+    }
+
+    public function ptMoiTam()
+    {
+        return $this->belongsTo(NguoiDung::class, 'id_pt_moi_tam', 'id_nd');
     }
 
     public function packagePrice()

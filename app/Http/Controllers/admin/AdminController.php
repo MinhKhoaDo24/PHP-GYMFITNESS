@@ -148,6 +148,34 @@ class AdminController extends Controller
         ]);
     }
 
+    public function thongBao()
+    {
+        $thongbaos = \App\Models\Thongbao::where('id_nguoidung', auth()->user()->id_nd)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+            
+        // Đánh dấu tất cả là đã đọc khi vào trang này
+        \App\Models\Thongbao::where('id_nguoidung', auth()->user()->id_nd)
+            ->where('da_doc', 0)
+            ->update(['da_doc' => 1]);
 
+        return view('admin.thongbao.index', compact('thongbaos'));
+    }
 
+    public function docThongBao($id)
+    {
+        $thongbao = \App\Models\Thongbao::where('id_nguoidung', auth()->user()->id_nd)->findOrFail($id);
+        $thongbao->update(['da_doc' => 1]);
+        
+        return response()->json(['success' => true]);
+    }
+
+    public function docHetThongBao()
+    {
+        \App\Models\Thongbao::where('id_nguoidung', auth()->user()->id_nd)
+            ->where('da_doc', 0)
+            ->update(['da_doc' => 1]);
+            
+        return response()->json(['success' => true]);
+    }
 }

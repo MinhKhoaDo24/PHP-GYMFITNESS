@@ -31,7 +31,12 @@ class AdminRequestController extends Controller
         }
 
         $requests = $query->orderBy('id', 'desc')->paginate(10);
-        $pts = NguoiDung::where('id_phanquyen', 4)->get(); // Danh sách PT
+        $pts = NguoiDung::where('id_phanquyen', 4)
+            ->where('trang_thai', 1)
+            ->withCount(['ptRegistrations' => function ($query) {
+                $query->where('trang_thai', 'dang_tap');
+            }])
+            ->get(); // Danh sách PT đang hoạt động và số lượng học viên đang dạy
 
         return view('admin.pt_change.index', compact('requests', 'pts'));
     }
@@ -47,7 +52,7 @@ class AdminRequestController extends Controller
 
         $yeuCau = YeuCauDoiPT::findOrFail($id);
 
-        if ($yeuCau->trang_thai !== 'cho_xu_ly') {
+        if (!in_array($yeuCau->trang_thai, ['cho_xu_ly'])) {
             return back()->with('error', 'Yêu cầu này đã được xử lý trước đó.');
         }
 
@@ -55,47 +60,38 @@ class AdminRequestController extends Controller
         $ptMoi = NguoiDung::findOrFail($request->id_pt_moi);
         $ptCu = NguoiDung::find($yeuCau->id_pt_cu);
 
-        // Cập nhật đăng ký gói tập
+        // ✅ Kịch bản A: Học viên vẫn tập với PT cũ (id_pt không đổi, trang_thai không đổi)
+        // Chỉ lưu PT mới vào id_pt_moi_tam để chờ PT mới xác nhận
         $dangKy->update([
-            'id_pt' => $ptMoi->id_nd
+            'id_pt_moi_tam' => $ptMoi->id_nd,
+            // id_pt và trang_thai giữ nguyên → học viên không gián đoạn
         ]);
 
-        // Cập nhật yêu cầu đổi PT
+        // Cập nhật yêu cầu đổi PT sang trạng thái chờ PT mới xác nhận
         $yeuCau->update([
             'id_pt_moi' => $ptMoi->id_nd,
-            'trang_thai' => 'da_duyet'
+            'trang_thai' => 'cho_pt_moi_xac_nhan'
         ]);
 
-        // 1. Thông báo cho Khách hàng
+        // 1. Thông báo cho Khách hàng: yêu cầu đang được xử lý
         Thongbao::create([
             'id_nguoidung' => $yeuCau->id_khachhang,
-            'tieu_de' => 'Yêu cầu đổi PT thành công',
-            'noi_dung' => 'Yêu cầu đổi PT của bạn đã được duyệt. PT mới của bạn là ' . $ptMoi->hoten . ' (SĐT: 0' . $ptMoi->sdt . ').',
+            'tieu_de' => 'Yêu cầu đổi PT đang được xử lý',
+            'noi_dung' => 'Yêu cầu đổi PT của bạn đang được Admin xử lý. Bạn vẫn tiếp tục tập luyện với ' . ($ptCu ? $ptCu->hoten : 'PT hiện tại') . ' trong thời gian này.',
             'loai' => 'kich_hoat',
             'link' => '/goi-tap/lich-su'
         ]);
 
-        // 2. Thông báo cho PT mới
+        // 2. Thông báo cho PT mới: lời mời tiếp nhận đổi PT
         Thongbao::create([
             'id_nguoidung' => $ptMoi->id_nd,
-            'tieu_de' => 'Được phân công học viên mới (đổi PT)',
-            'noi_dung' => 'Bạn được phân công phụ trách học viên ' . $yeuCau->khachHang->hoten . ' thế cho PT cũ ' . ($ptCu ? $ptCu->hoten : 'chưa có') . '.',
+            'tieu_de' => 'Lời mời tiếp nhận học viên đổi PT',
+            'noi_dung' => 'Bạn được mời tiếp nhận học viên ' . $yeuCau->khachHang->hoten . ' hiện đang học với PT ' . ($ptCu ? $ptCu->hoten : 'chưa có') . '. Học viên sẽ chuyển sang bạn sau khi bạn xác nhận. Vui lòng vào trang Quản lý Khách Hàng để đồng ý hoặc từ chối.',
             'loai' => 'phan_pt',
             'link' => '/pt/khach-hang'
         ]);
 
-        // 3. Thông báo cho PT cũ
-        if ($ptCu) {
-            Thongbao::create([
-                'id_nguoidung' => $ptCu->id_nd,
-                'tieu_de' => 'Thay đổi học viên phụ trách',
-                'noi_dung' => 'Học viên ' . $yeuCau->khachHang->hoten . ' đã được đổi sang PT khác phụ trách.',
-                'loai' => 'phan_pt',
-                'link' => '/pt/khach-hang'
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Phê duyệt đổi Huấn luyện viên thành công!');
+        return redirect()->back()->with('success', 'Đã gửi lời mời đến PT ' . $ptMoi->hoten . '. Học viên vẫn tiếp tục tập với PT cũ trong lúc chờ xác nhận.');
     }
 
     public function rejectPTRequest(Request $request, $id)
