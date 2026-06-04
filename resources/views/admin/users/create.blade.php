@@ -112,11 +112,12 @@
                        placeholder="example@gmail.com" required>
             </div>
 
-            <!-- Mật khẩu -->
-            <div>
-                <label class="promo-label">Mật khẩu <span style="color:red">*</span></label>
-                <input type="password" name="password" class="form-control promo-input"
-                       placeholder="Nhập mật khẩu" required>
+            <!-- Thông báo mật khẩu -->
+            <div style="grid-column: 1 / -1;">
+                <div style="background: #f0fdfa; border: 1px solid #0d9488; border-radius: 10px; padding: 14px 18px; font-size: 14px; color: #0f766e;">
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    <strong>Bảo mật tự động:</strong> Hệ thống sẽ tự tạo mật khẩu ngẫu nhiên và gửi qua email cho nhân viên. Admin không cần và không thể xem mật khẩu.
+                </div>
             </div>
 
             <!-- SĐT -->

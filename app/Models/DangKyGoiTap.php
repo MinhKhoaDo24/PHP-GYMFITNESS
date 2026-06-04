@@ -40,4 +40,14 @@ class DangKyGoiTap extends Model
     {
         return $this->belongsTo(GoiTapGia::class, 'id_goitap_gia', 'id');
     }
+
+    public function yeuCauDoiPTs()
+    {
+        return $this->hasMany(YeuCauDoiPT::class, 'id_dangky');
+    }
+
+    public function yeuCauBaoLuus()
+    {
+        return $this->hasMany(YeuCauBaoLuu::class, 'id_dangky');
+    }
 }

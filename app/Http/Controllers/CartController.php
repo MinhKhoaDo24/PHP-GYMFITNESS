@@ -593,8 +593,7 @@ if ($isFreeship) {
                 $tienphaitra = max($tongtien - $tiengiam, 0) + $phi_ship;
             }
 
-            // Cập nhật lượt dùng mã KM
-            $km->increment('so_luot_da_dung');
+            // Bắt đầu transaction ở trong try catch của khối ghi bên dưới
         } else {
             // Không dùng mã KM: tiền phải trả = tiền hàng + phí ship theo địa chỉ
             $tiengiam = 0;
@@ -624,73 +623,87 @@ if ($isFreeship) {
             }
         }
 
-        // -----------------------------
-        // TẠO ĐƠN HÀNG
-        // -----------------------------
-        $diachi = $request->display_diachigiaohang;
-        $thanh_pho = $request->thanh_pho ?? env('STORE_CITY', 'Hà Nội');
-        $trimmedDiachi = mb_strtolower(trim($diachi));
-        $trimmedThanhPho = mb_strtolower(trim($thanh_pho));
-        $len = mb_strlen($trimmedThanhPho);
-        
-        if (mb_substr($trimmedDiachi, -$len) === $trimmedThanhPho) {
-            $diachi_cuoi = $diachi;
-        } else {
-            $diachi_cuoi = $diachi . ', ' . $thanh_pho;
-        }
-
-        $order = Dathang::create([
-            'tongtien'     => $tongtien,
-            'tiengiam'     => $tiengiam,
-            'tienphaitra'  => $tienphaitra,
-            'id_khuyenmai' => $id_km,
-            'phuongthucthanhtoan' => $request->redirect,
-            'diachigiaohang' => $diachi_cuoi,
-            'hoten'        => $request->display_hoten,
-            'email'        => $request->display_email,
-            'sdt'          => $request->display_sdt,
-            'ngaydathang'  => now(),
-            'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
-        ]);
-
-        // -----------------------------
-        // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
-        // -----------------------------
-        foreach ($cart as $item) {
-            $orderDetailName = $item['tensp'];
-            if (!empty($item['ten_size'])) {
-                $orderDetailName .= ' (Size: ' . $item['ten_size'] . ')';
+        // ----------------------------------------------------
+        // TẠO ĐƠN HÀNG & GHI CSDL (BỌC DATABASE TRANSACTION)
+        // ----------------------------------------------------
+        DB::beginTransaction();
+        try {
+            // Cập nhật lượt dùng mã KM nếu có
+            if ($id_km) {
+                $km->increment('so_luot_da_dung');
             }
 
-            ChitietDonhang::create([
-                'tensp'         => $orderDetailName,
-                'soluong'       => $item['quantity'],
-                'giamgia'       => $item['giamgia'],
-                'giatien'       => $item['giasp'] + ($item['gia_cong_them'] ?? 0),
-                'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
-                'id_sanpham'    => $item['id_sanpham'],
-                'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
+            $diachi = $request->display_diachigiaohang;
+            $thanh_pho = $request->thanh_pho ?? env('STORE_CITY', 'Hà Nội');
+            $trimmedDiachi = mb_strtolower(trim($diachi));
+            $trimmedThanhPho = mb_strtolower(trim($thanh_pho));
+            $len = mb_strlen($trimmedThanhPho);
+            
+            if (mb_substr($trimmedDiachi, -$len) === $trimmedThanhPho) {
+                $diachi_cuoi = $diachi;
+            } else {
+                $diachi_cuoi = $diachi . ', ' . $thanh_pho;
+            }
+
+            $order = Dathang::create([
+                'tongtien'     => $tongtien,
+                'tiengiam'     => $tiengiam,
+                'tienphaitra'  => $tienphaitra,
+                'id_khuyenmai' => $id_km,
+                'phuongthucthanhtoan' => $request->redirect,
+                'diachigiaohang' => $diachi_cuoi,
+                'hoten'        => $request->display_hoten,
+                'email'        => $request->display_email,
+                'sdt'          => $request->display_sdt,
+                'ngaydathang'  => now(),
+                'ngaygiaohang' => now()->addDays(4),
+                'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
             ]);
 
-            // Trừ tồn kho
-            $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
-            if ($sp) {
-                if ($sp->co_size == 1 && !empty($item['id_size'])) {
-                    $sizePivot = $sp->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
-                    if ($sizePivot) {
-                        $newSizeQty = max(0, $sizePivot->pivot->soluong - $item['quantity']);
-                        $sp->sizes()->updateExistingPivot($item['id_size'], ['soluong' => $newSizeQty]);
+            // -----------------------------
+            // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
+            // -----------------------------
+            foreach ($cart as $item) {
+                $orderDetailName = $item['tensp'];
+                if (!empty($item['ten_size'])) {
+                    $orderDetailName .= ' (Size: ' . $item['ten_size'] . ')';
+                }
+
+                ChitietDonhang::create([
+                    'tensp'         => $orderDetailName,
+                    'soluong'       => $item['quantity'],
+                    'giamgia'       => $item['giamgia'],
+                    'giatien'       => $item['giasp'] + ($item['gia_cong_them'] ?? 0),
+                    'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
+                    'id_sanpham'    => $item['id_sanpham'],
+                    'id_dathang'    => $order->id_dathang,
+                    'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
+                ]);
+
+                // Trừ tồn kho
+                $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
+                if ($sp) {
+                    if ($sp->co_size == 1 && !empty($item['id_size'])) {
+                        $sizePivot = $sp->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
+                        if ($sizePivot) {
+                            $newSizeQty = max(0, $sizePivot->pivot->soluong - $item['quantity']);
+                            $sp->sizes()->updateExistingPivot($item['id_size'], ['soluong' => $newSizeQty]);
+                        }
+                        // Tính lại tổng số lượng của sản phẩm
+                        $sp->soluong = $sp->sizes()->sum('sanpham_size.soluong');
+                        $sp->save();
+                    } else {
+                        $sp->soluong -= $item['quantity'];
+                        $sp->save();
                     }
-                    // Tính lại tổng số lượng của sản phẩm
-                    $sp->soluong = $sp->sizes()->sum('sanpham_size.soluong');
-                    $sp->save();
-                } else {
-                    $sp->soluong -= $item['quantity'];
-                    $sp->save();
                 }
             }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Lỗi đặt hàng (Transaction rollback): ' . $e->getMessage());
+            return back()->with('error', 'Đã xảy ra lỗi hệ thống khi đặt hàng. Vui lòng thử lại!');
         }
 
         // -----------------------------
@@ -796,7 +809,6 @@ if ($isFreeship) {
                 return back()->with('error', 'Mã khuyến mãi đã hết lượt sử dụng!');
             }
 
-            $km->increment('so_luot_da_dung');
         }
 
         // -----------------------------
@@ -822,61 +834,75 @@ if ($isFreeship) {
             }
         }
 
-        // -----------------------------
-        // TẠO ĐƠN HÀNG (TRẠNG THÁI: Chưa thanh toán)
-        // -----------------------------
-        $order = Dathang::create([
-            'tongtien'     => $tongtien,
-            'tiengiam'     => $tiengiam,
-            'tienphaitra'  => $tienphaitra,
-            'id_khuyenmai' => $id_km,
-            'phuongthucthanhtoan' => 'VNPAY',
-            'diachigiaohang' => $request->display_diachigiaohang,
-            'hoten'        => $request->display_hoten,
-            'email'        => $request->display_email,
-            'sdt'          => $request->display_sdt,
-            'ngaygiaohang' => now()->addDays(4),
-            'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
-            'trangthai'    => 'Chờ xác nhận',
-        ]);
-
-        // -----------------------------
-        // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
-        // -----------------------------
-        foreach ($cart as $item) {
-            $orderDetailName = $item['tensp'];
-            if (!empty($item['ten_size'])) {
-                $orderDetailName .= ' (Size: ' . $item['ten_size'] . ')';
+        // ----------------------------------------------------
+        // TẠO ĐƠN HÀNG & GHI CSDL (BỌC DATABASE TRANSACTION)
+        // ----------------------------------------------------
+        DB::beginTransaction();
+        try {
+            // Cập nhật lượt dùng mã KM nếu có
+            if ($id_km) {
+                $km->increment('so_luot_da_dung');
             }
 
-            ChitietDonhang::create([
-                'tensp'         => $orderDetailName,
-                'soluong'       => $item['quantity'],
-                'giamgia'       => $item['giamgia'],
-                'giatien'       => $item['giasp'] + ($item['gia_cong_them'] ?? 0),
-                'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
-                'id_sanpham'    => $item['id_sanpham'],
-                'id_dathang'    => $order->id_dathang,
-                'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
+            $order = Dathang::create([
+                'tongtien'     => $tongtien,
+                'tiengiam'     => $tiengiam,
+                'tienphaitra'  => $tienphaitra,
+                'id_khuyenmai' => $id_km,
+                'phuongthucthanhtoan' => 'VNPAY',
+                'diachigiaohang' => $request->display_diachigiaohang,
+                'hoten'        => $request->display_hoten,
+                'email'        => $request->display_email,
+                'sdt'          => $request->display_sdt,
+                'ngaygiaohang' => now()->addDays(4),
+                'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
+                'trangthai'    => 'Chờ xác nhận',
             ]);
 
-            // Trừ tồn kho
-            $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
-            if ($sp) {
-                if ($sp->co_size == 1 && !empty($item['id_size'])) {
-                    $sizePivot = $sp->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
-                    if ($sizePivot) {
-                        $newSizeQty = max(0, $sizePivot->pivot->soluong - $item['quantity']);
-                        $sp->sizes()->updateExistingPivot($item['id_size'], ['soluong' => $newSizeQty]);
+            // -----------------------------
+            // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
+            // -----------------------------
+            foreach ($cart as $item) {
+                $orderDetailName = $item['tensp'];
+                if (!empty($item['ten_size'])) {
+                    $orderDetailName .= ' (Size: ' . $item['ten_size'] . ')';
+                }
+
+                ChitietDonhang::create([
+                    'tensp'         => $orderDetailName,
+                    'soluong'       => $item['quantity'],
+                    'giamgia'       => $item['giamgia'],
+                    'giatien'       => $item['giasp'] + ($item['gia_cong_them'] ?? 0),
+                    'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
+                    'id_sanpham'    => $item['id_sanpham'],
+                    'id_dathang'    => $order->id_dathang,
+                    'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
+                ]);
+
+                // Trừ tồn kho
+                $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
+                if ($sp) {
+                    if ($sp->co_size == 1 && !empty($item['id_size'])) {
+                        $sizePivot = $sp->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
+                        if ($sizePivot) {
+                            $newSizeQty = max(0, $sizePivot->pivot->soluong - $item['quantity']);
+                            $sp->sizes()->updateExistingPivot($item['id_size'], ['soluong' => $newSizeQty]);
+                        }
+                        // Tính lại tổng số lượng của sản phẩm
+                        $sp->soluong = $sp->sizes()->sum('sanpham_size.soluong');
+                        $sp->save();
+                    } else {
+                        $sp->soluong -= $item['quantity'];
+                        $sp->save();
                     }
-                    // Tính lại tổng số lượng của sản phẩm
-                    $sp->soluong = $sp->sizes()->sum('sanpham_size.soluong');
-                    $sp->save();
-                } else {
-                    $sp->soluong -= $item['quantity'];
-                    $sp->save();
                 }
             }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Lỗi thanh toán VNPay (Transaction rollback): ' . $e->getMessage());
+            return back()->with('error', 'Đã xảy ra lỗi hệ thống khi chuẩn bị thanh toán VNPay. Vui lòng thử lại!');
         }
 
         // Xóa giỏ hàng khỏi session

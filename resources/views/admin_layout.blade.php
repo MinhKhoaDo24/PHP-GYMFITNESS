@@ -97,7 +97,7 @@
                 </li>
 
                 {{-- GÓI TẬP GYM --}}
-                <li class="sidebar-item {{ request()->is('admin/goitap*') ? 'active' : '' }}">
+                <li class="sidebar-item {{ request()->is('admin/goitap*') || request()->is('admin/yeucau-doipt*') || request()->is('admin/yeucau-baoluu*') ? 'active' : '' }}">
                     <a class="sidebar-link d-flex align-items-center"
                     data-bs-toggle="collapse"
                     href="#goitapMenu"
@@ -106,7 +106,7 @@
                     </a>
 
                     <ul id="goitapMenu"
-                        class="collapse list-unstyled ms-4 {{ request()->is('admin/goitap*') ? 'show' : '' }}">
+                        class="collapse list-unstyled ms-4 {{ request()->is('admin/goitap*') || request()->is('admin/yeucau-doipt*') || request()->is('admin/yeucau-baoluu*') ? 'show' : '' }}">
                         <li>
                             <a class="sidebar-link submenu-link {{ request()->routeIs('admin.goitap.index') ? 'active-sub' : '' }}"
                             href="{{ route('admin.goitap.index') }}">
@@ -116,7 +116,19 @@
                         <li>
                             <a class="sidebar-link submenu-link {{ request()->routeIs('admin.goitap.dangky') ? 'active-sub' : '' }}"
                             href="{{ route('admin.goitap.dangky') }}">
-                                Duyệt Gói tập
+                                Duyệt Đăng Ký
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sidebar-link submenu-link {{ request()->routeIs('admin.yeucau-doipt.index') ? 'active-sub' : '' }}"
+                            href="{{ route('admin.yeucau-doipt.index') }}">
+                                Duyệt Đổi PT
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sidebar-link submenu-link {{ request()->routeIs('admin.yeucau-baoluu.index') ? 'active-sub' : '' }}"
+                            href="{{ route('admin.yeucau-baoluu.index') }}">
+                                Duyệt Bảo Lưu
                             </a>
                         </li>
                     </ul>

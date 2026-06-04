@@ -8,6 +8,9 @@ use App\Models\Phanquyen;
 use App\Models\Nguoidung;
 use App\Http\Controllers\Controller;
 use App\Repositories\IUserRepository;
+use App\Mail\TaiKhoanNhanVienMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -67,15 +70,31 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'hoten' => 'required',
-            'email' => 'required|email|unique:nguoidung,email',
-            'password' => 'required|min:6',
-            'sdt' => 'nullable|numeric',
+            'hoten'        => 'required|string|max:255',
+            'email'        => 'required|email|unique:nguoidung,email',
+            'sdt'          => 'nullable|numeric',
+            'id_phanquyen' => 'required',
         ]);
 
-        $this->repo->create($request->all());
+        // Tự động tạo mật khẩu ngẫu nhiên 12 ký tự
+        $matKhauGoc = Str::password(12, true, true, false); // chữ hoa + chữ thường + số
 
-        return redirect()->route('users.index')->with('success', 'Thêm người dùng thành công!');
+        $data = $request->all();
+        $data['password'] = $matKhauGoc; // Repository sẽ bcrypt trước khi lưu
+
+        $user = $this->repo->create($data);
+
+        // Gửi email thông tin đăng nhập cho nhân viên/PT mới
+        try {
+            Mail::to($user->email)->send(
+                new TaiKhoanNhanVienMail($user->hoten, $user->email, $matKhauGoc)
+            );
+        } catch (\Exception $e) {
+            // Ghi log nếu email thất bại nhưng vẫn tiếp tục
+        }
+
+        return redirect()->route('users.index')
+            ->with('success', 'Tạo tài khoản thành công! Mật khẩu đã được gửi đến email ' . $user->email . '.');
     }
 
     public function edit($id)

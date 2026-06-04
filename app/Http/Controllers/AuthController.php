@@ -93,20 +93,28 @@ class AuthController extends Controller
 
         // ── 1. Validate reCAPTCHA ──────────────────────────────────────────
         $recaptchaToken = $request->input('g-recaptcha-response');
+        $recaptchaPassed = false;
 
-        if (empty($recaptchaToken)) {
-            return back()->with('error', 'Vui lòng xác nhận reCAPTCHA để tiếp tục!');
+        if (app()->environment('local') || env('APP_ENV') === 'local') {
+            $recaptchaPassed = true;
+        } else {
+            if (empty($recaptchaToken)) {
+                return back()->with('error', 'Vui lòng xác nhận reCAPTCHA để tiếp tục!');
+            }
+
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret'   => env('RECAPTCHA_SECRET_KEY'),
+                'response' => $recaptchaToken,
+                'remoteip' => $request->ip(),
+            ]);
+
+            $result = $response->json();
+            if (!empty($result['success']) && $result['success']) {
+                $recaptchaPassed = true;
+            }
         }
 
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret'   => env('RECAPTCHA_SECRET_KEY'),
-            'response' => $recaptchaToken,
-            'remoteip' => $request->ip(),
-        ]);
-
-        $result = $response->json();
-
-        if (empty($result['success']) || !$result['success']) {
+        if (!$recaptchaPassed) {
             return back()->with('error', 'Xác minh reCAPTCHA thất bại. Vui lòng thử lại!');
         }
 

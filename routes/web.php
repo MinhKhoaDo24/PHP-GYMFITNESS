@@ -41,6 +41,13 @@ Route::middleware(['auth'])->group(function () {
     
     // Khách hàng xem chỉ số sức khỏe
     Route::get('/chi-so-suc-khoe', [\App\Http\Controllers\GoiTapController::class, 'chiSoSucKhoe'])->name('chiso.index');
+
+    // Yêu cầu đổi PT
+    Route::post('/goi-tap/yeucau-doi-pt/{id}', [\App\Http\Controllers\GoiTapController::class, 'storeRequestPTChange'])->name('goitap.yeucau-doi-pt');
+    // Yêu cầu bảo lưu gói tập
+    Route::post('/goi-tap/baoluu/{id}', [\App\Http\Controllers\GoiTapController::class, 'storeRequestBaoLuu'])->name('goitap.baoluu');
+    // Kích hoạt lại gói tập sớm
+    Route::post('/goi-tap/baoluu/{id}/resume', [\App\Http\Controllers\GoiTapController::class, 'resumeGoiTap'])->name('goitap.baoluu.resume');
 });
 
 //Frontend
@@ -219,6 +226,17 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     // Quản lý đánh giá (Admin)
     Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
     Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
+
+    // Quản lý yêu cầu đổi PT (Admin)
+    Route::get('/admin/yeucau-doipt', [\App\Http\Controllers\admin\AdminRequestController::class, 'listPTRequests'])->name('admin.yeucau-doipt.index');
+    Route::post('/admin/yeucau-doipt/{id}/accept', [\App\Http\Controllers\admin\AdminRequestController::class, 'acceptPTRequest'])->name('admin.yeucau-doipt.accept');
+    Route::post('/admin/yeucau-doipt/{id}/reject', [\App\Http\Controllers\admin\AdminRequestController::class, 'rejectPTRequest'])->name('admin.yeucau-doipt.reject');
+
+    // Quản lý bảo lưu gói tập (Admin)
+    Route::get('/admin/yeucau-baoluu', [\App\Http\Controllers\admin\AdminRequestController::class, 'listBaoLuuRequests'])->name('admin.yeucau-baoluu.index');
+    Route::post('/admin/yeucau-baoluu/{id}/approve', [\App\Http\Controllers\admin\AdminRequestController::class, 'approveBaoLuu'])->name('admin.yeucau-baoluu.approve');
+    Route::post('/admin/yeucau-baoluu/{id}/reject', [\App\Http\Controllers\admin\AdminRequestController::class, 'rejectBaoLuu'])->name('admin.yeucau-baoluu.reject');
+    Route::post('/admin/yeucau-baoluu/{id}/resume', [\App\Http\Controllers\admin\AdminRequestController::class, 'resumeBaoLuu'])->name('admin.yeucau-baoluu.resume');
 
 });
 

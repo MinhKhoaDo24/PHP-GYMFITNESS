@@ -184,7 +184,7 @@ class AdminGoiTapController extends Controller
             'trang_thai' => 'dang_tap',
             'id_pt' => $dangKy->co_pt ? $request->id_pt : null,
             'ngay_bat_dau' => $now,
-            'ngay_ket_thuc' => $now->copy()->addMonths($soThang)
+            'ngay_ket_thuc' => $now->copy()->addDays($soThang * 30)
         ]);
 
         if ($dangKy->co_pt && $request->id_pt) {
