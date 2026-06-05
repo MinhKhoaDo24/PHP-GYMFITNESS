@@ -67,16 +67,37 @@ class TelegramService
         $safePhone   = $this->escapeHtml((string) $customerPhone);
         $safeMessage = $this->escapeHtml($message);
 
+        $appUrl = rtrim(env('APP_URL', ''), '/');
+
         $text  = "📨 <b>TIN NHẮN MỚI TỪ KHÁCH HÀNG</b>\n\n";
         $text .= "👤 <b>Tên:</b> {$safeName}\n";
         $text .= "📧 <b>Email:</b> {$safeEmail}\n";
         $text .= "📞 <b>SĐT:</b> {$safePhone}\n";
         $text .= "💬 <b>Nội dung:</b>\n";
         $text .= "<pre>{$safeMessage}</pre>\n\n";
-        $text .= "✍️ <b>Trả lời:</b> gõ lệnh vào bot:\n";
+        $text .= "✍️ <b>Trả lời qua bot:</b>\n";
         $text .= "<code>/reply_{$conversationId} Nội dung trả lời...</code>";
 
-        return $this->sendMessage($text);
+        // Chỉ thêm nút bấm khi APP_URL là domain thật (không phải localhost)
+        $isPublicUrl = !empty($appUrl)
+            && !str_contains($appUrl, 'localhost')
+            && !str_contains($appUrl, '127.0.0.1')
+            && str_starts_with($appUrl, 'https://');
+
+        $replyMarkup = null;
+        if ($isPublicUrl) {
+            $chatUrl = $appUrl . '/chat';
+            $replyMarkup = [
+                'inline_keyboard' => [[
+                    [
+                        'text' => '💬 Mở trang Chat',
+                        'url'  => $chatUrl,
+                    ],
+                ]]
+            ];
+        }
+
+        return $this->sendMessage($text, 'HTML', $replyMarkup);
     }
 
     /**
