@@ -10,10 +10,224 @@ use App\Models\NguoiDung;
 use App\Mail\KichHoatGoiTapMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AdminGoiTapController extends Controller
 {
+    // ============================================================
+    // DASHBOARD GÓI TẬP
+    // ============================================================
+
+    /**
+     * Trang dashboard thống kê gói tập
+     */
+    public function goitapDashboard(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end] = $this->getDateRange($range);
+
+        $rangeLabels = [
+            'week'    => 'tuần này',
+            'month'   => 'tháng này',
+            'quarter' => 'quý này',
+            'year'    => 'năm nay',
+        ];
+
+        // KPI numbers
+        $baseQuery = DangKyGoiTap::whereBetween('created_at', [$start, $end]);
+
+        $kpi = [
+            'total_registrations' => (clone $baseQuery)->count(),
+            'revenue'             => (clone $baseQuery)
+                                        ->whereIn('trang_thai', ['da_thanh_toan', 'dang_tap', 'het_han'])
+                                        ->sum('tong_tien'),
+            'active'              => (clone $baseQuery)->where('trang_thai', 'dang_tap')->count(),
+            'with_pt'             => (clone $baseQuery)->where('co_pt', 1)->count(),
+        ];
+
+        // Recent registrations (10 latest overall)
+        $recentRegistrations = DangKyGoiTap::with(['user', 'packagePrice.goitap'])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return view('admin.goitap.dashboard', compact('kpi', 'range', 'recentRegistrations'))
+            ->with('rangeLabel', $rangeLabels[$range] ?? 'kỳ này');
+    }
+
+    // ============================================================
+    // CHART APIs
+    // ============================================================
+
+    /** Chart 1: Số lượt đăng ký theo thời gian */
+    public function chartRegistrations(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end, $format, $groupFormat] = $this->getChartConfig($range);
+
+        $rows = DB::table('dangky_goitap')
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw("DATE_FORMAT(created_at, '{$groupFormat}') as period, COUNT(*) as total")
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->keyBy('period');
+
+        [$labels, $values] = $this->buildTimeSeries($start, $end, $range, $rows, 'total');
+
+        return response()->json(['labels' => $labels, 'values' => $values]);
+    }
+
+    /** Chart 2: Doanh thu theo thời gian */
+    public function chartRevenue(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end, $format, $groupFormat] = $this->getChartConfig($range);
+
+        $rows = DB::table('dangky_goitap')
+            ->whereBetween('created_at', [$start, $end])
+            ->whereIn('trang_thai', ['da_thanh_toan', 'dang_tap', 'het_han'])
+            ->selectRaw("DATE_FORMAT(created_at, '{$groupFormat}') as period, SUM(tong_tien) as total")
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get()
+            ->keyBy('period');
+
+        [$labels, $values] = $this->buildTimeSeries($start, $end, $range, $rows, 'total');
+
+        return response()->json(['labels' => $labels, 'values' => $values]);
+    }
+
+    /** Chart 3: Phân bổ loại gói tập (silver/gold/diamond) */
+    public function chartPackageType(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end] = $this->getDateRange($range);
+
+        $rows = DB::table('dangky_goitap')
+            ->join('goitap_gia', 'dangky_goitap.id_goitap_gia', '=', 'goitap_gia.id')
+            ->join('goitap', 'goitap_gia.id_goitap', '=', 'goitap.id_goitap')
+            ->whereBetween('dangky_goitap.created_at', [$start, $end])
+            ->selectRaw('goitap.loai_goi, COUNT(*) as total')
+            ->groupBy('goitap.loai_goi')
+            ->get();
+
+        $labelMap = ['silver' => 'Silver', 'gold' => 'Gold', 'diamond' => 'Diamond'];
+
+        return response()->json([
+            'labels' => $rows->pluck('loai_goi')->map(fn($l) => $labelMap[$l] ?? ucfirst($l)),
+            'values' => $rows->pluck('total'),
+        ]);
+    }
+
+    /** Chart 4: Tỷ lệ có PT / không PT */
+    public function chartPtRatio(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end] = $this->getDateRange($range);
+
+        $with    = DangKyGoiTap::whereBetween('created_at', [$start, $end])->where('co_pt', 1)->count();
+        $without = DangKyGoiTap::whereBetween('created_at', [$start, $end])->where('co_pt', 0)->count();
+
+        return response()->json(['with_pt' => $with, 'without_pt' => $without]);
+    }
+
+    /** Chart 5: Đăng ký theo từng gói tập */
+    public function chartPerPackage(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end] = $this->getDateRange($range);
+
+        $rows = DB::table('dangky_goitap')
+            ->join('goitap_gia', 'dangky_goitap.id_goitap_gia', '=', 'goitap_gia.id')
+            ->join('goitap', 'goitap_gia.id_goitap', '=', 'goitap.id_goitap')
+            ->whereBetween('dangky_goitap.created_at', [$start, $end])
+            ->selectRaw('goitap.ten_goi, COUNT(*) as total')
+            ->groupBy('goitap.ten_goi')
+            ->orderByDesc('total')
+            ->get();
+
+        return response()->json([
+            'labels' => $rows->pluck('ten_goi'),
+            'values' => $rows->pluck('total'),
+        ]);
+    }
+
+    /** Chart 6: Phân bổ thời hạn đăng ký (1/3/6/12 tháng) */
+    public function chartDuration(Request $request)
+    {
+        $range = $request->input('range', 'month');
+        [$start, $end] = $this->getDateRange($range);
+
+        $rows = DB::table('dangky_goitap')
+            ->join('goitap_gia', 'dangky_goitap.id_goitap_gia', '=', 'goitap_gia.id')
+            ->whereBetween('dangky_goitap.created_at', [$start, $end])
+            ->selectRaw('goitap_gia.so_thang, COUNT(*) as total')
+            ->groupBy('goitap_gia.so_thang')
+            ->orderBy('goitap_gia.so_thang')
+            ->get()
+            ->keyBy('so_thang');
+
+        $months = [1, 3, 6, 12];
+        $labels = array_map(fn($m) => "$m tháng", $months);
+        $values = array_map(fn($m) => $rows->get($m)->total ?? 0, $months);
+
+        return response()->json(['labels' => $labels, 'values' => $values]);
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+
+    private function getDateRange(string $range): array
+    {
+        return match ($range) {
+            'week'    => [Carbon::now()->startOfWeek(),    Carbon::now()->endOfWeek()],
+            'quarter' => [Carbon::now()->startOfQuarter(), Carbon::now()->endOfQuarter()],
+            'year'    => [Carbon::now()->startOfYear(),    Carbon::now()->endOfYear()],
+            default   => [Carbon::now()->startOfMonth(),   Carbon::now()->endOfMonth()],
+        };
+    }
+
+    private function getChartConfig(string $range): array
+    {
+        return match ($range) {
+            'week'    => [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek(),    'd/m',      '%Y-%m-%d'],
+            'quarter' => [Carbon::now()->startOfQuarter(), Carbon::now()->endOfQuarter(), 'T%m/%Y', '%Y-%m'],
+            'year'    => [Carbon::now()->startOfYear(), Carbon::now()->endOfYear(),    'T%m/%Y',   '%Y-%m'],
+            default   => [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth(),  'd/m',      '%Y-%m-%d'],
+        };
+    }
+
+    private function buildTimeSeries(Carbon $start, Carbon $end, string $range, $rows, string $field): array
+    {
+        $labels = [];
+        $values = [];
+
+        if (in_array($range, ['week', 'month'])) {
+            $cur = $start->copy();
+            while ($cur <= $end) {
+                $key = $cur->format('Y-m-d');
+                $labels[] = $cur->format('d/m');
+                $values[] = $rows->get($key)->{$field} ?? 0;
+                $cur->addDay();
+            }
+        } else {
+            // Quarter / Year: group by month
+            $cur = $start->copy()->startOfMonth();
+            while ($cur <= $end) {
+                $key = $cur->format('Y-m');
+                $labels[] = 'T' . $cur->format('m/Y');
+                $values[] = $rows->get($key)->{$field} ?? 0;
+                $cur->addMonth();
+            }
+        }
+
+        return [$labels, $values];
+    }
+
     public function index()
     {
         $goitaps = GoiTap::with('prices')->get();
