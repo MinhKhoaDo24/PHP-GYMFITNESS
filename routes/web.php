@@ -113,7 +113,7 @@ Route::get('/tra-cuu-don-hang/{id}', [GuestCheckoutController::class, 'showDetai
 
 
 Route::get('/login', [AuthController::class, 'index'])->name('login');
-Route::post('/login', [AuthController::class, 'loginPost'])->name('login.post');
+Route::post('/login', [AuthController::class, 'loginPost'])->middleware('throttle:5,1')->name('login.post');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
 Route::post('/kiem-tra-email', [AuthController::class, 'kiemTraEmail'])->name('kiemtra.email');
@@ -149,25 +149,21 @@ Route::post('/mail', [MailController::class, 'subscribe'])
 //admin
 Route::prefix('/')->group(function () {
     Route::get('/admin', [AdminController::class, 'index']);
-    Route::post('/signinDashboard', [AdminController::class, 'signin_dashboard']);
+    Route::post('/signinDashboard', [AdminController::class, 'signin_dashboard'])->middleware('throttle:5,1');
     Route::get('/signinDashboard', function () {
         return redirect('/admin');
     });
 });
 
-Route::prefix('/admin')->group(function () {
-    // API cho biểu đồ KHÔNG nên để trong admin.login
-    Route::get('/chart/revenue', [AdminController::class, 'revenueChart']);
-    Route::get('/chart/orders', [AdminController::class, 'orderChart']);
-    Route::get('/chart/trials', [AdminController::class, 'trialChart']);
-    Route::get('/chart/sold', [AdminController::class, 'soldChart']);
-});
-
-
-
 Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard']);
     Route::get('/admin_logout', [AdminController::class, 'admin_logout']);
+
+    // API cho biểu đồ được bảo vệ bởi admin.login
+    Route::get('/admin/chart/revenue', [AdminController::class, 'revenueChart']);
+    Route::get('/admin/chart/orders', [AdminController::class, 'orderChart']);
+    Route::get('/admin/chart/trials', [AdminController::class, 'trialChart']);
+    Route::get('/admin/chart/sold', [AdminController::class, 'soldChart']);
 
     Route::get('/admin/product', [ProductController::class, 'index'])->name('product.index');
     Route::get('/admin/product/search', [AdminController::class, 'search'])->name('adminSearch');

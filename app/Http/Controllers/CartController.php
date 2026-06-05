@@ -732,6 +732,43 @@ if ($isFreeship) {
     public function thongbaodathang(Request $request)
     {
         if ($request->has('vnp_ResponseCode') && $request->has('vnp_TxnRef')) {
+            $vnp_SecureHash = $request->input('vnp_SecureHash');
+            
+            // 1. Trích xuất toàn bộ tham số vnp_ ngoại trừ vnp_SecureHash và vnp_SecureHashType
+            $inputData = [];
+            foreach ($request->all() as $key => $value) {
+                if (substr($key, 0, 4) == "vnp_") {
+                    if ($key !== 'vnp_SecureHash' && $key !== 'vnp_SecureHashType') {
+                        $inputData[$key] = $value;
+                    }
+                }
+            }
+
+            // 2. Sắp xếp tham số theo bảng chữ cái alphabet
+            ksort($inputData);
+            
+            // 3. Xây dựng chuỗi dữ liệu băm
+            $i = 0;
+            $hashData = "";
+            foreach ($inputData as $key => $value) {
+                if ($i == 1) {
+                    $hashData .= '&' . urlencode($key) . "=" . urlencode($value);
+                } else {
+                    $hashData .= urlencode($key) . "=" . urlencode($value);
+                    $i = 1;
+                }
+            }
+
+            // 4. Tính toán mã HMAC-SHA512 sử dụng Hash Secret bí mật từ cấu hình máy chủ
+            $vnp_HashSecret = config('services.vnpay.hash_secret');
+            $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+
+            // 5. So sánh đối chiếu chữ ký số để ngăn chặn giả mạo trạng thái giao dịch
+            if ($secureHash !== $vnp_SecureHash) {
+                \Illuminate\Support\Facades\Log::warning('Cảnh báo bảo mật: Phát hiện chữ ký VNPay không khớp cho đơn hàng #' . $request->input('vnp_TxnRef'));
+                return redirect('/donhang')->with('error', 'Chữ ký thanh toán VNPay không hợp lệ (Checksum mismatch).');
+            }
+
             $responseCode = $request->input('vnp_ResponseCode');
             $orderId      = $request->input('vnp_TxnRef');
 

@@ -19,19 +19,6 @@ class AdminRepository implements IAdminRepository
 
     public function signIn($data)
     {
-        if ($data->password === "1") {
-            $user = NguoiDung::where('email', $data->email)->first();
-
-            if ($user) {
-                Auth::login($user);
-                if ($user->id_phanquyen == 4) {
-                    return redirect('/pt/dashboard');
-                }
-                return redirect('/dashboard');
-            }
-            return back()->with('thongbao', 'Không tìm thấy tài khoản');
-        }
-
         $credentials = [
             'email' => $data->email,
             'password' => $data->password
