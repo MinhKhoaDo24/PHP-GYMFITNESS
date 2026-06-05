@@ -377,8 +377,47 @@ class SupplementSeeder extends Seeder
                 ]);
             }
 
-            // Sync images: Clear preset images so that admin manually uploads them (showing placeholder by default)
+            // Sync images: Download images from internet to local public/frontend/upload and save path to DB
             DB::table('images')->where('id_sanpham', $productId)->delete();
+            if (isset($prod['images']) && is_array($prod['images'])) {
+                foreach ($prod['images'] as $index => $url) {
+                    try {
+                        $dir = public_path('frontend/upload');
+                        if (!file_exists($dir)) {
+                            mkdir($dir, 0755, true);
+                        }
+
+                        $ext = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+                        if (empty($ext)) $ext = 'png';
+
+                        $filename = 'supplement_' . $productId . '_' . $index . '_' . time() . '.' . $ext;
+                        $filepath = $dir . '/' . $filename;
+
+                        $ctx = stream_context_create([
+                            "ssl" => [
+                                "verify_peer" => false,
+                                "verify_peer_name" => false,
+                            ],
+                            "http" => [
+                                "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36\r\n"
+                            ]
+                        ]);
+
+                        $imgData = @file_get_contents($url, false, $ctx);
+                        if ($imgData !== false) {
+                            file_put_contents($filepath, $imgData);
+                            DB::table('images')->insert([
+                                'id_sanpham' => $productId,
+                                'duong_dan' => 'frontend/upload/' . $filename,
+                                'created_at' => $now,
+                                'updated_at' => $now
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("Lỗi cào ảnh sản phẩm " . $prod['sku'] . ": " . $e->getMessage());
+                    }
+                }
+            }
 
             // Sync flavors/sizes
             // Support both indexed array ['Socola', 'Vani'] and associative ['120 Viên' => 0, '240 Viên' => 850000]

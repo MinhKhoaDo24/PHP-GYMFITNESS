@@ -361,25 +361,25 @@ class HomeController extends Controller
 
         if ($goal == 'lose_fat') {
             $goalText = 'Giảm mỡ, Giảm cân';
-            $categoryIds = [5]; // Giảm cân - Đốt mỡ
+            $categoryIds = [5]; // ...
             $recommendedServices = [
-                ['name' => 'Kick Boxing', 'url' => route('services.kickboxing'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-3.webp'],
-                ['name' => 'Dance', 'url' => route('services.dance'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-5.webp']
+                ['name' => 'Kick Boxing', 'url' => route('services.kickboxing'), 'img' => 'frontend/img/tc-kick-1.jpg'],
+                ['name' => 'Dance', 'url' => route('services.dance'), 'img' => 'frontend/img/tc-dance-1.jpg']
             ];
             $caloAdvice = $tdee - 500;
         } elseif ($goal == 'gain_muscle') {
             $goalText = 'Tăng cơ, Tăng cân';
             $categoryIds = [6, 7]; // Tăng cân, Tăng cơ
             $recommendedServices = [
-                ['name' => 'Gym Thể hình', 'url' => route('services.gym'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-1.webp']
+                ['name' => 'Gym Thể hình', 'url' => route('services.gym'), 'img' => 'frontend/img/tc-gym-1.jpg']
             ];
             $caloAdvice = $tdee + 500;
         } else {
             $goalText = 'Giữ dáng, Tăng dẻo dai';
             $categoryIds = [7]; // Tăng cơ / Phục hồi
             $recommendedServices = [
-                ['name' => 'Yoga', 'url' => route('services.yoga'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-2.webp'],
-                ['name' => 'Swimming', 'url' => route('services.swimming'), 'img' => '/frontend/img/Gioi-thieu/khoa-tap-6.webp']
+                ['name' => 'Yoga', 'url' => route('services.yoga'), 'img' => 'frontend/img/tc-yoga-1.jpg'],
+                ['name' => 'Swimming', 'url' => route('services.swimming'), 'img' => 'frontend/img/tc-swim-1.jpg']
             ];
             $caloAdvice = $tdee;
         }

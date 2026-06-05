@@ -123,6 +123,9 @@
 }
 
 /* Products are using sale-grid styles from home.css */
+.sale-item .sale-name {
+    color: #111111 !important;
+}
 </style>
 @endpush
 
@@ -183,7 +186,7 @@
         <div class="hr-services">
             @foreach($recommendedServices as $srv)
             <a href="{{ $srv['url'] }}" class="hr-service-card">
-                <img src="{{ $srv['img'] }}" alt="{{ $srv['name'] }}">
+                <img src="{{ asset($srv['img']) }}" alt="{{ $srv['name'] }}">
                 <div class="hr-service-overlay">
                     <h3>{{ $srv['name'] }}</h3>
                     <span>Xem chi tiết & Đăng ký <i class="fa-solid fa-arrow-right"></i></span>
