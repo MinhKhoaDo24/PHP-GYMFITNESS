@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Sanpham;
 
 class Dathang extends Model
 {
@@ -80,7 +81,7 @@ class Dathang extends Model
     {
         $details = $this->details;
         foreach ($details as $detail) {
-            $product = SanPham::with('sizes')->find($detail->id_sanpham);
+            $product = Sanpham::with('sizes')->find($detail->id_sanpham);
             if ($product) {
                 if ($product->co_size == 1) {
                     $sizeName = null;
