@@ -108,6 +108,12 @@
                     <ul id="goitapMenu"
                         class="collapse list-unstyled ms-4 {{ request()->is('admin/goitap*') || request()->is('admin/yeucau-doipt*') || request()->is('admin/yeucau-baoluu*') ? 'show' : '' }}">
                         <li>
+                            <a class="sidebar-link submenu-link {{ request()->routeIs('admin.goitap.dashboard') ? 'active-sub' : '' }}"
+                            href="{{ route('admin.goitap.dashboard') }}">
+                                <i class="bi bi-bar-chart-line me-1" style="font-size:12px;"></i> Dashboard
+                            </a>
+                        </li>
+                        <li>
                             <a class="sidebar-link submenu-link {{ request()->routeIs('admin.goitap.index') ? 'active-sub' : '' }}"
                             href="{{ route('admin.goitap.index') }}">
                                 Quản lý Gói tập

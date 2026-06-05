@@ -223,6 +223,17 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/admin/goitap/dangky', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyList'])->name('admin.goitap.dangky');
     Route::post('/admin/goitap/dangky/kichhoat/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyKichHoat'])->name('admin.goitap.dangky.kichhoat');
 
+    // Dashboard thống kê gói tập
+    Route::get('/admin/goitap/dashboard', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'goitapDashboard'])->name('admin.goitap.dashboard');
+
+    // Chart APIs (no auth needed for JS fetch — still within admin.login middleware)
+    Route::get('/admin/goitap/chart/registrations', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartRegistrations']);
+    Route::get('/admin/goitap/chart/revenue',        [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartRevenue']);
+    Route::get('/admin/goitap/chart/package-type',   [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartPackageType']);
+    Route::get('/admin/goitap/chart/pt-ratio',       [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartPtRatio']);
+    Route::get('/admin/goitap/chart/per-package',    [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartPerPackage']);
+    Route::get('/admin/goitap/chart/duration',       [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartDuration']);
+
     // Quản lý đánh giá (Admin)
     Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
     Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
