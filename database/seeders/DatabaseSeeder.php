@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
             ImageSeeder::class,
             SizeSeeder::class,
             GoiTapSeeder::class,
-            SupplementSeeder::class
+            SupplementSeeder::class,
+            CommentSeeder::class
         ]);
     }
 }
