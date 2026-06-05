@@ -369,6 +369,11 @@ class AdminGoiTapController extends Controller
 
     public function dangKyList(Request $request)
     {
+        // Tự động quét gói hết hạn
+        DangKyGoiTap::where('trang_thai', 'dang_tap')
+            ->where('ngay_ket_thuc', '<', today())
+            ->update(['trang_thai' => 'het_han']);
+
         $query = DangKyGoiTap::with(['user', 'pt', 'packagePrice.goitap']);
 
         if ($request->filled('trang_thai')) {
@@ -377,59 +382,73 @@ class AdminGoiTapController extends Controller
 
         $dangKys = $query->orderBy('id', 'desc')->get();
 
-        // Lấy danh sách PT (nguoidung thuộc phanquyen = 4)
-        $pts = NguoiDung::where('id_phanquyen', 4)->get();
+        // Lấy danh sách PT (nguoidung thuộc phanquyen = 4) đang hoạt động và đếm số lượng học viên đang tập của họ
+        $pts = NguoiDung::where('id_phanquyen', 4)
+            ->where('trang_thai', 1)
+            ->withCount(['ptRegistrations' => function ($query) {
+                $query->where('trang_thai', 'dang_tap');
+            }])
+            ->get();
 
         return view('admin.goitap.dangky', compact('dangKys', 'pts'));
     }
 
     public function dangKyKichHoat(Request $request, $id)
     {
-        $dangKy = DangKyGoiTap::with('packagePrice')->findOrFail($id);
+        $dangKy = DangKyGoiTap::with(['packagePrice', 'user'])->findOrFail($id);
 
         $request->validate([
             'id_pt' => 'nullable|exists:nguoidung,id_nd'
         ]);
 
-        $now = now();
         $soThang = $dangKy->packagePrice->so_thang;
-
-        $dangKy->update([
-            'trang_thai' => 'dang_tap',
-            'id_pt' => $dangKy->co_pt ? $request->id_pt : null,
-            'ngay_bat_dau' => $now,
-            'ngay_ket_thuc' => $now->copy()->addDays($soThang * 30)
-        ]);
 
         if ($dangKy->co_pt && $request->id_pt) {
             $pt = NguoiDung::find($request->id_pt);
+
+            $dangKy->update([
+                'trang_thai' => 'cho_pt_xac_nhan',
+                'id_pt' => $request->id_pt,
+                'ngay_bat_dau' => null,
+                'ngay_ket_thuc' => null
+            ]);
             
             // Thông báo cho PT
             \App\Models\Thongbao::create([
                 'id_nguoidung' => $pt->id_nd,
-                'tieu_de' => 'Có khách hàng mới',
-                'noi_dung' => 'Bạn được phân công huấn luyện cho khách hàng ' . $dangKy->user->hoten . ' (' . $dangKy->user->sdt . ') - ' . $dangKy->packagePrice->goitap->ten_goi,
+                'tieu_de' => 'Yêu cầu nhận lớp mới',
+                'noi_dung' => 'Bạn được phân công làm PT cho học viên ' . $dangKy->user->hoten . ' (' . $dangKy->user->sdt . ') - Gói tập: ' . $dangKy->packagePrice->goitap->ten_goi . '. Vui lòng xác nhận đồng ý hoặc từ chối.',
                 'loai' => 'phan_pt',
                 'link' => '/pt/khach-hang'
+            ]);
+
+            return redirect()->back()->with('success', 'Đã phân công PT. Gói tập đang chờ PT xác nhận để kích hoạt!');
+        } else {
+            $now = now();
+            $dangKy->update([
+                'trang_thai' => 'dang_tap',
+                'id_pt' => null,
+                'ngay_bat_dau' => $now,
+                'ngay_ket_thuc' => $now->copy()->addDays($soThang * 30)
             ]);
 
             // Thông báo cho khách hàng
             \App\Models\Thongbao::create([
                 'id_nguoidung' => $dangKy->id_nguoidung,
-                'tieu_de' => 'Đã phân công Huấn luyện viên',
-                'noi_dung' => 'Gói tập đã kích hoạt. PT phụ trách của bạn là ' . $pt->hoten . ' (SĐT: 0' . $pt->sdt . ').',
+                'tieu_de' => 'Gói tập đã kích hoạt',
+                'noi_dung' => 'Gói tập ' . $dangKy->packagePrice->goitap->ten_goi . ' của bạn đã được kích hoạt thành công.',
                 'loai' => 'kich_hoat',
                 'link' => '/goi-tap/lich-su'
             ]);
-        }
 
-        // Gửi mail kích hoạt thành công
-        try {
-            Mail::to($dangKy->user->email)->send(new KichHoatGoiTapMail($dangKy));
-        } catch (\Exception $e) {
-            // Vẫn tiếp tục nếu SMTP lỗi
-        }
+            // Gửi mail kích hoạt thành công
+            try {
+                Mail::to($dangKy->user->email)->send(new KichHoatGoiTapMail($dangKy));
+            } catch (\Exception $e) {
+                // Vẫn tiếp tục nếu SMTP lỗi
+            }
 
-        return redirect()->back()->with('success', 'Kích hoạt gói tập cho khách hàng thành công!');
+            return redirect()->back()->with('success', 'Kích hoạt gói tập cho khách hàng thành công!');
+        }
     }
 }

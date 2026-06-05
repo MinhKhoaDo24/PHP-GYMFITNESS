@@ -195,8 +195,58 @@
             <div class="container-fluid d-flex justify-content-between align-items-center">
 
 
-                {{-- USER DROPDOWN --}}
-                <ul class="navbar-nav ms-auto align-items-center">
+                {{-- USER & NOTIFICATION DROPDOWN --}}
+                <ul class="navbar-nav ms-auto align-items-center gap-3">
+
+                    {{-- NOTIFICATION DROPDOWN --}}
+                    @php
+                        $adminNotifications = \App\Models\Thongbao::where('id_nguoidung', Auth::user()->id_nd)
+                            ->orderBy('created_at', 'desc')
+                            ->limit(5)
+                            ->get();
+                        $unreadNotificationsCount = \App\Models\Thongbao::where('id_nguoidung', Auth::user()->id_nd)
+                            ->where('da_doc', 0)
+                            ->count();
+                    @endphp
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative text-dark px-2" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 1.25rem;">
+                            <i class="bi bi-bell-fill" style="color: var(--gym-primary);"></i>
+                            @if($unreadNotificationsCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                    {{ $unreadNotificationsCount }}
+                                </span>
+                            @endif
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-0" aria-labelledby="notificationDropdown" style="width: 320px; border-radius: 12px; overflow: hidden; font-size: 0.875rem;">
+                            <li class="bg-primary text-white p-3 d-flex justify-content-between align-items-center" style="background-color: var(--gym-primary) !important;">
+                                <span class="fw-bold">Thông báo mới nhất</span>
+                                @if($unreadNotificationsCount > 0)
+                                    <a href="#" id="markAllReadBtn" class="text-white small text-decoration-none fw-semibold">Đọc hết</a>
+                                @endif
+                            </li>
+                            <div class="notification-list" style="max-height: 250px; overflow-y: auto;">
+                                @forelse($adminNotifications as $noti)
+                                    <li class="border-bottom">
+                                        <a href="{{ $noti->link ?: '#' }}" class="dropdown-item p-3 d-flex flex-column gap-1 text-wrap {{ $noti->da_doc ? 'opacity-75' : 'bg-light fw-bold' }} admin-noti-item" data-id="{{ $noti->id }}">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <span class="text-primary">{{ $noti->tieu_de }}</span>
+                                                <span class="text-muted small" style="font-size: 0.75rem;">{{ $noti->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <div class="text-dark small">{{ $noti->noi_dung }}</div>
+                                        </a>
+                                    </li>
+                                @empty
+                                    <li class="p-4 text-center text-muted">
+                                        <i class="bi bi-bell-slash" style="font-size: 1.5rem;"></i>
+                                        <p class="mb-0 mt-2">Không có thông báo nào</p>
+                                    </li>
+                                @endforelse
+                            </div>
+                            <li class="bg-light text-center py-2 border-top">
+                                <a href="{{ route('admin.thongbao') }}" class="text-primary fw-semibold small text-decoration-none">Xem tất cả thông báo</a>
+                            </li>
+                        </ul>
+                    </li>
 
                     <li class="nav-item dropdown">
 
@@ -373,6 +423,21 @@ html, body {
     background: rgba(52,164,224,0.15);
     color: var(--gym-primary);
 }
+
+/* Notifications Scrollbar & Hover */
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+.notification-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+.admin-noti-item {
+    transition: background 0.2s;
+}
+.admin-noti-item:hover {
+    background: rgba(52, 164, 224, 0.05) !important;
+}
 </style>
 
 
@@ -388,9 +453,51 @@ html, body {
         showConfirmButton: false
     });
 </script>
-
-
 @endif
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Đánh dấu thông báo đã đọc khi click
+        const adminNotiItems = document.querySelectorAll('.admin-noti-item');
+        adminNotiItems.forEach(item => {
+            item.addEventListener('click', function (e) {
+                const id = this.dataset.id;
+                const link = this.getAttribute('href');
+                if (id && link !== '#') {
+                    e.preventDefault();
+                    fetch(`/admin/thong-bao/${id}/doc`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    }).then(() => {
+                        window.location.href = link;
+                    }).catch(() => {
+                        window.location.href = link;
+                    });
+                }
+            });
+        });
+
+        // Đánh dấu đọc tất cả
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                fetch('/admin/thong-bao/doc-het', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).then(() => {
+                    location.reload();
+                });
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

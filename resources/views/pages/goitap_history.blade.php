@@ -200,6 +200,11 @@
         color: #8b5cf6;
         border: 1px solid #8b5cf6;
     }
+    .badge-cho_pt_xac_nhan {
+        background: rgba(14, 165, 233, 0.2);
+        color: #0ea5e9;
+        border: 1px solid #0ea5e9;
+    }
 </style>
 
 <section class="page-header">
@@ -260,6 +265,7 @@
                                     $statusLabels = [
                                         'cho_thanh_toan' => 'Chờ thanh toán',
                                         'da_thanh_toan' => 'Đã thanh toán',
+                                        'cho_pt_xac_nhan' => 'Chờ xác nhận',
                                         'dang_tap' => 'Đang tập luyện',
                                         'bao_luu' => 'Đang bảo lưu',
                                         'het_han' => 'Đã hết hạn',
@@ -311,14 +317,20 @@
                                     @if($reg->co_pt == 1)
                                         @if($reg->pt)
                                             @php
-                                                $pendingPT = $reg->yeuCauDoiPTs->where('trang_thai', 'cho_xu_ly')->first();
+                                                $pendingPT = $reg->yeuCauDoiPTs->whereIn('trang_thai', ['cho_xu_ly', 'cho_pt_moi_xac_nhan'])->first();
                                                 $hasChangedPT = $reg->yeuCauDoiPTs->where('trang_thai', 'da_duyet')->isNotEmpty();
                                                 $daysSinceStart = $reg->ngay_bat_dau ? \Carbon\Carbon::parse($reg->ngay_bat_dau)->diffInDays(now()) : 0;
                                             @endphp
                                             @if($pendingPT)
-                                                <span class="badge badge-warning text-dark py-2 px-3" style="border-radius: 8px; font-weight: 600;">
-                                                    <i class="bi bi-hourglass-split"></i> Chờ duyệt đổi PT
-                                                </span>
+                                                @if($pendingPT->trang_thai === 'cho_xu_ly')
+                                                    <span class="badge badge-warning text-dark py-2 px-3" style="border-radius: 8px; font-weight: 600;">
+                                                        <i class="bi bi-hourglass-split"></i> Chờ duyệt đổi PT
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-info text-white py-2 px-3" style="border-radius: 8px; font-weight: 600; background-color: #0ea5e9; border: 1px solid #0ea5e9;">
+                                                        <i class="bi bi-hourglass-split"></i> Đang sắp xếp PT mới
+                                                    </span>
+                                                @endif
                                             @elseif($hasChangedPT)
                                                 <button class="btn btn-sm btn-secondary btn-disabled-style" disabled title="Mỗi gói tập chỉ được đổi Huấn luyện viên tối đa 1 lần" style="border-radius: 8px; font-weight: 600;">
                                                     Đổi PT
