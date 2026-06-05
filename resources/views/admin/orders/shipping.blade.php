@@ -210,7 +210,7 @@
 {{-- PAGINATION --}}
 @if($orders instanceof \Illuminate\Pagination\LengthAwarePaginator)
     <div class="mt-3">
-        {{ $orders->links() }}
+        {{ $orders->links('pagination::bootstrap-5') }}
     </div>
 @endif
 

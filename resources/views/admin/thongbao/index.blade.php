@@ -53,7 +53,7 @@
             
             @if($thongbaos->hasPages())
             <div class="card-footer bg-white border-0 py-3">
-                {{ $thongbaos->links() }}
+                {{ $thongbaos->links('pagination::bootstrap-5') }}
             </div>
             @endif
         </div>

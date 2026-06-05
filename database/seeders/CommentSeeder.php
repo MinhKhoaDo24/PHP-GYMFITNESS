@@ -10,55 +10,39 @@ class CommentSeeder extends Seeder
 {
     public function run(): void
     {
-        // Xóa sạch các đánh giá cũ để tránh trùng lặp khi chạy lại seeder
-        DB::table('comments')->delete();
-
         $now = Carbon::now();
 
-        // Danh sách người dùng mẫu mặc định có trong DB
+        // Danh sách người dùng mẫu mặc định và fake
         $userIds = [1, 4, 5];
-
-        // Tạo thêm 10 tài khoản khách hàng mẫu nếu chưa tồn tại để đánh giá phong phú hơn
-        $fakeCustomers = [
-            ['hoten' => 'Nguyễn Văn Nam', 'email' => 'namnguyen@gmail.com', 'sdt' => '0912345678', 'diachi' => 'Hà Nội'],
-            ['hoten' => 'Trần Thị Hoa', 'email' => 'hoatran@gmail.com', 'sdt' => '0987654321', 'diachi' => 'Đà Nẵng'],
-            ['hoten' => 'Lê Hoàng Anh', 'email' => 'hoanganh@gmail.com', 'sdt' => '0905123456', 'diachi' => 'TP. HCM'],
-            ['hoten' => 'Phạm Minh Đức', 'email' => 'ducpham@gmail.com', 'sdt' => '0934567890', 'diachi' => 'Hải Phòng'],
-            ['hoten' => 'Hoàng Thu Trang', 'email' => 'tranghoang@gmail.com', 'sdt' => '0978123456', 'diachi' => 'Cần Thơ'],
-            ['hoten' => 'Đỗ Quốc Bảo', 'email' => 'baodo@gmail.com', 'sdt' => '0945678901', 'diachi' => 'Quảng Ninh'],
-            ['hoten' => 'Vũ Thùy Linh', 'email' => 'linhvu@gmail.com', 'sdt' => '0967890123', 'diachi' => 'Nam Định'],
-            ['hoten' => 'Phan Huy Khánh', 'email' => 'khanhphan@gmail.com', 'sdt' => '0919876543', 'diachi' => 'Nghệ An'],
-            ['hoten' => 'Bùi Minh Tuấn', 'email' => 'tuanbui@gmail.com', 'sdt' => '0981234567', 'diachi' => 'Thanh Hóa'],
-            ['hoten' => 'Nguyễn Mai Chi', 'email' => 'chinguyen@gmail.com', 'sdt' => '0936789012', 'diachi' => 'Bắc Ninh'],
+        $fakeEmails = [
+            'namnguyen@gmail.com', 'hoatran@gmail.com', 'hoanganh@gmail.com',
+            'ducpham@gmail.com', 'tranghoang@gmail.com', 'baodo@gmail.com',
+            'linhvu@gmail.com', 'khanhphan@gmail.com', 'tuanbui@gmail.com',
+            'chinguyen@gmail.com'
         ];
 
-        foreach ($fakeCustomers as $cust) {
-            $existing = DB::table('nguoidung')->where('email', $cust['email'])->first();
-            if ($existing) {
-                $userIds[] = $existing->id_nd;
-            } else {
-                $userId = DB::table('nguoidung')->insertGetId([
-                    'hoten' => $cust['hoten'],
-                    'email' => $cust['email'],
-                    'password' => bcrypt('123456'),
-                    'diachi' => $cust['diachi'],
-                    'sdt' => $cust['sdt'],
-                    'id_phanquyen' => 2, // Khách hàng
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ]);
-                $userIds[] = $userId;
+        foreach ($fakeEmails as $email) {
+            $user = DB::table('nguoidung')->where('email', $email)->first();
+            if ($user) {
+                $userIds[] = $user->id_nd;
             }
         }
 
-        // Lấy danh sách sản phẩm hiện có trong CSDL
-        $products = DB::table('sanpham')->get();
+        // Xóa sạch các đánh giá cũ của các users mẫu này để tránh trùng lặp
+        DB::table('comments')->whereIn('user_id', $userIds)->delete();
 
-        if ($products->isEmpty()) {
+        // Lấy danh sách đơn hàng đã hoàn thành của các user này
+        $completedOrders = DB::table('dathang')
+            ->where('trangthai', 'Hoàn thành')
+            ->whereIn('id_nd', $userIds)
+            ->get();
+
+        if ($completedOrders->isEmpty()) {
+            $this->command->warn('Không tìm thấy đơn hàng Hoàn thành nào để seeding đánh giá.');
             return;
         }
 
-        // Các mẫu đánh giá theo danh mục sản phẩm (Đã mở rộng thêm nhiều bình luận chất lượng)
+        // Các mẫu đánh giá theo danh mục sản phẩm
         $clothingReviews = [
             ['content' => 'Áo mặc rất mát, co giãn tốt và thấm hút mồ hôi siêu nhanh khi tập gym.', 'rating' => 5],
             ['content' => 'Quần co giãn thoải mái, thực hiện động tác squat rất dễ dàng không lo bị lộ.', 'rating' => 5],
@@ -109,46 +93,50 @@ class CommentSeeder extends Seeder
 
         $comments = [];
 
-        foreach ($products as $product) {
-            // Xác định mẫu đánh giá dựa theo danh mục sản phẩm (id_danhmuc)
-            if (in_array($product->id_danhmuc, [1, 2])) {
-                $pool = $clothingReviews;
-            } elseif ($product->id_danhmuc == 3 || $product->id_danhmuc == 4) {
-                $pool = $equipmentReviews;
-            } else {
-                $pool = $supplementReviews;
-            }
+        foreach ($completedOrders as $order) {
+            // Lấy các chi tiết sản phẩm của đơn hàng này
+            $items = DB::table('chitiet_donhang')
+                ->where('id_dathang', $order->id_dathang)
+                ->get();
 
-            // Tăng số lượng đánh giá ngẫu nhiên lên từ 5 đến 7 đánh giá cho mỗi sản phẩm
-            $numReviews = rand(5, 7);
-            $selectedKeys = array_rand($pool, $numReviews);
+            foreach ($items as $item) {
+                // Tìm sản phẩm tương ứng để biết danh mục
+                $product = DB::table('sanpham')
+                    ->where('id_sanpham', $item->id_sanpham)
+                    ->first();
 
-            if (!is_array($selectedKeys)) {
-                $selectedKeys = [$selectedKeys];
-            }
+                if (!$product) {
+                    continue;
+                }
 
-            // Xáo trộn người dùng mẫu để tránh trùng lặp tuần tự
-            $users = $userIds;
-            shuffle($users);
+                // Chọn pool đánh giá dựa trên danh mục
+                if (in_array($product->id_danhmuc, [1, 2])) {
+                    $pool = $clothingReviews;
+                } elseif ($product->id_danhmuc == 3 || $product->id_danhmuc == 4) {
+                    $pool = $equipmentReviews;
+                } else {
+                    $pool = $supplementReviews;
+                }
 
-            foreach ($selectedKeys as $idx => $key) {
-                $userId = $users[$idx % count($users)];
-                $review = $pool[$key];
+                // Chọn ngẫu nhiên 1 đánh giá từ pool
+                $review = $pool[array_rand($pool)];
 
                 $comments[] = [
-                    'user_id' => $userId,
-                    'sanpham_id' => $product->id_sanpham,
-                    'id_dathang' => null,
+                    'user_id' => $order->id_nd,
+                    'sanpham_id' => $item->id_sanpham,
+                    'id_dathang' => $order->id_dathang,
                     'content' => $review['content'],
                     'rating' => $review['rating'],
                     'images' => null,
-                    'created_at' => $now->copy()->subDays(rand(1, 30))->subHours(rand(1, 23)),
+                    'created_at' => Carbon::parse($order->ngay_hoan_thanh)->addHours(rand(1, 5)),
                     'updated_at' => $now,
                 ];
             }
         }
 
-        // Chèn hàng loạt đánh giá vào bảng
-        DB::table('comments')->insert($comments);
+        // Chèn hàng loạt đánh giá vào bảng comments
+        if (!empty($comments)) {
+            DB::table('comments')->insert($comments);
+        }
     }
 }

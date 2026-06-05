@@ -142,7 +142,7 @@
             
             @if($requests->hasPages())
             <div class="card-footer bg-white border-0 py-3">
-                {{ $requests->links() }}
+                {{ $requests->links('pagination::bootstrap-5') }}
             </div>
             @endif
         </div>

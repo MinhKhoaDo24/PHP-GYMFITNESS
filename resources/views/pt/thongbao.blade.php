@@ -38,7 +38,7 @@
             </div>
             
             <div class="p-3 border-top d-flex justify-content-center">
-                {{ $thongbaos->links() }}
+                {{ $thongbaos->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>

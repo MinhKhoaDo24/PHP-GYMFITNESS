@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SizeSeeder::class,
             GoiTapSeeder::class,
             SupplementSeeder::class,
+            DonHangSeeder::class,
             CommentSeeder::class
         ]);
     }
