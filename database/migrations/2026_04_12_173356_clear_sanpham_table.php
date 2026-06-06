@@ -17,6 +17,10 @@ return new class extends Migration
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
             DB::table('sanpham')->truncate();
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF;');
+            DB::table('sanpham')->truncate();
+            DB::statement('PRAGMA foreign_keys = ON;');
         } else { // PostgreSQL
             DB::statement('TRUNCATE TABLE sanpham RESTART IDENTITY CASCADE;');
         }

@@ -17,6 +17,10 @@ public function up(): void
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('danhmuc')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+    } elseif ($driver === 'sqlite') {
+        DB::statement('PRAGMA foreign_keys = OFF;');
+        DB::table('danhmuc')->truncate();
+        DB::statement('PRAGMA foreign_keys = ON;');
     } else {
         DB::statement('TRUNCATE TABLE danhmuc RESTART IDENTITY CASCADE;');
     }

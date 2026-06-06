@@ -98,10 +98,11 @@
 <script>
     Swal.fire({
         icon: 'error',
-        title: 'Đăng nhập thất bại',
+        title: "{{ request()->is('register') ? 'Đăng ký thất bại' : 'Đăng nhập thất bại' }}",
         text: "{{ session('error') }}",
-        timer: 3000,
-        showConfirmButton: false,
+        showConfirmButton: true,
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#3b82f6',
         background: '#fff',
         customClass: {
             popup: 'animated-popup'
