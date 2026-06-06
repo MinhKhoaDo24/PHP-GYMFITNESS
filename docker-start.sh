@@ -5,7 +5,7 @@ echo "==> Chạy migrations..."
 php artisan migrate --force
 
 echo "==> Chạy seeders nếu chưa có dữ liệu..."
-PRODUCT_COUNT=$(php artisan tinker --execute="echo \App\Models\Sanpham::count();" 2>/dev/null | tail -1 || echo "0")
+PRODUCT_COUNT=$(php artisan tinker --execute="echo \App\Models\SanPham::count();" 2>/dev/null | tail -1 || echo "0")
 if [ "$PRODUCT_COUNT" = "0" ] || [ -z "$PRODUCT_COUNT" ]; then
     echo "    Database trống, đang seed dữ liệu..."
     php artisan db:seed --force || echo "    Seed thất bại, tiếp tục..."

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
-use App\Models\Sanpham;
+use App\Models\SanPham;
 use App\Models\Dathang;
 use App\Models\Khuyenmai;
 use App\Models\ChitietDonhang;

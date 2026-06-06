@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Sanpham;
+use App\Models\SanPham;
 
 class ProductRepository implements IProductRepository
 {
