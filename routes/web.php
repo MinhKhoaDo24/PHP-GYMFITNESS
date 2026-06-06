@@ -289,12 +289,3 @@ Route::post('/telegram/webhook', function (\Illuminate\Http\Request $request) {
 })->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])->name('telegram.webhook');
 // ─────────────────────────────────────────────────────────────────────────────
 
-Route::get('/debug-logs', function() {
-    $logPath = storage_path('logs/laravel.log');
-    if (!file_exists($logPath)) {
-        return "Log file not found.";
-    }
-    $lines = file($logPath);
-    $lastLines = array_slice($lines, -150);
-    return response(implode("", $lastLines), 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
-});
