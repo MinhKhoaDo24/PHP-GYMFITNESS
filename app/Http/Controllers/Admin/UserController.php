@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Models\Danhmuc;
-use App\Models\Phanquyen;
-use App\Models\Nguoidung;
+use App\Models\PhanQuyen;
+use App\Models\NguoiDung;
 use App\Http\Controllers\Controller;
 use App\Repositories\IUserRepository;
 use App\Mail\TaiKhoanNhanVienMail;
@@ -23,7 +23,7 @@ class UserController extends Controller
     public function index(Request $request)
 {
     // Khởi tạo query
-    $query = Nguoidung::with('phanquyen');
+    $query = NguoiDung::with('phanquyen');
 
     // Tìm kiếm
     if ($request->q) {
@@ -48,7 +48,7 @@ class UserController extends Controller
     $users = $query->get();
 
     // Tính thống kê (dựa trên tất cả user, không theo lọc)
-    $allUsers = Nguoidung::all();
+    $allUsers = NguoiDung::all();
 
     $stats = [
         'total'    => $allUsers->count(),

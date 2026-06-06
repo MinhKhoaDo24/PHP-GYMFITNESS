@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id_phanquyen
  * @property int $id_phanquyen
  */
-class Phanquyen extends Model
+class PhanQuyen extends Model
 {
     /**
      * The database table used by the model.

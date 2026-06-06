@@ -78,6 +78,6 @@ class ChitietDonhang extends Model
 
     public function nguoidung()
     {
-        return $this->belongsTo(Nguoidung::class, 'id_nd', 'id_nd');
+        return $this->belongsTo(NguoiDung::class, 'id_nd', 'id_nd');
     }
 }
