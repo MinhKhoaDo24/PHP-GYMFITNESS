@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Sanpham;
+use App\Models\SanPham;
 use App\Models\Danhmuc;
 use App\Models\GoiTap;
 use App\Repositories\IProductRepository;

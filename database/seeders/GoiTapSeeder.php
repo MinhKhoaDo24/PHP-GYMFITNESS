@@ -126,7 +126,12 @@ class GoiTapSeeder extends Seeder
             ],
         ];
 
-        DB::table('goitap')->insert($goiTaps);
+        foreach ($goiTaps as $goiTap) {
+            DB::table('goitap')->updateOrInsert(
+                ['slug' => $goiTap['slug']],
+                $goiTap
+            );
+        }
 
         // =====================================================
         // 2. SEED BẢNG GOITAP_GIA — Bảng giá theo tháng
@@ -164,6 +169,11 @@ class GoiTapSeeder extends Seeder
             }
         }
 
-        DB::table('goitap_gia')->insert($giaRows);
+        foreach ($giaRows as $row) {
+            DB::table('goitap_gia')->updateOrInsert(
+                ['id_goitap' => $row['id_goitap'], 'so_thang' => $row['so_thang']],
+                $row
+            );
+        }
     }
 }

@@ -16,7 +16,10 @@ class PhanQuyenSeeder extends Seeder
         ];
 
         foreach ($data as $item) {
-            PhanQuyen::create($item);
+            PhanQuyen::firstOrCreate(
+                ['id_phanquyen' => $item['id_phanquyen']],
+                $item
+            );
         }
     }
 }

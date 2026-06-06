@@ -20,7 +20,7 @@ class Image extends Model
 
     public function sanpham()
     {
-        return $this->belongsTo(Sanpham::class, 'id_sanpham', 'id_sanpham');
+        return $this->belongsTo(SanPham::class, 'id_sanpham', 'id_sanpham');
     }
     public function images()
     {

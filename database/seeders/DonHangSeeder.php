@@ -35,15 +35,15 @@ class DonHangSeeder extends Seeder
                 $userIds[] = $existing->id_nd;
             } else {
                 $userId = DB::table('nguoidung')->insertGetId([
-                    'hoten' => $cust['hoten'],
-                    'email' => $cust['email'],
-                    'password' => bcrypt('123456'),
-                    'diachi' => $cust['diachi'],
-                    'sdt' => $cust['sdt'],
-                    'id_phanquyen' => 2, // Khách hàng
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ]);
+                    'hoten'        => $cust['hoten'],
+                    'email'        => $cust['email'],
+                    'password'     => bcrypt('123456'),
+                    'diachi'       => $cust['diachi'],
+                    'sdt'          => $cust['sdt'],
+                    'id_phanquyen' => 2,
+                    'created_at'   => $now,
+                    'updated_at'   => $now
+                ], 'id_nd'); // ← PK cho PostgreSQL
                 $userIds[] = $userId;
             }
         }
@@ -130,21 +130,21 @@ class DonHangSeeder extends Seeder
 
             // Tạo đơn hàng
             $orderId = DB::table('dathang')->insertGetId([
-                'ngaydathang' => $ngayDat,
-                'ngaygiaohang' => $ngayGiao,
-                'ngay_hoan_thanh' => $ngayHoanThanh,
-                'tongtien' => $tongTien,
-                'tiengiam' => $tienGiam,
-                'tienphaitra' => $tienPhaiTra,
-                'id_khuyenmai' => null,
-                'phuongthucthanhtoan' => rand(0, 1) ? 'COD' : 'VNPAY',
-                'diachigiaohang' => $user->diachi ?? 'Hà Nội',
-                'hoten' => $user->hoten,
-                'email' => $user->email,
-                'sdt' => $user->sdt ?? '0912345678',
-                'trangthai' => $status,
-                'id_nd' => $userId
-            ]);
+                'ngaydathang'          => $ngayDat,
+                'ngaygiaohang'         => $ngayGiao,
+                'ngay_hoan_thanh'      => $ngayHoanThanh,
+                'tongtien'             => $tongTien,
+                'tiengiam'             => $tienGiam,
+                'tienphaitra'          => $tienPhaiTra,
+                'id_khuyenmai'         => null,
+                'phuongthucthanhtoan'  => rand(0, 1) ? 'COD' : 'VNPAY',
+                'diachigiaohang'       => $user->diachi ?? 'Hà Nội',
+                'hoten'                => $user->hoten,
+                'email'                => $user->email,
+                'sdt'                  => $user->sdt ?? '0912345678',
+                'trangthai'            => $status,
+                'id_nd'                => $userId
+            ], 'id_dathang'); // ← PK cho PostgreSQL
 
             // Thêm chi tiết đơn hàng
             foreach ($orderItems as $item) {

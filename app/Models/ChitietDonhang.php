@@ -73,11 +73,11 @@ class ChitietDonhang extends Model
 
     public function sanpham()
     {
-        return $this->belongsTo(Sanpham::class, 'id_sanpham', 'id_sanpham');
+        return $this->belongsTo(SanPham::class, 'id_sanpham', 'id_sanpham');
     }
 
     public function nguoidung()
     {
-        return $this->belongsTo(Nguoidung::class, 'id_nd', 'id_nd');
+        return $this->belongsTo(NguoiDung::class, 'id_nd', 'id_nd');
     }
 }

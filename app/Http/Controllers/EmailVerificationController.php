@@ -49,12 +49,17 @@ class EmailVerificationController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $sent = $this->service->resend($request->email);
+        try {
+            $sent = $this->service->resend($request->email);
 
-        if (!$sent) {
-            return back()->with('error', 'Không tìm thấy yêu cầu đăng ký cho email này. Vui lòng đăng ký lại.');
+            if (!$sent) {
+                return back()->with('error', 'Không tìm thấy yêu cầu đăng ký cho email này. Vui lòng đăng ký lại.');
+            }
+
+            return back()->with('success', 'Email xác nhận đã được gửi lại! Vui lòng kiểm tra hộp thư (bao gồm Spam).');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Resend verification email error: ' . $e->getMessage());
+            return back()->with('error', 'Không thể gửi lại email xác thực. Vui lòng thử lại sau. Chi tiết lỗi: ' . $e->getMessage());
         }
-
-        return back()->with('success', 'Email xác nhận đã được gửi lại! Vui lòng kiểm tra hộp thư (bao gồm Spam).');
     }
 }

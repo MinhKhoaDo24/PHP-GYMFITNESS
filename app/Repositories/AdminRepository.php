@@ -4,7 +4,7 @@ namespace App\Repositories;
 use App\Repositories\IAdminRepository;
 
 use App\Models\NguoiDung;
-use App\Models\Sanpham;
+use App\Models\SanPham;
 use App\Models\Dathang;
 
 use Illuminate\Support\Facades\DB;

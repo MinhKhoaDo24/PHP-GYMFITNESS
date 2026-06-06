@@ -42,7 +42,7 @@ return new class extends Migration
                 ])->default('Chờ xác nhận')->change();
             });
 
-        } else {
+        } elseif ($driver === 'pgsql') {
             DB::statement("ALTER TABLE dathang ALTER COLUMN trangthai TYPE varchar(255);");
 
             DB::statement("ALTER TABLE dathang DROP CONSTRAINT IF EXISTS dathang_trangthai_check;");
@@ -80,7 +80,7 @@ return new class extends Migration
                 $table->integer('trangthai')->default(0)->change();
             });
 
-        } else {
+        } elseif ($driver === 'pgsql') {
 
             DB::statement("ALTER TABLE dathang DROP CONSTRAINT IF EXISTS dathang_trangthai_check;");
             DB::statement("ALTER TABLE dathang ALTER COLUMN trangthai TYPE integer USING trangthai::integer;");

@@ -48,7 +48,7 @@ class Khuyenmai extends Model
     // 1 khuyến mãi có thể áp dụng cho nhiều sản phẩm
     public function sanphams()
     {
-        return $this->hasMany(Sanpham::class, 'id_khuyenmai');
+        return $this->hasMany(SanPham::class, 'id_khuyenmai');
     }
 
     /*---------------------------------------

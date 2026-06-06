@@ -38,7 +38,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:nguoidung,email|unique:pending_registrations,email',
+            'email'    => 'required|email|unique:nguoidung,email',
             'password' => [
                 'required',
                 'confirmed',
@@ -61,14 +61,21 @@ class AuthController extends Controller
             'phone.regex'        => 'Số điện thoại phải có 10-11 chữ số'
         ]);
 
-        // Gửi email xác nhận, lưu pending (không tạo tài khoản thật)
-        $this->verificationService->storePendingAndSendEmail([
-            'hoten'    => $request->name,
-            'email'    => $request->email,
-            'password' => $request->password,
-            'diachi'   => $request->address,
-            'sdt'      => $request->phone,
-        ]);
+        try {
+            // Bọc việc lưu pending và gửi email trong transaction để tự động rollback khi gửi mail lỗi
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+                $this->verificationService->storePendingAndSendEmail([
+                    'hoten'    => $request->name,
+                    'email'    => $request->email,
+                    'password' => $request->password,
+                    'diachi'   => $request->address,
+                    'sdt'      => $request->phone,
+                ]);
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Registration error: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Không thể gửi email xác thực tài khoản. Vui lòng kiểm tra lại địa chỉ email hoặc cấu hình SMTP. Chi tiết lỗi: ' . $e->getMessage());
+        }
 
         // Lưu email vào session để hiển thị trên trang notice
         session(['pending_email' => $request->email]);
@@ -212,8 +219,7 @@ class AuthController extends Controller
     public function kiemTraEmail(Request $request)
     {
         $existsInUsers   = NguoiDung::where('email', $request->email)->exists();
-        $existsInPending = \App\Models\PendingRegistration::where('email', $request->email)->exists();
-        return response()->json(['exists' => $existsInUsers || $existsInPending]);
+        return response()->json(['exists' => $existsInUsers]);
     }
 }
 

@@ -62,7 +62,7 @@ class NguoiDung extends Authenticatable
     protected $primaryKey = 'id_nd';
     public function phanquyen()
     {
-        return $this->belongsTo(Phanquyen::class, 'id_phanquyen', 'id_phanquyen');
+        return $this->belongsTo(PhanQuyen::class, 'id_phanquyen', 'id_phanquyen');
     }
 
     public function ptRegistrations()

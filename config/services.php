@@ -49,4 +49,8 @@ return [
         'url' => env('VNPAY_URL'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
+
 ];
