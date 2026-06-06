@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\admin\{AdminController, ProductController, DanhmucController, OrderController, KhuyenmaiController, UserController, DangkidichvuController};
+use App\Http\Controllers\Admin\{AdminController, ProductController, DanhmucController, OrderController, KhuyenmaiController, UserController, DangkidichvuController};
 
 use App\Http\Controllers\{
     HomeController,
@@ -208,47 +208,47 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::post('/admin/sizes/{id}/restore', [\App\Http\Controllers\Admin\SizeController::class, 'restore'])->name('sizes.restore');
 
     // Quản lý gói tập (Admin)
-    Route::get('/admin/goitap', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'index'])->name('admin.goitap.index');
-    Route::get('/admin/goitap/create', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'create'])->name('admin.goitap.create');
-    Route::post('/admin/goitap', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'store'])->name('admin.goitap.store');
-    Route::get('/admin/goitap/edit/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'edit'])->name('admin.goitap.edit');
-    Route::put('/admin/goitap/update/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'update'])->name('admin.goitap.update');
-    Route::delete('/admin/goitap/destroy/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'destroy'])->name('admin.goitap.destroy');
+    Route::get('/admin/goitap', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'index'])->name('admin.goitap.index');
+    Route::get('/admin/goitap/create', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'create'])->name('admin.goitap.create');
+    Route::post('/admin/goitap', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'store'])->name('admin.goitap.store');
+    Route::get('/admin/goitap/edit/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'edit'])->name('admin.goitap.edit');
+    Route::put('/admin/goitap/update/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'update'])->name('admin.goitap.update');
+    Route::delete('/admin/goitap/destroy/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'destroy'])->name('admin.goitap.destroy');
 
     // Phê duyệt đăng ký gói tập (Admin)
-    Route::get('/admin/goitap/dangky', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyList'])->name('admin.goitap.dangky');
-    Route::post('/admin/goitap/dangky/kichhoat/{id}', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'dangKyKichHoat'])->name('admin.goitap.dangky.kichhoat');
+    Route::get('/admin/goitap/dangky', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'dangKyList'])->name('admin.goitap.dangky');
+    Route::post('/admin/goitap/dangky/kichhoat/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'dangKyKichHoat'])->name('admin.goitap.dangky.kichhoat');
 
     // Dashboard thống kê gói tập
-    Route::get('/admin/goitap/dashboard', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'goitapDashboard'])->name('admin.goitap.dashboard');
+    Route::get('/admin/goitap/dashboard', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'goitapDashboard'])->name('admin.goitap.dashboard');
 
     // Chart APIs (no auth needed for JS fetch — still within admin.login middleware)
-    Route::get('/admin/goitap/chart/registrations', [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartRegistrations']);
-    Route::get('/admin/goitap/chart/revenue',        [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartRevenue']);
-    Route::get('/admin/goitap/chart/package-type',   [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartPackageType']);
-    Route::get('/admin/goitap/chart/pt-ratio',       [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartPtRatio']);
-    Route::get('/admin/goitap/chart/per-package',    [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartPerPackage']);
-    Route::get('/admin/goitap/chart/duration',       [\App\Http\Controllers\admin\AdminGoiTapController::class, 'chartDuration']);
+    Route::get('/admin/goitap/chart/registrations', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'chartRegistrations']);
+    Route::get('/admin/goitap/chart/revenue',        [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'chartRevenue']);
+    Route::get('/admin/goitap/chart/package-type',   [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'chartPackageType']);
+    Route::get('/admin/goitap/chart/pt-ratio',       [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'chartPtRatio']);
+    Route::get('/admin/goitap/chart/per-package',    [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'chartPerPackage']);
+    Route::get('/admin/goitap/chart/duration',       [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'chartDuration']);
 
     // Quản lý đánh giá (Admin)
     Route::get('/admin/comments', [CommentController::class, 'adminIndex'])->name('admin.comments.index');
     Route::delete('/admin/comments/{id}', [CommentController::class, 'adminDestroy'])->name('admin.comments.destroy');
 
     // Quản lý yêu cầu đổi PT (Admin)
-    Route::get('/admin/yeucau-doipt', [\App\Http\Controllers\admin\AdminRequestController::class, 'listPTRequests'])->name('admin.yeucau-doipt.index');
-    Route::post('/admin/yeucau-doipt/{id}/accept', [\App\Http\Controllers\admin\AdminRequestController::class, 'acceptPTRequest'])->name('admin.yeucau-doipt.accept');
-    Route::post('/admin/yeucau-doipt/{id}/reject', [\App\Http\Controllers\admin\AdminRequestController::class, 'rejectPTRequest'])->name('admin.yeucau-doipt.reject');
+    Route::get('/admin/yeucau-doipt', [\App\Http\Controllers\Admin\AdminRequestController::class, 'listPTRequests'])->name('admin.yeucau-doipt.index');
+    Route::post('/admin/yeucau-doipt/{id}/accept', [\App\Http\Controllers\Admin\AdminRequestController::class, 'acceptPTRequest'])->name('admin.yeucau-doipt.accept');
+    Route::post('/admin/yeucau-doipt/{id}/reject', [\App\Http\Controllers\Admin\AdminRequestController::class, 'rejectPTRequest'])->name('admin.yeucau-doipt.reject');
 
     // Thông báo Admin
-    Route::get('/admin/thong-bao', [\App\Http\Controllers\admin\AdminController::class, 'thongBao'])->name('admin.thongbao');
-    Route::post('/admin/thong-bao/{id}/doc', [\App\Http\Controllers\admin\AdminController::class, 'docThongBao'])->name('admin.thongbao.doc');
-    Route::post('/admin/thong-bao/doc-het', [\App\Http\Controllers\admin\AdminController::class, 'docHetThongBao'])->name('admin.thongbao.doc-het');
+    Route::get('/admin/thong-bao', [\App\Http\Controllers\Admin\AdminController::class, 'thongBao'])->name('admin.thongbao');
+    Route::post('/admin/thong-bao/{id}/doc', [\App\Http\Controllers\Admin\AdminController::class, 'docThongBao'])->name('admin.thongbao.doc');
+    Route::post('/admin/thong-bao/doc-het', [\App\Http\Controllers\Admin\AdminController::class, 'docHetThongBao'])->name('admin.thongbao.doc-het');
 
     // Quản lý bảo lưu gói tập (Admin)
-    Route::get('/admin/yeucau-baoluu', [\App\Http\Controllers\admin\AdminRequestController::class, 'listBaoLuuRequests'])->name('admin.yeucau-baoluu.index');
-    Route::post('/admin/yeucau-baoluu/{id}/approve', [\App\Http\Controllers\admin\AdminRequestController::class, 'approveBaoLuu'])->name('admin.yeucau-baoluu.approve');
-    Route::post('/admin/yeucau-baoluu/{id}/reject', [\App\Http\Controllers\admin\AdminRequestController::class, 'rejectBaoLuu'])->name('admin.yeucau-baoluu.reject');
-    Route::post('/admin/yeucau-baoluu/{id}/resume', [\App\Http\Controllers\admin\AdminRequestController::class, 'resumeBaoLuu'])->name('admin.yeucau-baoluu.resume');
+    Route::get('/admin/yeucau-baoluu', [\App\Http\Controllers\Admin\AdminRequestController::class, 'listBaoLuuRequests'])->name('admin.yeucau-baoluu.index');
+    Route::post('/admin/yeucau-baoluu/{id}/approve', [\App\Http\Controllers\Admin\AdminRequestController::class, 'approveBaoLuu'])->name('admin.yeucau-baoluu.approve');
+    Route::post('/admin/yeucau-baoluu/{id}/reject', [\App\Http\Controllers\Admin\AdminRequestController::class, 'rejectBaoLuu'])->name('admin.yeucau-baoluu.reject');
+    Route::post('/admin/yeucau-baoluu/{id}/resume', [\App\Http\Controllers\Admin\AdminRequestController::class, 'resumeBaoLuu'])->name('admin.yeucau-baoluu.resume');
 
 });
 
