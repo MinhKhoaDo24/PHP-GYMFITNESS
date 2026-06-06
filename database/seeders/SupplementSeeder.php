@@ -359,22 +359,22 @@ class SupplementSeeder extends Seeder
                 ]);
             } else {
                 $productId = DB::table('sanpham')->insertGetId([
-                    'tensp' => $prod['tensp'],
-                    'sku' => $prod['sku'],
-                    'giasp' => $prod['giasp'],
-                    'gia_duoc_giam' => $prod['gia_duoc_giam'],
-                    'mota' => $prod['mota'],
-                    'mota_ngan' => $prod['mota_ngan'],
-                    'giamgia' => $prod['giamgia'],
+                    'tensp'        => $prod['tensp'],
+                    'sku'          => $prod['sku'],
+                    'giasp'        => $prod['giasp'],
+                    'gia_duoc_giam'=> $prod['gia_duoc_giam'],
+                    'mota'         => $prod['mota'],
+                    'mota_ngan'    => $prod['mota_ngan'],
+                    'giamgia'      => $prod['giamgia'],
                     'giakhuyenmai' => $prod['giakhuyenmai'],
-                    'soluong' => $prod['soluong'],
-                    'noi_bat' => $prod['noi_bat'],
-                    'trang_thai' => $prod['trang_thai'],
-                    'id_danhmuc' => $prod['id_danhmuc'],
-                    'co_size' => 1,
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ]);
+                    'soluong'      => $prod['soluong'],
+                    'noi_bat'      => $prod['noi_bat'],
+                    'trang_thai'   => $prod['trang_thai'],
+                    'id_danhmuc'   => $prod['id_danhmuc'],
+                    'co_size'      => 1,
+                    'created_at'   => $now,
+                    'updated_at'   => $now
+                ], 'id_sanpham'); // ← chỉ định PK cho PostgreSQL
             }
 
             // Sync images: Download images from internet to local public/frontend/upload and save path to DB
