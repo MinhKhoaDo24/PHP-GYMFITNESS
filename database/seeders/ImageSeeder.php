@@ -75,10 +75,10 @@ class ImageSeeder extends Seeder
 
             $productId = $product->id_sanpham;
 
-            // Xóa ảnh cũ
+            // Xóa ảnh cũ trong DB
             DB::table('images')->where('id_sanpham', $productId)->delete();
 
-            // Download ảnh mới
+            // Download ảnh mới nếu chưa có trên đĩa và lưu vào DB
             foreach ($urls as $index => $url) {
                 try {
                     $dir = public_path('frontend/upload');
@@ -86,31 +86,34 @@ class ImageSeeder extends Seeder
                         mkdir($dir, 0755, true);
                     }
 
-                    // Tải ảnh về
+                    // Tải ảnh về với tên cố định (không dùng time() để tránh mất ảnh khi restart container)
                     $ext = 'jpg';
-                    $filename = 'product_' . $productId . '_' . $index . '_' . time() . '.' . $ext;
+                    $filename = 'product_' . $productId . '_' . $index . '.' . $ext;
                     $filepath = $dir . '/' . $filename;
 
-                    $ctx = stream_context_create([
-                        "ssl" => [
-                            "verify_peer" => false,
-                            "verify_peer_name" => false,
-                        ],
-                        "http" => [
-                            "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36\r\n"
-                        ]
-                    ]);
-
-                    $imgData = @file_get_contents($url, false, $ctx);
-                    if ($imgData !== false) {
-                        file_put_contents($filepath, $imgData);
-                        DB::table('images')->insert([
-                            'id_sanpham' => $productId,
-                            'duong_dan' => 'frontend/upload/' . $filename,
-                            'created_at' => $now,
-                            'updated_at' => $now
+                    if (!file_exists($filepath)) {
+                        $ctx = stream_context_create([
+                            "ssl" => [
+                                "verify_peer" => false,
+                                "verify_peer_name" => false,
+                            ],
+                            "http" => [
+                                "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36\r\n"
+                            ]
                         ]);
+
+                        $imgData = @file_get_contents($url, false, $ctx);
+                        if ($imgData !== false) {
+                            file_put_contents($filepath, $imgData);
+                        }
                     }
+
+                    DB::table('images')->insert([
+                        'id_sanpham' => $productId,
+                        'duong_dan' => 'frontend/upload/' . $filename,
+                        'created_at' => $now,
+                        'updated_at' => $now
+                    ]);
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error("Lỗi cào ảnh sản phẩm " . $sku . ": " . $e->getMessage());
                 }

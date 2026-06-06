@@ -390,29 +390,33 @@ class SupplementSeeder extends Seeder
                         $ext = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
                         if (empty($ext)) $ext = 'png';
 
-                        $filename = 'supplement_' . $productId . '_' . $index . '_' . time() . '.' . $ext;
+                        // Tải ảnh về với tên cố định (không dùng time() để tránh mất ảnh khi restart container)
+                        $filename = 'supplement_' . $productId . '_' . $index . '.' . $ext;
                         $filepath = $dir . '/' . $filename;
 
-                        $ctx = stream_context_create([
-                            "ssl" => [
-                                "verify_peer" => false,
-                                "verify_peer_name" => false,
-                            ],
-                            "http" => [
-                                "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36\r\n"
-                            ]
-                        ]);
-
-                        $imgData = @file_get_contents($url, false, $ctx);
-                        if ($imgData !== false) {
-                            file_put_contents($filepath, $imgData);
-                            DB::table('images')->insert([
-                                'id_sanpham' => $productId,
-                                'duong_dan' => 'frontend/upload/' . $filename,
-                                'created_at' => $now,
-                                'updated_at' => $now
+                        if (!file_exists($filepath)) {
+                            $ctx = stream_context_create([
+                                "ssl" => [
+                                    "verify_peer" => false,
+                                    "verify_peer_name" => false,
+                                ],
+                                "http" => [
+                                    "header" => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36\r\n"
+                                ]
                             ]);
+
+                            $imgData = @file_get_contents($url, false, $ctx);
+                            if ($imgData !== false) {
+                                file_put_contents($filepath, $imgData);
+                            }
                         }
+
+                        DB::table('images')->insert([
+                            'id_sanpham' => $productId,
+                            'duong_dan' => 'frontend/upload/' . $filename,
+                            'created_at' => $now,
+                            'updated_at' => $now
+                        ]);
                     } catch (\Exception $e) {
                         \Illuminate\Support\Facades\Log::error("Lỗi cào ảnh sản phẩm " . $prod['sku'] . ": " . $e->getMessage());
                     }
