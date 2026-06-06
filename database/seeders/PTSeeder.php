@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Phanquyen;
+use App\Models\PhanQuyen;
 use App\Models\NguoiDung;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,7 +12,7 @@ class PTSeeder extends Seeder
     public function run(): void
     {
         // Thêm quyền PT vào bảng phanquyen (nếu chưa có)
-        Phanquyen::firstOrCreate(
+        PhanQuyen::firstOrCreate(
             ['id_phanquyen' => 4],
             ['tenquyen' => 'pt']
         );

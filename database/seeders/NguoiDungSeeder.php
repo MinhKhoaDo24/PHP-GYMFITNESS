@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\NguoiDung;
 
 class NguoiDungSeeder extends Seeder
@@ -37,7 +38,7 @@ class NguoiDungSeeder extends Seeder
                 'diachi' => '102',
                 'sdt' => 359723803,
                 'id_phanquyen' => 1,
-            ],         
+            ],
             [
                 'id_nd' => 5,
                 'hoten' => 'LÂM ĐỨC THỊNH',
@@ -46,11 +47,19 @@ class NguoiDungSeeder extends Seeder
                 'diachi' => '58 Nguyễn Khánh Toàn',
                 'sdt' => 359723803,
                 'id_phanquyen' => 1,
-            ],   
+            ],
         ];
 
         foreach ($data as $item) {
-            NguoiDung::create($item);
+            NguoiDung::firstOrCreate(
+                ['id_nd' => $item['id_nd']],
+                $item
+            );
+        }
+
+        // Reset PostgreSQL sequence để tránh lỗi trùng ID khi insert sau này
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("SELECT setval('nguoidung_id_nd_seq', (SELECT MAX(id_nd) FROM nguoidung))");
         }
     }
 }
