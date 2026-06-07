@@ -158,8 +158,19 @@ class PtController extends Controller
         $dangKy = DangKyGoiTap::with(['packagePrice', 'user'])
             ->where('id', $id)
             ->where('id_pt', $pt->id_nd)
-            ->where('trang_thai', 'cho_pt_xac_nhan')
-            ->firstOrFail();
+            ->first();
+
+        if (!$dangKy) {
+            return redirect()->route('pt.khachhang')->with('error', 'Không tìm thấy thông tin đăng ký gói tập!');
+        }
+
+        if ($dangKy->trang_thai === 'dang_tap') {
+            return redirect()->route('pt.khachhang')->with('warning', 'Gói tập này đã được tiếp nhận và kích hoạt từ trước.');
+        }
+
+        if ($dangKy->trang_thai !== 'cho_pt_xac_nhan') {
+            return redirect()->route('pt.khachhang')->with('error', 'Trạng thái đăng ký không hợp lệ để tiếp nhận.');
+        }
 
         $now = now();
         $soThang = $dangKy->packagePrice->so_thang;
@@ -207,8 +218,15 @@ class PtController extends Controller
         $dangKy = DangKyGoiTap::with(['packagePrice', 'user'])
             ->where('id', $id)
             ->where('id_pt', $pt->id_nd)
-            ->where('trang_thai', 'cho_pt_xac_nhan')
-            ->firstOrFail();
+            ->first();
+
+        if (!$dangKy) {
+            return redirect()->route('pt.khachhang')->with('error', 'Không tìm thấy thông tin đăng ký gói tập!');
+        }
+
+        if ($dangKy->trang_thai !== 'cho_pt_xac_nhan') {
+            return redirect()->route('pt.khachhang')->with('error', 'Gói tập đã thay đổi trạng thái, không thể từ chối.');
+        }
 
         // Lưu danh sách PT đã từ chối để Admin không phân lại PT này
         $rejectedPts = $dangKy->rejected_pts ?? [];
@@ -249,7 +267,11 @@ class PtController extends Controller
             ->where('id', $id)
             ->where('id_pt_moi_tam', $pt->id_nd)
             ->where('trang_thai', 'dang_tap')
-            ->firstOrFail();
+            ->first();
+
+        if (!$dangKy) {
+            return redirect()->route('pt.khachhang')->with('error', 'Không tìm thấy yêu cầu đổi PT hoặc yêu cầu đã được xử lý.');
+        }
 
         $ptCu = $dangKy->pt; // PT cũ hiện tại
 
@@ -317,7 +339,11 @@ class PtController extends Controller
             ->where('id', $id)
             ->where('id_pt_moi_tam', $pt->id_nd)
             ->where('trang_thai', 'dang_tap')
-            ->firstOrFail();
+            ->first();
+
+        if (!$dangKy) {
+            return redirect()->route('pt.khachhang')->with('error', 'Không tìm thấy yêu cầu đổi PT hoặc yêu cầu đã được xử lý.');
+        }
 
         // Lưu PT vào danh sách từ chối
         $rejectedPts = $dangKy->rejected_pts ?? [];

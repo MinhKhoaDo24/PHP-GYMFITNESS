@@ -612,6 +612,7 @@
                     <table id="cart" class="table table-hover table-condensed cart-table">
                         <thead>
                             <tr>
+                                <th class="text-center" style="width: 50px;"><input type="checkbox" id="select-all-cart" checked style="transform: scale(1.2); cursor: pointer;"></th>
                                 <th>Ảnh sp</th>
                                 <th>Tên sp</th>
                                 <th class="text-center">Size</th>
@@ -627,6 +628,9 @@
                             @foreach(session('cart') as $id => $details)
                             @php $total += ($details['giakhuyenmai'] + ($details['gia_cong_them'] ?? 0)) * $details['quantity'] @endphp
                             <tr class="cart-item" data-id="{{ $id }}">
+                                <td class="text-center" style="vertical-align: middle;">
+                                    <input type="checkbox" class="cart-item-checkbox" data-id="{{ $id }}" checked style="transform: scale(1.2); cursor: pointer;">
+                                </td>
                                 <td>
                                     <div class="cart-product-thumb">
                                         <img src="{{ asset($details['anhsp'] ?? 'frontend/upload/placeholder.jpg') }}"
@@ -935,7 +939,7 @@
                             }
                         }
 
-                        updateCartSummary(response);
+                        updateCartTotal();
                     } else {
                         var quantityInput = row.querySelector('.quantity');
                         quantityInput.value = response.quantity || quantityInput.value;
@@ -979,7 +983,7 @@
             }
         }
 
-        function updateCartTotal(total) {
+        function updateCartTotal() {
             const rows = document.querySelectorAll('.cart-item');
 
             let totalOriginal = 0;
@@ -987,6 +991,9 @@
             let totalSurcharge = 0;
 
             rows.forEach(row => {
+                const cb = row.querySelector('.cart-item-checkbox');
+                if (cb && !cb.checked) return;
+
                 const qtyInput = row.querySelector('.quantity');
                 if (!qtyInput) return;
 
@@ -1077,6 +1084,59 @@
                 });
             });
         });
+
+        // Xử lý Checkbox chọn/bỏ chọn sản phẩm
+        const selectAllCheckbox = document.getElementById('select-all-cart');
+        const itemCheckboxes = document.querySelectorAll('.cart-item-checkbox');
+
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                itemCheckboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+                updateCartTotal();
+            });
+        }
+
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!this.checked && selectAllCheckbox) {
+                    selectAllCheckbox.checked = false;
+                } else if (selectAllCheckbox) {
+                    const allChecked = Array.from(itemCheckboxes).every(item => item.checked);
+                    selectAllCheckbox.checked = allChecked;
+                }
+                updateCartTotal();
+            });
+        });
+
+        // Xử lý nút tiến hành thanh toán
+        const checkoutBtn = document.querySelector('.cart-btn-checkout');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedIds = [];
+                document.querySelectorAll('.cart-item-checkbox:checked').forEach(cb => {
+                    selectedIds.push(cb.getAttribute('data-id'));
+                });
+
+                if (selectedIds.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Chưa chọn sản phẩm!',
+                        text: 'Vui lòng chọn ít nhất một sản phẩm để tiến hành thanh toán.',
+                        confirmButtonText: 'Đồng ý'
+                    });
+                    return;
+                }
+
+                // Chuyển hướng sang checkout kèm tham số selected
+                window.location.href = "{{ route('checkout') }}?selected=" + selectedIds.join(',');
+            });
+        }
+
+        // Gọi tính lại tổng tiền lúc ban đầu
+        updateCartTotal();
     });
 </script>
 

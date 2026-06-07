@@ -464,24 +464,47 @@ class CartController extends Controller
         ]);
     }
 
-    public function checkout()
+    public function checkout(Request $request) //Điền sẵn thông tin hội viên
     {
-        $user = Auth::user();
+        $user = Auth::user(); // Lấy thông tin của Hội viên đang đăng nhập thông qua Guard Auth
         
-        $buyNow = session()->get('buy_now');
-        $cart = !empty($buyNow) ? $buyNow : session()->get('cart', []);
-        if (empty($cart)) {
+        $buyNow = session()->get('buy_now'); // Lấy dữ liệu "Mua ngay" (nếu có) từ session
+        if (!empty($buyNow)) {
+            $cart = $buyNow;
+        } else {
+            $selected = $request->query('selected');
+            if ($selected) {
+                $selectedKeys = explode(',', $selected);
+                $fullCart = session()->get('cart', []);
+                $checkoutItems = [];
+                foreach ($selectedKeys as $key) {
+                    if (isset($fullCart[$key])) {
+                        $checkoutItems[$key] = $fullCart[$key];
+                    }
+                }
+                session()->put('checkout_items', $checkoutItems);
+                $cart = $checkoutItems;
+            } else {
+                if (session()->has('checkout_items')) {
+                    $cart = session()->get('checkout_items');
+                } else {
+                    $cart = session()->get('cart', []);
+                }
+            }
+        }
+        if (empty($cart)) { // Nếu giỏ hàng trống
             return redirect('/cart')->with('error', 'Giỏ hàng của bạn đang trống!');
         }
 
-        $showusers = $user 
-            ? DB::table('nguoidung')
-                ->select('nguoidung.*')
-                ->where('nguoidung.id_nd', $user->id_nd)
-                ->get()
-            : collect();
 
-        $total = 0;
+        $showusers = $user // Nếu đã đăng nhập, truy vấn CSDL lấy thông tin người dùng
+            ? DB::table('nguoidung')
+                ->select('nguoidung.*') // Lấy tất cả các cột từ bảng người dùng
+                ->where('nguoidung.id_nd', $user->id_nd) // Theo đúng ID của hội viên đang đăng nhập
+                ->get()
+            : collect(); // Nếu chưa đăng nhập, trả về một collection trống.
+
+        $total = 0;// Tính toán tổng tiền đơn hàng
         $totalSurcharge = 0;
         foreach ($cart as $item) {
             $qty          = $item['quantity'] ?? 0;
@@ -490,18 +513,18 @@ class CartController extends Controller
             $total       += $giaKM * $qty;
             $totalSurcharge += $surcharge * $qty;
         }
-
+// Trả về view 'pages.checkout' và truyền các biến chứa thông tin người dùng, giỏ hàng, tổng tiền sang giao diện
         return view('pages.checkout', compact('showusers', 'cart', 'total', 'totalSurcharge'));
     }
 
     // Đặt hàng
 
-    public function dathang(Request $request)
+    public function dathang(Request $request) //Thực hiện trừ kho, tạo đơn hàng và dọn dẹp giỏ hàng
     {
 
-        $buyNow = session('buy_now');
-        $cart = !empty($buyNow) ? $buyNow : session('cart', []);
-        if (empty($cart)) {
+        $buyNow = session('buy_now'); // Lấy dữ liệu từ session
+        $cart = !empty($buyNow) ? $buyNow : (session('checkout_items') ?: session('cart', [])); // Lấy giỏ hàng từ session
+        if (empty($cart)) { // Nếu giỏ hàng trống   
             return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
         }
 
@@ -603,14 +626,15 @@ if ($isFreeship) {
         // -----------------------------
         // KIỂM TRA TỒN KHO CHUẨN
         // -----------------------------
+        // Chạy cơ chế kiểm tra tồn kho (Stock validation) cho từng mặt hàng trong giỏ
         foreach ($cart as $item) {
-            $sanpham = Sanpham::with('sizes')->find($item['id_sanpham']);
+            $sanpham = Sanpham::with('sizes')->find($item['id_sanpham']); // Lấy thông tin sản phẩm
 
-            if (!$sanpham) {
+            if (!$sanpham) { // Nếu không tìm thấy sản phẩm
                 return back()->with('error', 'Sản phẩm không tồn tại!');
             }
 
-            if ($sanpham->co_size == 1 && !empty($item['id_size'])) {
+            if ($sanpham->co_size == 1 && !empty($item['id_size'])) { // Nếu sản phẩm có size và có size_id
                 $sizePivot = $sanpham->sizes()->where('sanpham_size.id_size', $item['id_size'])->first();
                 if (!$sizePivot || $item['quantity'] > $sizePivot->pivot->soluong) {
                     $sizeName = $sizePivot ? $sizePivot->ten_size : 'Không xác định';
@@ -626,23 +650,23 @@ if ($isFreeship) {
         // ----------------------------------------------------
         // TẠO ĐƠN HÀNG & GHI CSDL (BỌC DATABASE TRANSACTION)
         // ----------------------------------------------------
-        DB::beginTransaction();
-        try {
+        DB::beginTransaction(); // Bắt đầu giao dịch cơ sở dữ liệu
+        try { // Tạo một khối lệnh try/catch để xử lý lỗi trong quá trình ghi CSDL. Nếu có bất kỳ lỗi nào xảy ra, giao dịch sẽ bị rollback, ngăn chặn việc dữ liệu bị ghi không nhất quán.
             // Cập nhật lượt dùng mã KM nếu có
-            if ($id_km) {
-                $km->increment('so_luot_da_dung');
+            if ($id_km) { // Nếu có mã giảm giá
+                $km->increment('so_luot_da_dung'); // Tăng số lượt sử dụng mã giảm giá
             }
 
-            $diachi = $request->display_diachigiaohang;
-            $thanh_pho = $request->thanh_pho ?? env('STORE_CITY', 'Hà Nội');
-            $trimmedDiachi = mb_strtolower(trim($diachi));
-            $trimmedThanhPho = mb_strtolower(trim($thanh_pho));
-            $len = mb_strlen($trimmedThanhPho);
+            $diachi = $request->display_diachigiaohang; // Lấy địa chỉ giao hàng từ request
+            $thanh_pho = $request->thanh_pho ?? env('STORE_CITY', 'Hà Nội'); // Lấy thành phố từ request hoặc env
+            $trimmedDiachi = mb_strtolower(trim($diachi)); // Loại bỏ khoảng trắng và chuyển sang chữ thường
+            $trimmedThanhPho = mb_strtolower(trim($thanh_pho)); // Loại bỏ khoảng trắng và chuyển sang chữ thường
+            $len = mb_strlen($trimmedThanhPho); // Lấy độ dài của thành phố
             
-            if (mb_substr($trimmedDiachi, -$len) === $trimmedThanhPho) {
-                $diachi_cuoi = $diachi;
+            if (mb_substr($trimmedDiachi, -$len) === $trimmedThanhPho) { // Kiểm tra xem địa chỉ có chứa thành phố không
+                $diachi_cuoi = $diachi; // Nếu có thì gán địa chỉ cuối cùng bằng địa chỉ
             } else {
-                $diachi_cuoi = $diachi . ', ' . $thanh_pho;
+                $diachi_cuoi = $diachi . ', ' . $thanh_pho; // Nếu không có thì gán địa chỉ cuối cùng bằng địa chỉ + thành phố
             }
 
             $order = Dathang::create([
@@ -657,7 +681,7 @@ if ($isFreeship) {
                 'sdt'          => $request->display_sdt,
                 'ngaydathang'  => now(),
                 'ngaygiaohang' => now()->addDays(4),
-                'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,
+                'id_nd'        => Auth::check() ? Auth::user()->id_nd : null,   // LIÊN KẾT ĐƠN HÀNG VỚI HỘI VIÊN: Lưu ID của hội viên đang đăng nhập.
             ]);
 
             // -----------------------------
@@ -677,10 +701,10 @@ if ($isFreeship) {
                     'giakhuyenmai'  => $item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0),
                     'id_sanpham'    => $item['id_sanpham'],
                     'id_dathang'    => $order->id_dathang,
-                    'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
+                    'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,// Trừ số lượng tồn kho của sản phẩm / size tương ứng trong DB
                 ]);
 
-                // Trừ tồn kho
+                // Trừ tồn khotrong bảng trung gian sanpham_size
                 $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
                 if ($sp) {
                     if ($sp->co_size == 1 && !empty($item['id_size'])) {
@@ -699,9 +723,9 @@ if ($isFreeship) {
                 }
             }
 
-            DB::commit();
+            DB::commit();// Xác nhận mọi thay đổi CSDL thành công   
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollBack();// Hủy toàn bộ giao dịch nếu có lỗi
             \Illuminate\Support\Facades\Log::error('Lỗi đặt hàng (Transaction rollback): ' . $e->getMessage());
             return back()->with('error', 'Đã xảy ra lỗi hệ thống khi đặt hàng. Vui lòng thử lại!');
         }
@@ -719,20 +743,24 @@ if ($isFreeship) {
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Lỗi gửi email hóa đơn: ' . $e->getMessage());
         }
-
+ // 5. LÀM TRỐNG GIỎ HÀNG:
         if (session()->has('buy_now')) {
             session()->forget('buy_now');
         } else {
-            CartHelper::clearCart();
+            if (session()->has('checkout_items')) {
+                CartHelper::clearCompletedCheckout();
+            } else {
+                CartHelper::clearCart(); // Xóa sạch giỏ hàng trong Session
+            }
         }
 
-        return view('pages.thongbaodathang', compact('order'));
+        return view('pages.thongbaodathang', compact('order')); // Hiển thị trang cảm ơn kèm mã đơn
     }
 
     public function thongbaodathang(Request $request)
-    {
+    { // Kiểm tra xem VNPay có gửi đầy đủ mã kết quả và mã đơn hàng về không
         if ($request->has('vnp_ResponseCode') && $request->has('vnp_TxnRef')) {
-            $vnp_SecureHash = $request->input('vnp_SecureHash');
+            $vnp_SecureHash = $request->input('vnp_SecureHash');  // Chữ ký số do VNPay gửi về
             
             // 1. Trích xuất toàn bộ tham số vnp_ ngoại trừ vnp_SecureHash và vnp_SecureHashType
             $inputData = [];
@@ -775,7 +803,7 @@ if ($isFreeship) {
             $order = Dathang::find($orderId);
 
             if ($order) {
-                if ($responseCode == '00') {
+                if ($responseCode == '00') { // Nếu mã kết quả là '00' (VNPay quy định '00' là giao dịch thành công)
                     // Cập nhật trạng thái thành Đã thanh toán khi giao dịch thành công
                     $order->trangthai = 'Đã thanh toán';
                     $order->save();
@@ -795,9 +823,10 @@ if ($isFreeship) {
     }
 
     public function vnpay(Request $request)
-    {
+    { // Lấy thông tin giỏ hàng "Mua ngay" hoặc giỏ hàng mặc định từ session
         $buyNow = session('buy_now');
-        $cart = !empty($buyNow) ? $buyNow : session('cart', []);
+        $cart = !empty($buyNow) ? $buyNow : (session('checkout_items') ?: session('cart', []));
+        // Ngăn chặn nếu giỏ hàng trống
         if (empty($cart)) {
             return back()->with('error', 'Không có sản phẩm nào trong giỏ hàng!');
         }
@@ -880,7 +909,8 @@ if ($isFreeship) {
             if ($id_km) {
                 $km->increment('so_luot_da_dung');
             }
-
+            
+        // Tạo đơn hàng tạm thời trong bảng dathang (trạng thái: Chờ xác nhận)
             $order = Dathang::create([
                 'tongtien'     => $tongtien,
                 'tiengiam'     => $tiengiam,
@@ -897,7 +927,7 @@ if ($isFreeship) {
             ]);
 
             // -----------------------------
-            // TẠO CHI TIẾT ĐƠN HÀNG + TRỪ TỒN
+            // Tạo chi tiết đơn hàng và thực hiện trừ kho tạm thời để giữ hàng cho khách
             // -----------------------------
             foreach ($cart as $item) {
                 $orderDetailName = $item['tensp'];
@@ -916,7 +946,7 @@ if ($isFreeship) {
                     'id_nd'         => Auth::check() ? Auth::user()->id_nd : null,
                 ]);
 
-                // Trừ tồn kho
+                //  Trừ số lượng tồn kho của sản phẩm/size tương ứng
                 $sp = Sanpham::with('sizes')->find($item['id_sanpham']);
                 if ($sp) {
                     if ($sp->co_size == 1 && !empty($item['id_size'])) {
@@ -946,28 +976,32 @@ if ($isFreeship) {
         if (session()->has('buy_now')) {
             session()->forget('buy_now');
         } else {
-            CartHelper::clearCart();
+            if (session()->has('checkout_items')) {
+                CartHelper::clearCompletedCheckout();
+            } else {
+                CartHelper::clearCart();
+            }
         }
 
         // -----------------------------
         // CẤU HÌNH VNPAY
         // -----------------------------
-        $vnp_TmnCode    = config('services.vnpay.tmn_code');
-        $vnp_HashSecret = config('services.vnpay.hash_secret');
-        $vnp_Url        = config('services.vnpay.url');
-        $vnp_Returnurl  = url('/thongbaodathang');
+        $vnp_TmnCode    = config('services.vnpay.tmn_code');//Lấy mã website từ file cấu hình config/services.php
+        $vnp_HashSecret = config('services.vnpay.hash_secret'); // Chuỗi hash secret dùng làm chữ ký số
+        $vnp_Url        = config('services.vnpay.url');// Endpoint cổng VNPay
+        $vnp_Returnurl  = url('/thongbaodathang');// Link callback để VNPay trả kết quả về
 
-        $vnp_TxnRef     = $order->id_dathang;
+        $vnp_TxnRef     = $order->id_dathang;// Mã giao dịch của shop gửi đi (sử dụng ID đơn hàng vừa tạo)
         $vnp_Amount     = $order->tienphaitra * 100; // Nhân 100 theo chuẩn VNPAY
         $vnp_OrderInfo  = "Thanh toán đơn hàng: #" . $vnp_TxnRef;
         $vnp_OrderType  = "other";
-        $vnp_IpAddr     = request()->ip();
+        $vnp_IpAddr     = request()->ip();// IP thiết bị của khách hàng
 
         // -------------------------------
         // BUILD DATA GỬI LÊN VNPAY
         // -------------------------------
         $inputData = [
-            "vnp_Version"    => "2.1.0",
+            "vnp_Version"    => "2.1.0",//Tạo mảng dữ liệu gửi theo chuẩn VNPay API 2.1.0
             "vnp_TmnCode"    => $vnp_TmnCode,
             "vnp_Amount"     => $vnp_Amount,
             "vnp_Command"    => "pay",
@@ -984,13 +1018,13 @@ if ($isFreeship) {
         if ($request->bankCode) {
             $inputData['vnp_BankCode'] = $request->bankCode;
         }
-
+// Sắp xếp các key trong mảng $inputData theo thứ tự bảng chữ cái (bắt buộc)
         ksort($inputData);
 
         $query = "";
         $hashdata = "";
         $i = 0;
-
+// Duyệt qua mảng để tạo chuỗi dữ liệu URL Query
         foreach ($inputData as $key => $value) {
             if ($i == 1) {
                 $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
@@ -1000,10 +1034,11 @@ if ($isFreeship) {
             }
             $query .= urlencode($key) . "=" . urlencode($value) . '&';
         }
-
+// Băm chuỗi dữ liệu trên với HashSecret theo thuật toán HMAC-SHA512 để sinh chữ ký số bảo mật
         $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+      // Nối chữ ký số vào link redirect
         $vnp_Url = $vnp_Url . "?" . $query . "vnp_SecureHash=" . $vnpSecureHash;
-
+// Chuyển hướng trình duyệt khách sang cổng VNPay
         return redirect($vnp_Url);
     }
 
@@ -1045,7 +1080,7 @@ if ($isFreeship) {
 
         // Tính tổng tiền giỏ hàng
         $buyNow = session('buy_now');
-        $cart = !empty($buyNow) ? $buyNow : session('cart', []);
+        $cart = !empty($buyNow) ? $buyNow : (session('checkout_items') ?: session('cart', []));
         $total = 0;
         foreach ($cart as $item) {
             $total += ($item['giakhuyenmai'] + ($item['gia_cong_them'] ?? 0)) * $item['quantity'];

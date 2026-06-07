@@ -16,7 +16,7 @@ class CartHelper
      */
     public static function saveCart(array $cart): void
     {
-        session()->put('cart', $cart);
+        session()->put('cart', $cart);  // Ghi mảng giỏ hàng vào Session của trình duyệt
 
         // Đồng bộ vào Database nếu đã đăng nhập
         if (Auth::check()) {
@@ -31,10 +31,10 @@ class CartHelper
      * Thay thế lệnh session()->forget('cart') trực tiếp.
      *
      * @return void
-     */
+     */// 2. Hàm dọn sạch giỏ hàng (dùng sau khi đặt hàng thành công)
     public static function clearCart(): void
     {
-        session()->forget('cart');
+        session()->forget('cart'); // Xóa sạch giỏ hàng khỏi Session
 
         // Xóa giỏ hàng trong Database nếu đã đăng nhập
         if (Auth::check()) {
@@ -67,4 +67,32 @@ class CartHelper
 
         return $merged;
     }
+
+    /**
+     * Xóa chỉ các sản phẩm đã thanh toán thành công khỏi Session và CSDL.
+     *
+     * @return void
+     */
+    public static function clearCompletedCheckout(): void
+    {
+        $checkoutItems = session('checkout_items');
+        if ($checkoutItems) {
+            $cart = session('cart', []);
+            foreach ($checkoutItems as $key => $item) {
+                if (isset($cart[$key])) {
+                    unset($cart[$key]);
+                }
+            }
+            session()->put('cart', $cart);
+            session()->forget('checkout_items');
+
+            // Đồng bộ CSDL nếu đã đăng nhập
+            if (Auth::check()) {
+                Auth::user()->update(['cart_data' => $cart]);
+            }
+        } else {
+            self::clearCart();
+        }
+    }
 }
+
