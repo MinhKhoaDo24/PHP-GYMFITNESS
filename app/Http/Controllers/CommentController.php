@@ -34,7 +34,7 @@ class CommentController extends Controller
     // Thêm mới comment
     public function store(Request $request)
     {
-        $request->validate([
+        $request->validate([  // 1. RÀNG BUỘC DỮ LIỆU ĐẦU VÀO (VALIDATION)
             'sanpham_id' => 'required|exists:sanpham,id_sanpham',
             'id_dathang' => 'required|exists:dathang,id_dathang',
             'content' => 'nullable|string|max:1000',
@@ -45,7 +45,7 @@ class CommentController extends Controller
         ]);
 
         // Kiểm tra khách hàng đã đăng nhập chưa
-        $user = Auth::user();
+        $user = Auth::user();  // Lấy thông tin Hội viên đang đăng nhập thông qua Session login
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để đánh giá sản phẩm.'], 401);
         }
@@ -96,19 +96,19 @@ class CommentController extends Controller
         // Xử lý tệp đính kèm
         $attachments = [];
         if ($request->hasFile('attachments')) {
-            $destination = public_path('frontend/upload');
+            $destination = public_path('frontend/upload');// Đường dẫn thư mục lưu file trên server
             if (!file_exists($destination)) {
-                mkdir($destination, 0755, true);
+                mkdir($destination, 0755, true); // Tự động tạo thư mục nếu chưa tồn tại
             }
-            foreach ($request->file('attachments') as $file) {
+            foreach ($request->file('attachments') as $file) { // Tạo tên file duy nhất kết hợp thời gian + chuỗi ngẫu nhiên tránh trùng lặp
                 if ($file->isValid()) {
                     $imageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $file->move($destination, $imageName);
-                    $attachments[] = 'frontend/upload/' . $imageName;
+                    $attachments[] = 'frontend/upload/' . $imageName; 
                 }
             }
         }
-
+// 8. TẠO VÀ LƯU BẢN GHI ĐÁNH GIÁ MỚI VÀO DATABASE
         $comment = Comment::create([
             'user_id' => Auth::user()->id_nd,
             'sanpham_id' => $request->sanpham_id,
@@ -117,7 +117,7 @@ class CommentController extends Controller
             'rating' => (int)$request->rating,
             'images' => !empty($attachments) ? $attachments : null,
         ]);
-
+// Tải thông tin người dùng liên kết với comment vừa tạo để hiển thị lên màn hình tức thời
         $comment->load('user');
 
         return response()->json(['success' => true, 'comment' => $comment]);
