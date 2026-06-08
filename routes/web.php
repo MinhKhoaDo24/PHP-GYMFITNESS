@@ -214,6 +214,7 @@ Route::prefix('/')->middleware('admin.login')->group(function () {
     Route::get('/admin/goitap/edit/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'edit'])->name('admin.goitap.edit');
     Route::put('/admin/goitap/update/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'update'])->name('admin.goitap.update');
     Route::delete('/admin/goitap/destroy/{id}', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'destroy'])->name('admin.goitap.destroy');
+    Route::post('/admin/goitap/{id}/restore', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'restore'])->name('admin.goitap.restore');
 
     // Phê duyệt đăng ký gói tập (Admin)
     Route::get('/admin/goitap/dangky', [\App\Http\Controllers\Admin\AdminGoiTapController::class, 'dangKyList'])->name('admin.goitap.dangky');

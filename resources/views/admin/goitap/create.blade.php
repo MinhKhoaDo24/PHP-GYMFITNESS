@@ -21,7 +21,7 @@
 
         <div class="card shadow-sm border-0" style="border-radius: 12px;">
             <div class="card-body p-4">
-                <form action="{{ route('admin.goitap.store') }}" method="POST" enctype="multipart/form-data">
+                <form id="formGoiTap" action="{{ route('admin.goitap.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="row">
@@ -94,6 +94,7 @@
 
                             <div class="p-3 bg-light rounded mb-4 text-muted small">
                                 Nhập giá trị tiền gốc (VNĐ) tương ứng với từng mốc thời gian đăng ký của gói tập.
+                                Giá phải tăng dần theo thời hạn: <strong>1 tháng &lt; 3 tháng &lt; 6 tháng &lt; 12 tháng</strong>.
                             </div>
 
                             <div class="mb-3">
@@ -149,4 +150,35 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('formGoiTap').addEventListener('submit', function (e) {
+            // Lấy giá trị từ các ô input và chuyển về kiểu số nguyên (Integer)
+            let p1 = parseInt(document.querySelector('input[name="price_1"]').value) || 0;
+            let p3 = parseInt(document.querySelector('input[name="price_3"]').value) || 0;
+            let p6 = parseInt(document.querySelector('input[name="price_6"]').value) || 0;
+            let p12 = parseInt(document.querySelector('input[name="price_12"]').value) || 0;
+
+            let errorMessages = [];
+
+            // Kiểm tra các điều kiện logic tăng dần
+            if (p3 <= p1) {
+                errorMessages.push("- Giá gói 3 tháng phải lớn hơn giá gói 1 tháng.");
+            }
+            if (p6 <= p3) {
+                errorMessages.push("- Giá gói 6 tháng phải lớn hơn giá gói 3 tháng.");
+            }
+            if (p12 <= p6) {
+                errorMessages.push("- Giá gói 12 tháng phải lớn hơn giá gói 6 tháng.");
+            }
+
+            // Nếu có lỗi, chặn việc submit form và hiển thị thông báo
+            if (errorMessages.length > 0) {
+                e.preventDefault(); // Ngăn form gửi dữ liệu lên server
+
+                let alertText = "Cảnh báo lỗi logic giá tập:\n" + errorMessages.join("\n");
+                alert(alertText);
+            }
+        });
+    </script>
 @endsection

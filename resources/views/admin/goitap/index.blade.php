@@ -16,6 +16,13 @@
     </div>
     @endif
 
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi!</strong> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
     <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -28,12 +35,13 @@
                             <th>Loại</th>
                             <th>Phụ Thu PT/Tháng</th>
                             <th>Nổi Bật</th>
+                            <th>Trạng Thái</th>
                             <th class="text-end pe-4">Hành Động</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($goitaps as $goi)
-                        <tr>
+                        <tr class="{{ $goi->trang_thai == 0 ? 'table-secondary opacity-75' : '' }}">
                             <td class="ps-4">
                                 <img src="{{ asset($goi->hinh_anh) }}" alt="{{ $goi->ten_goi }}" class="rounded" style="width: 80px; height: 50px; object-fit: cover;">
                             </td>
@@ -52,25 +60,41 @@
                                 <span class="badge bg-secondary">Thường</span>
                                 @endif
                             </td>
+                            <td>
+                                @if($goi->trang_thai == 1)
+                                <span class="badge bg-success">Đang hiển thị</span>
+                                @else
+                                <span class="badge bg-secondary">Đã ẩn</span>
+                                @endif
+                            </td>
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex gap-2">
                                     <a href="{{ route('admin.goitap.edit', $goi->id_goitap) }}" class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Chỉnh sửa">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    
-                                    <form action="{{ route('admin.goitap.destroy', $goi->id_goitap) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa gói tập này không?');">
+
+                                    @if($goi->trang_thai == 1)
+                                    <form action="{{ route('admin.goitap.destroy', $goi->id_goitap) }}" method="POST" onsubmit="return confirm('Ẩn gói tập này khỏi giao diện khách hàng? Gói tập vẫn được lưu và có thể mở lại sau.');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Xóa">
-                                            <i class="bi bi-trash"></i>
+                                        <button type="submit" class="btn btn-sm btn-outline-warning d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Ẩn gói tập">
+                                            <i class="bi bi-eye-slash"></i>
                                         </button>
                                     </form>
+                                    @else
+                                    <form action="{{ route('admin.goitap.restore', $goi->id_goitap) }}" method="POST" onsubmit="return confirm('Hiển thị lại gói tập này cho khách hàng?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-success d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Hiển thị lại">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5">
+                            <td colspan="8" class="text-center py-5">
                                 <i class="bi bi-journal-x" style="font-size: 40px; color: #cbd5e1;"></i>
                                 <p class="text-muted mt-2">Chưa có gói tập nào.</p>
                             </td>

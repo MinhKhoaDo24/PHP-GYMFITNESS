@@ -194,7 +194,7 @@
 
                         {{-- Cột Phải: Form cấu hình đăng ký --}}
                         <div class="col-md-7 p-4 p-lg-5">
-                            <h3 class="font-weight-bold mb-4" style="font-size: 22px; color: #0f172a;">Cấu hình Gói tập của bạn</h3>
+                            <h3 class="font-weight-bold mb-4" style="font-size: 22px; color: #0f172a;"> Đăng ký gói tập của bạn </h3>
                             
                             <form action="{{ route('goitap.register.store', $goitap->slug) }}" method="POST" id="rfRegisterForm">
                                 @csrf

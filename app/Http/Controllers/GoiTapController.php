@@ -19,6 +19,36 @@ class GoiTapController extends Controller
         $this->middleware('auth');
     }
 
+   public function store(Request $request)
+    {
+        // 1. Kiểm tra dữ liệu đầu vào (Lớp bảo mật Backend)
+        $request->validate([
+            'ten_goi'         => 'required|string|max:255',
+            'mo_ta_ngan'      => 'required|string',
+            'loai_goi'        => 'required|in:silver,gold,diamond',
+            'gia_pt_them'     => 'required|numeric|min:0',
+            
+            // Ràng buộc giá gói dài hạn bắt buộc phải lớn hơn gói ngắn hạn
+            'price_1'         => 'required|numeric|min:0',
+            'price_3'         => 'required|numeric|gt:price_1',  
+            'price_6'         => 'required|numeric|gt:price_3',  
+            'price_12'        => 'required|numeric|gt:price_6', 
+            'mo_ta_chi_tiet'  => 'required',
+            'hinh_anh'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            // Thông báo lỗi Tiếng Việt phục vụ hiển thị ngoài giao diện Admin
+            'price_3.gt'   => 'Giá gói tập 3 tháng bắt buộc phải lớn hơn giá gói 1 tháng.',
+            'price_6.gt'   => 'Giá gói tập 6 tháng bắt buộc phải lớn hơn giá gói 3 tháng.',
+            'price_12.gt'  => 'Giá gói tập 12 tháng bắt buộc phải lớn hơn giá gói 6 tháng.',
+        ]);
+
+        // 2. Xử lý lưu file hình ảnh nếu có upload
+        $hinhAnhPath = null;
+        if ($request->hasFile('hinh_anh')) {
+            $hinhAnhPath = $request->file('hinh_anh')->store('goitap', 'public');
+        }
+    }
+
     public function registerShow($slug)
     {
         $goitap = GoiTap::where('slug', $slug)
@@ -340,5 +370,24 @@ class GoiTapController extends Controller
         ]);
 
         return back()->with('success', 'Đã kích hoạt lại gói tập thành công! Chúc bạn tập luyện vui vẻ.');
+    }
+
+    public function destroy($id)
+    {
+        // 1. Tìm gói tập hoặc tự động trả về lỗi 404 nếu không tìm thấy id
+        $goitap = GoiTap::findOrFail($id);
+
+        // 2. Cập nhật trạng thái gói tập thành 0 (Ẩn đi) thay vì xóa vật lý (Hard Delete)
+        $goitap->update([
+            'trang_thai' => 0
+        ]);
+
+        // 3. Đồng bộ ẩn luôn các cấu hình mốc thời gian của gói tập này
+        GoiTapGia::where('id_goitap', $goitap->id_goitap)->update([
+            'trang_thai' => 0
+        ]);
+
+        // 4. Điều hướng về trang danh sách quản trị Admin cùng thông báo thành công
+        return redirect()->route('admin.goitap.index')->with('success', 'Đã ẩn gói tập thành công khỏi hệ thống hiển thị!');
     }
 }

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
 class AdminGoiTapController extends Controller
@@ -181,6 +182,43 @@ class AdminGoiTapController extends Controller
     // HELPERS
     // ============================================================
 
+    private function validateGoiTapRequest(Request $request): void
+    {
+        $request->validate([
+            'ten_goi' => 'required|string|max:100',
+            'mo_ta_ngan' => 'required|string|max:255',
+            'mo_ta_chi_tiet' => 'required|string',
+            'loai_goi' => 'required|in:silver,gold,diamond',
+            'gia_pt_them' => 'required|numeric|min:0',
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'price_1' => 'required|numeric|min:0',
+            'price_3' => 'required|numeric|min:0',
+            'price_6' => 'required|numeric|min:0',
+            'price_12' => 'required|numeric|min:0',
+        ]);
+
+        $p1 = (float) $request->input('price_1');
+        $p3 = (float) $request->input('price_3');
+        $p6 = (float) $request->input('price_6');
+        $p12 = (float) $request->input('price_12');
+
+        $errors = [];
+
+        if ($p3 <= $p1) {
+            $errors['price_3'] = 'Giá gói 3 tháng phải lớn hơn giá gói 1 tháng.';
+        }
+        if ($p6 <= $p3) {
+            $errors['price_6'] = 'Giá gói 6 tháng phải lớn hơn giá gói 3 tháng.';
+        }
+        if ($p12 <= $p6) {
+            $errors['price_12'] = 'Giá gói 12 tháng phải lớn hơn giá gói 6 tháng.';
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
+    }
+
     private function getDateRange(string $range): array
     {
         return match ($range) {
@@ -230,7 +268,11 @@ class AdminGoiTapController extends Controller
 
     public function index()
     {
-        $goitaps = GoiTap::with('prices')->get();
+        $goitaps = GoiTap::with('prices')
+            ->orderByDesc('trang_thai')
+            ->orderBy('id_goitap')
+            ->get();
+
         return view('admin.goitap.index', compact('goitaps'));
     }
 
@@ -241,18 +283,7 @@ class AdminGoiTapController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'ten_goi' => 'required|string|max:100',
-            'mo_ta_ngan' => 'required|string|max:255',
-            'mo_ta_chi_tiet' => 'required|string',
-            'loai_goi' => 'required|in:silver,gold,diamond',
-            'gia_pt_them' => 'required|numeric|min:0',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'price_1' => 'required|numeric|min:0',
-            'price_3' => 'required|numeric|min:0',
-            'price_6' => 'required|numeric|min:0',
-            'price_12' => 'required|numeric|min:0',
-        ]);
+        $this->validateGoiTapRequest($request);
 
         $hinhAnhPath = 'frontend/img/basic-silver-1.jpg'; // default
         if ($request->hasFile('hinh_anh')) {
@@ -306,18 +337,7 @@ class AdminGoiTapController extends Controller
     {
         $goitap = GoiTap::findOrFail($id);
 
-        $request->validate([
-            'ten_goi' => 'required|string|max:100',
-            'mo_ta_ngan' => 'required|string|max:255',
-            'mo_ta_chi_tiet' => 'required|string',
-            'loai_goi' => 'required|in:silver,gold,diamond',
-            'gia_pt_them' => 'required|numeric|min:0',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'price_1' => 'required|numeric|min:0',
-            'price_3' => 'required|numeric|min:0',
-            'price_6' => 'required|numeric|min:0',
-            'price_12' => 'required|numeric|min:0',
-        ]);
+        $this->validateGoiTapRequest($request);
 
         $hinhAnhPath = $goitap->hinh_anh;
         if ($request->hasFile('hinh_anh')) {
@@ -353,14 +373,31 @@ class AdminGoiTapController extends Controller
     public function destroy($id)
     {
         $goitap = GoiTap::findOrFail($id);
-        
-        // Xóa các bảng giá trước
-        GoiTapGia::where('id_goitap', $goitap->id_goitap)->delete();
-        
-        // Xóa gói tập
-        $goitap->delete();
 
-        return redirect()->route('admin.goitap.index')->with('success', 'Xóa gói tập thành công!');
+        if ($goitap->trang_thai == 0) {
+            return redirect()->route('admin.goitap.index')->with('error', 'Gói tập này đã được ẩn trước đó.');
+        }
+
+        $goitap->update(['trang_thai' => 0]);
+
+        GoiTapGia::where('id_goitap', $goitap->id_goitap)->update(['trang_thai' => 0]);
+
+        return redirect()->route('admin.goitap.index')->with('success', 'Đã ẩn gói tập khỏi giao diện khách hàng. Bạn có thể mở lại bất cứ lúc nào.');
+    }
+
+    public function restore($id)
+    {
+        $goitap = GoiTap::findOrFail($id);
+
+        if ($goitap->trang_thai == 1) {
+            return redirect()->route('admin.goitap.index')->with('error', 'Gói tập này đang được hiển thị.');
+        }
+
+        $goitap->update(['trang_thai' => 1]);
+
+        GoiTapGia::where('id_goitap', $goitap->id_goitap)->update(['trang_thai' => 1]);
+
+        return redirect()->route('admin.goitap.index')->with('success', 'Đã hiển thị lại gói tập cho khách hàng!');
     }
 
     // ==========================================
